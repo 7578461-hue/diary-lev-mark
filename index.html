@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<!-- build: 2026-05-25 00:20:34 (auto-deploy test) -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1990,7 +1991,8 @@ window.exportPDF = async function(){
     bodyH += `<h2>${escH(fmtDateRU(d))}</h2><ul>${items.map(i=>`<li>${escH(i.txt)}</li>`).join('')}</ul>`;
   });
 
-  const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Дневник — ${childName}</title>
+  const html = `<!DOCTYPE html><html lang="ru"><head>
+<!-- build: 2026-05-25 00:20:34 (auto-deploy test) --><meta charset="UTF-8"><title>Дневник — ${childName}</title>
   <style>
     body{font-family:-apple-system,Arial,sans-serif;color:#111;margin:24px;font-size:13px;line-height:1.5}
     h1{font-size:20px;margin:0 0 2px}
