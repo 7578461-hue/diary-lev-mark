@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<!-- build: 2026-05-25 00:20:34 (auto-deploy test) -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1076,7 +1075,10 @@ const REAS = [
 // ═══════════════════════════════════════════════════════════════
 // UTILITIES
 // ═══════════════════════════════════════════════════════════════
-function todayISO(){ return new Date().toISOString().slice(0,10); }
+// Use LOCAL date (not UTC) so entries bucket into the calendar day
+// the nanny/parent is actually living in (Manila UTC+8, Moscow UTC+3, etc.)
+function dateISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayISO(){ return dateISO(new Date()); }
 function nowHHMM(){ return new Date().toTimeString().slice(0,5); }
 function sc(){ return child==='lev' ? 'sl' : 'sm'; }
 function colorVar(){ return child==='lev' ? 'var(--lev)' : 'var(--mark)'; }
@@ -1909,7 +1911,7 @@ async function renderHistoryByDay(root){
   const days = [];
   for (let i=0;i<30;i++){
     const d = new Date(); d.setDate(d.getDate()-i);
-    days.push(d.toISOString().slice(0,10));
+    days.push(dateISO(d));
   }
   let stripHtml = `<div class="day-strip">${days.map(d => {
     const {day,mo} = fmtDateShortRU(d);
@@ -1959,7 +1961,7 @@ window.setExportPeriod = function(p){ exportPeriod = p; renderHistory(); };
 window.exportPDF = async function(){
   const days = exportPeriod==='all' ? 3650 : exportPeriod;
   const start = new Date(); start.setDate(start.getDate()-(days-1));
-  const startISO = start.toISOString().slice(0,10);
+  const startISO = dateISO(start);
   const endISO = todayISO();
   showToast('Готовлю PDF... / Preparing...');
   const [F,M,S,DS,WA,SL] = await Promise.all([
@@ -1992,7 +1994,6 @@ window.exportPDF = async function(){
   });
 
   const html = `<!DOCTYPE html><html lang="ru"><head>
-<!-- build: 2026-05-25 00:20:34 (auto-deploy test) --><meta charset="UTF-8"><title>Дневник — ${childName}</title>
   <style>
     body{font-family:-apple-system,Arial,sans-serif;color:#111;margin:24px;font-size:13px;line-height:1.5}
     h1{font-size:20px;margin:0 0 2px}
@@ -2331,7 +2332,7 @@ window.saveEditMed = async (id) => {
 async function renderProfile(root){
   const days = profilePeriod==='all' ? 365 : profilePeriod;
   const start = new Date(); start.setDate(start.getDate()-(days-1));
-  const startISO = start.toISOString().slice(0,10);
+  const startISO = dateISO(start);
   const endISO   = todayISO();
 
   const [feeds, meds, solids, summaries, weights] = await Promise.all([
@@ -2347,7 +2348,7 @@ async function renderProfile(root){
   const dates = [];
   for (let i=days-1;i>=0;i--){
     const d = new Date(); d.setDate(d.getDate()-i);
-    dates.push(d.toISOString().slice(0,10));
+    dates.push(dateISO(d));
   }
   const mlByDay = dates.map(d => F.filter(e=>e.date===d).reduce((s,e)=>s+(e.kabrita_ml||0)+(e.nutrilon_ml||0),0));
   const stoolByDay = dates.map(d => F.filter(e=>e.date===d && e.stool).length);
