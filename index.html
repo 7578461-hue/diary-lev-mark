@@ -542,6 +542,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 .tile.t-water{background:#E9F4FB;border-color:rgba(42,107,136,.18)}
 .tile.t-solids{background:var(--ok-bg);border-color:rgba(42,122,42,.2)}
 .tile.t-meds{background:var(--warn-bg);border-color:rgba(138,95,26,.22)}
+.tile.t-stool{background:#F2EAE0;border-color:rgba(122,80,48,.22)}
 
 .tile-wide{width:100%;min-height:64px;border:.5px solid var(--bmd);background:#EEE9F5;border-radius:var(--rlg);
   display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;
@@ -640,6 +641,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       <div class="tiles">
         <button class="tile t-feeding" onclick="goView('feeding')"><span class="ti-ico">🍼</span><span class="ti-ru">Кормление</span><span class="ti-en">Feeding</span></button>
         <button class="tile t-water" onclick="goView('water')"><span class="ti-ico">💧</span><span class="ti-ru">Питьё</span><span class="ti-en">Water</span></button>
+        <button class="tile t-stool" onclick="goView('stool')"><span class="ti-ico">💩</span><span class="ti-ru">Стул</span><span class="ti-en">Stool</span></button>
         <button class="tile t-solids" onclick="goView('solids')"><span class="ti-ico">🥦</span><span class="ti-ru">Прикорм</span><span class="ti-en">Solids</span></button>
         <button class="tile t-meds" onclick="goView('meds')"><span class="ti-ico">💊</span><span class="ti-ru">Лекарства</span><span class="ti-en">Meds</span></button>
       </div>
@@ -748,6 +750,47 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       <div class="card">
         <div class="bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
         <textarea class="note-inp" id="wa-note" rows="2" placeholder="Пил охотно / Drank willingly"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ СТУЛ / STOOL (standalone) ═══ -->
+  <section class="tab-pane" data-view="stool" id="pane-stool">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="stool-childpick"></div>
+    <div id="stool-form" style="display:none">
+      <div class="cur-child" id="stool-cur"></div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Время стула</span><span class="bi-en">/ Stool time</span></div>
+        <div class="time-row">
+          <input type="time" class="time-inp" id="so-time">
+          <div class="time-hint">Когда покакал<br>When pooped</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Цвет</span><span class="bi-en">/ Color</span></div>
+        <div class="g5" id="so-color-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Консистенция</span><span class="bi-en">/ Consistency</span></div>
+        <div class="g2" id="so-cons-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo (до 3 / up to 3)</span></div>
+        <label class="photo-btn">
+          📷 Добавить фото / Add photo
+          <input type="file" accept="image/*" multiple id="so-photos" onchange="onPhotosPicked(event,'stool')">
+        </label>
+        <div class="photo-preview" id="so-photo-preview"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+        <textarea class="note-inp" id="so-note" rows="2" placeholder="Спокойно, без напряжения / Calm, no straining"></textarea>
       </div>
     </div>
   </section>
@@ -963,7 +1006,7 @@ let profilePeriod = 7;
 let exportPeriod = 7;
 
 // input screens that require a child-selection step
-const CHILD_VIEWS = ['feeding','water','solids','meds','sleep','eod'];
+const CHILD_VIEWS = ['feeding','water','stool','solids','meds','sleep','eod'];
 // water form
 let wSel = { ml:0 };
 
@@ -976,6 +1019,9 @@ function resetFormula(){
     photos:[], photoUrls:[],
   };
 }
+
+// standalone stool form (separate from feeding's stool block)
+let soForm = { color:null, cons:null, photos:[], photoUrls:[] };
 
 // solids form (existing logic)
 let sSel = { amount:null, accept:null, reactions:new Set(), photos:[], photoUrls:[] };
@@ -1222,6 +1268,7 @@ window.chooseChild = function(c, v){
   if (v==='feeding') resetFeedingForm();
   if (v==='solids')  resetSolidsForm();
   if (v==='water')   resetWaterForm();
+  if (v==='stool')   resetStoolOnlyForm();
   if (v==='meds')    renderMeds();
   if (v==='sleep'){  resetSleepForm(); renderSleepList(); }
   if (v==='eod')     openEod();
@@ -1249,11 +1296,12 @@ window.setChild = setChild;
 function updateSaveBar(){
   const w = document.querySelector('.save-wrap');
   const sb = document.getElementById('save-btn');
-  const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water'].includes(view);
+  const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water','stool'].includes(view);
   w.style.display = show ? 'block' : 'none';
   if (view==='feeding')      sb.textContent = '💾 Сохранить кормление · Save feeding';
   else if (view==='solids')  sb.textContent = '💾 Сохранить прикорм · Save solids';
   else if (view==='water')   sb.textContent = '💾 Сохранить питьё · Save water';
+  else if (view==='stool')   sb.textContent = '💩 Записать стул · Save stool';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1347,18 +1395,28 @@ function resetFeedingForm(){
 // ═══════════════════════════════════════════════════════════════
 // PHOTOS
 // ═══════════════════════════════════════════════════════════════
+function photoBucketFor(kind){
+  if (kind==='formula') return fForm;
+  if (kind==='stool')   return soForm;
+  return sSel; // solids
+}
+function photoPreviewIdFor(kind){
+  if (kind==='formula') return 'f-photo-preview';
+  if (kind==='stool')   return 'so-photo-preview';
+  return 's-photo-preview';
+}
 function onPhotosPicked(ev, kind){
   const files = Array.from(ev.target.files || []);
-  const bucket = kind==='formula' ? fForm : sSel;
+  const bucket = photoBucketFor(kind);
   const max = 3 - bucket.photos.length;
   files.slice(0, max).forEach(f => bucket.photos.push(f));
   renderPhotoPreview(kind);
   ev.target.value = '';
 }
 function renderPhotoPreview(kind){
-  const previewId = kind==='formula' ? 'f-photo-preview' : 's-photo-preview';
+  const previewId = photoPreviewIdFor(kind);
   const root = document.getElementById(previewId);
-  const bucket = kind==='formula' ? fForm : sSel;
+  const bucket = photoBucketFor(kind);
   root.innerHTML = '';
   bucket.photos.forEach((f, idx) => {
     const wrap = document.createElement('div');
@@ -1436,6 +1494,7 @@ async function onSave(){
   if (view==='feeding') await saveFeeding();
   else if (view==='solids') await saveSolids();
   else if (view==='water') await saveWater();
+  else if (view==='stool') await saveStoolOnly();
 }
 
 async function saveFeeding(){
@@ -1551,6 +1610,76 @@ async function saveWater(){
   if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
   else { showToast('Сохранено ✓ / Saved ✓'); resetWaterForm(); goHome(); }
   btn.disabled = false; btn.textContent = '💾 Сохранить питьё · Save water';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STOOL (standalone) / СТУЛ
+// ═══════════════════════════════════════════════════════════════
+function renderStoolOnlyGrids(){
+  const cg = document.getElementById('so-color-grid'); if (!cg) return;
+  const colorSc = sc();
+  cg.innerHTML = STOOL_COLORS.map(c => `
+    <div class="tap${soForm.color===c.k?' '+colorSc:''}" data-soc="${c.k}">
+      <span class="t1" style="font-size:18px">${c.ico}</span>
+      <span class="t2">${c.ru}</span>
+      <span class="t3">${c.en}</span>
+    </div>`).join('');
+  cg.querySelectorAll('[data-soc]').forEach(el => {
+    el.onclick = () => {
+      const k = el.dataset.soc;
+      soForm.color = soForm.color===k ? null : k;
+      renderStoolOnlyGrids();
+    };
+  });
+  const kg = document.getElementById('so-cons-grid');
+  kg.innerHTML = STOOL_CONS.map(c => `
+    <div class="tap${soForm.cons===c.k?' '+colorSc:''}" data-sok="${c.k}">
+      <span class="t1">${c.ru}</span>
+      <span class="t2">${c.en}</span>
+    </div>`).join('');
+  kg.querySelectorAll('[data-sok]').forEach(el => {
+    el.onclick = () => {
+      const k = el.dataset.sok;
+      soForm.cons = soForm.cons===k ? null : k;
+      renderStoolOnlyGrids();
+    };
+  });
+}
+function resetStoolOnlyForm(){
+  soForm = { color:null, cons:null, photos:[], photoUrls:[] };
+  const t = document.getElementById('so-time'); if (t) t.value = nowHHMM();
+  const n = document.getElementById('so-note'); if (n) n.value = '';
+  const p = document.getElementById('so-photo-preview'); if (p) p.innerHTML = '';
+  renderStoolOnlyGrids();
+}
+async function saveStoolOnly(){
+  if (!soForm.color && !soForm.cons && soForm.photos.length===0){
+    showToast('Выбери цвет или консистенцию / Pick color or consistency'); return;
+  }
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  const id = newId();
+  let photoUrls = [];
+  if (soForm.photos.length){
+    btn.textContent = 'Загрузка фото... / Uploading photos...';
+    photoUrls = await uploadPhotos(soForm.photos, 'stool', id);
+  }
+  const entry = {
+    id, child,
+    date: todayISO(),
+    time: document.getElementById('so-time').value || nowHHMM(),
+    kabrita_ml: 0, nutrilon_ml: 0, water_ml: 0,
+    stool: true,
+    stool_color: soForm.color,
+    stool_consistency: soForm.cons,
+    photo_urls: photoUrls,
+    note: document.getElementById('so-note').value.trim(),
+    voice_note: '',
+  };
+  const { error } = await db.from(T_FORMULA).insert([entry]);
+  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
+  else { showToast('Стул записан ✓ / Stool saved ✓'); resetStoolOnlyForm(); goHome(); }
+  btn.disabled = false; btn.textContent = '💾 Записать стул · Save stool';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2025,18 +2154,28 @@ function renderTimelineEntry(ev){
   let kindLbl='', title='', sub='', pills='', noteH='', voiceH='', photosH='';
   switch (kind){
     case 'formula':{
-      kindLbl = '🍼 Кормление / Feeding';
       const total = (e.kabrita_ml||0)+(e.nutrilon_ml||0);
-      title = total>0 ? `${total} мл смеси / ml formula` : 'Кормление / Feeding';
-      const parts = [];
-      if (e.kabrita_ml) parts.push(`KABRITA ${e.kabrita_ml}мл`);
-      if (e.nutrilon_ml) parts.push(`NUTRILON ${e.nutrilon_ml}мл`);
-      if (e.water_ml) parts.push(`💧 ${e.water_ml}мл / ml`);
-      sub = parts.join(' · ');
-      if (e.stool){
+      // standalone stool entry = no formula ml AND stool=true
+      const isStoolOnly = total===0 && !e.water_ml && e.stool;
+      if (isStoolOnly){
+        kindLbl = '💩 Стул / Stool';
         const c = STOOL_COLORS.find(x=>x.k===e.stool_color);
         const cs = STOOL_CONS.find(x=>x.k===e.stool_consistency);
-        pills += `<span class="pill p-warn">💩 Стул / Stool${c?' '+c.ico:''}${cs?' '+cs.ru:''}</span>`;
+        title = [c?c.ico+' '+c.ru:'', cs?cs.ru:''].filter(Boolean).join(' · ') || 'Стул / Stool';
+        sub = [c?c.en:'', cs?cs.en:''].filter(Boolean).join(' · ');
+      } else {
+        kindLbl = '🍼 Кормление / Feeding';
+        title = total>0 ? `${total} мл смеси / ml formula` : 'Кормление / Feeding';
+        const parts = [];
+        if (e.kabrita_ml) parts.push(`KABRITA ${e.kabrita_ml}мл`);
+        if (e.nutrilon_ml) parts.push(`NUTRILON ${e.nutrilon_ml}мл`);
+        if (e.water_ml) parts.push(`💧 ${e.water_ml}мл / ml`);
+        sub = parts.join(' · ');
+        if (e.stool){
+          const c = STOOL_COLORS.find(x=>x.k===e.stool_color);
+          const cs = STOOL_CONS.find(x=>x.k===e.stool_consistency);
+          pills += `<span class="pill p-warn">💩 Стул / Stool${c?' '+c.ico:''}${cs?' '+cs.ru:''}</span>`;
+        }
       }
       break;
     }
