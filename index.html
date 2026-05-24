@@ -1,0 +1,2721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<title>Lev & Mark · Дневник близнецов</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#F4F3F0; --surface:#FFFFFF;
+  --border:rgba(0,0,0,.08); --bmd:rgba(0,0,0,.14);
+  --text:#111010; --muted:#6A6860; --hint:#AAA49C;
+  --lev:#2A6B88; --lev-bg:#E7F2F8;
+  --mark:#7A5030; --mark-bg:#F5EDE3;
+  --ok:#2A7A2A; --ok-bg:#E7F5E7;
+  --warn:#8A5F1A; --warn-bg:#FEF2DC;
+  --bad:#8A1A1A; --bad-bg:#FEE7E7;
+  --r:12px; --rsm:8px; --rlg:16px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+  --nav-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:15px; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--surface);
+  border-bottom:.5px solid var(--border);
+  padding:calc(12px + var(--safe-top)) 14px 0;
+  position:sticky; top:0; z-index:100;
+}
+.tb-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.brand{font-size:14px;font-weight:700;letter-spacing:.02em}
+.brand .b-sub{font-size:10px;font-weight:500;color:var(--hint);display:block;margin-top:1px}
+.mode-btn{
+  font-family:inherit; font-size:12px; font-weight:600;
+  padding:8px 12px; border-radius:20px;
+  border:.5px solid var(--bmd); background:var(--bg);
+  color:var(--muted); cursor:pointer;
+  display:flex; gap:6px; align-items:center;
+  touch-action:manipulation; min-height:36px;
+}
+.mode-btn.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
+
+.child-tabs{display:flex;border-top:.5px solid var(--border)}
+.ctab{
+  flex:1;padding:11px 8px;text-align:center;
+  border:none;background:none;cursor:pointer;font-family:inherit;
+  border-bottom:2.5px solid transparent;transition:all .15s;
+  position:relative;top:.5px;touch-action:manipulation;
+}
+.ctab-main{font-size:15px;font-weight:600;color:var(--muted);display:block}
+.ctab-sub{font-size:10px;color:var(--hint);display:block;margin-top:2px}
+.ctab.lev.active .ctab-main{color:var(--lev)}
+.ctab.lev.active{border-bottom-color:var(--lev)}
+.ctab.mark.active .ctab-main{color:var(--mark)}
+.ctab.mark.active{border-bottom-color:var(--mark)}
+
+/* Inline child-tabs container (used inside meds/history panes) */
+.inline-tabs{
+  border:.5px solid var(--border); border-radius:var(--r);
+  background:var(--surface); margin-bottom:12px; overflow:hidden;
+}
+.inline-tabs .ctab{border-bottom:none;top:0;transition:background .15s}
+.inline-tabs .ctab.lev.active{background:var(--lev-bg)}
+.inline-tabs .ctab.mark.active{background:var(--mark-bg)}
+.inline-tabs .ctab.lev.active .ctab-main{color:var(--lev)}
+.inline-tabs .ctab.mark.active .ctab-main{color:var(--mark)}
+
+.date-strip{font-size:11px;color:var(--muted);padding:0 0 8px;text-align:center;line-height:1.4}
+.date-strip .d-en{color:var(--hint);font-size:10px;display:block}
+
+/* ── MAIN ── */
+.main{
+  padding:12px 14px calc(var(--nav-h) + 76px + var(--safe-bot));
+  max-width:560px; margin:0 auto;
+}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── CARD ── */
+.card{
+  background:var(--surface);
+  border:.5px solid var(--border);
+  border-radius:var(--rlg);
+  padding:14px; margin-bottom:10px;
+}
+.card.tight{padding:12px}
+
+/* ── BILINGUAL LABEL ── */
+.bi{display:flex;gap:6px;align-items:baseline;margin-bottom:10px;flex-wrap:wrap}
+.bi-ru{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.07em}
+.bi-en{font-size:10px;color:var(--hint);opacity:.65}
+
+/* ── TIME ── */
+.time-row{display:flex;align-items:center;gap:12px}
+.time-inp{
+  font-family:inherit;font-size:26px;font-weight:500;color:var(--text);
+  border:none;background:transparent;outline:none;width:120px;cursor:pointer;
+}
+.time-hint{font-size:11px;color:var(--hint);line-height:1.5}
+
+/* ── INPUTS ── */
+.prod-inp,.ml-inp,.note-inp{
+  width:100%; padding:12px 14px;
+  border:.5px solid var(--bmd); border-radius:var(--r);
+  font-family:inherit; font-size:16px;
+  color:var(--text); background:var(--bg);
+  outline:none; -webkit-appearance:none;
+}
+.prod-inp:focus,.ml-inp:focus,.note-inp:focus{background:var(--surface)}
+.note-inp{resize:none;min-height:64px;line-height:1.5}
+.ml-inp{margin-top:8px;text-align:center;font-size:18px;font-weight:600}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  padding:7px 12px;border-radius:20px;
+  border:.5px solid var(--bmd);background:var(--bg);
+  cursor:pointer;touch-action:manipulation;transition:all .12s;
+  font-family:inherit;
+}
+.chip:active{transform:scale(.94);opacity:.8}
+.chip .cru{font-size:13px;font-weight:500;color:var(--text);display:block}
+.chip .cen{font-size:10px;color:var(--hint);display:block;margin-top:1px}
+.chip.ml-chip{font-size:15px;font-weight:600;padding:9px 14px;min-width:54px;text-align:center}
+.chip.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
+.mark .chip.on,.tab-pane[data-child="mark"] .chip.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.g5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+
+/* ── TAP CARDS ── */
+.tap{
+  border:.5px solid var(--bmd);background:var(--bg);
+  border-radius:var(--r);padding:12px 6px;text-align:center;
+  cursor:pointer;touch-action:manipulation;transition:all .15s;
+  min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+}
+.tap:active{transform:scale(.96)}
+.t1{font-size:14px;font-weight:600;color:var(--text)}
+.t2{font-size:10px;color:var(--hint)}
+.t3{font-size:9px;color:var(--hint);opacity:.6}
+
+.acc{
+  border:.5px solid var(--bmd);background:var(--bg);
+  border-radius:var(--r);padding:12px 8px;
+  cursor:pointer;touch-action:manipulation;transition:all .15s;text-align:center;
+  min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+.acc:active{transform:scale(.96)}
+.a-ico{font-size:22px}
+.a-ru{font-size:13px;font-weight:500;color:var(--text)}
+.a-en{font-size:10px;color:var(--hint)}
+
+.rea{
+  border:.5px solid var(--bmd);background:var(--bg);border-radius:var(--r);
+  padding:11px 10px;cursor:pointer;touch-action:manipulation;transition:all .15s;
+  min-height:58px;display:flex;flex-direction:column;justify-content:center;gap:3px;
+}
+.rea:active{transform:scale(.96)}
+.r-ru{font-size:13px;font-weight:500;color:var(--muted)}
+.r-en{font-size:10px;color:var(--hint)}
+
+/* selected states */
+.sl{background:var(--lev-bg)!important;border-color:var(--lev)!important}
+.sl .t1,.sl .a-ru,.sl .r-ru{color:var(--lev)!important}
+.sm{background:var(--mark-bg)!important;border-color:var(--mark)!important}
+.sm .t1,.sm .a-ru,.sm .r-ru{color:var(--mark)!important}
+.s-ok{background:var(--ok-bg)!important;border-color:var(--ok)!important}
+.s-ok .r-ru{color:var(--ok)!important}
+.s-warn{background:var(--warn-bg)!important;border-color:var(--warn)!important}
+.s-warn .r-ru{color:var(--warn)!important}
+.s-bad{background:var(--bad-bg)!important;border-color:var(--bad)!important}
+.s-bad .r-ru{color:var(--bad)!important}
+
+/* big yes/no */
+.yesno{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.yesno button{
+  font-family:inherit;font-size:15px;font-weight:600;color:var(--muted);
+  padding:16px 10px;border-radius:var(--r);border:.5px solid var(--bmd);
+  background:var(--bg);cursor:pointer;touch-action:manipulation;transition:all .15s;
+  min-height:64px;
+}
+.yesno button:active{transform:scale(.97)}
+.yesno button.on-yes{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.yesno button.on-no{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+
+/* ── TOGGLE ── */
+.tog-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tog-sw{position:relative;width:50px;height:28px;flex-shrink:0}
+.tog-sw input{opacity:0;width:0;height:0}
+.tog-tr{position:absolute;inset:0;border-radius:14px;background:var(--bmd);cursor:pointer;transition:background .2s}
+.tog-tr::after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:white;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.lev-tog input:checked + .tog-tr{background:var(--lev)}
+.mark-tog input:checked + .tog-tr{background:var(--mark)}
+input:checked + .tog-tr::after{transform:translateX(22px)}
+
+/* ── VOICE ── */
+.mic-btn{
+  width:100%;padding:13px;border-radius:var(--r);
+  border:.5px solid var(--bmd);background:var(--bg);
+  font-family:inherit;font-size:14px;font-weight:500;
+  cursor:pointer;touch-action:manipulation;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);
+}
+.mic-btn.rec{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.mdot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.rec .mdot{background:var(--bad);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.vtrans{
+  min-height:44px;padding:10px 13px;border:.5px solid var(--bmd);border-radius:var(--r);
+  background:var(--bg);font-size:14px;color:var(--text);line-height:1.5;font-style:italic;margin-top:8px;
+}
+.vtrans.emp{color:var(--hint);font-style:normal}
+.vstatus{font-size:11px;color:var(--hint);text-align:center;margin-top:5px;min-height:14px}
+
+/* ── PHOTO ── */
+.photo-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;padding:14px;border-radius:var(--r);
+  border:.5px dashed var(--bmd);background:var(--bg);
+  font-size:14px;font-weight:500;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;gap:8px;
+}
+.photo-btn input{display:none}
+.photo-preview{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.photo-thumb{
+  position:relative;width:72px;height:72px;border-radius:var(--rsm);
+  overflow:hidden;background:var(--bg);border:.5px solid var(--bmd);
+}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-thumb .px{
+  position:absolute;top:2px;right:2px;
+  width:22px;height:22px;border:none;border-radius:50%;
+  background:rgba(0,0,0,.55);color:white;font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+
+/* ── TOTAL READOUT ── */
+.formula-total{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);
+  padding:11px 14px;margin-bottom:10px;
+}
+.formula-total .ft-n{font-size:18px;font-weight:700;color:var(--lev)}
+.mark-active .formula-total .ft-n{color:var(--mark)}
+
+/* ── STICKY SAVE ── */
+.save-wrap{
+  position:fixed;bottom:var(--nav-h);left:0;right:0;
+  padding:8px 14px calc(8px + var(--safe-bot));
+  background:rgba(244,243,240,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-top:.5px solid var(--border);z-index:90;
+}
+.save-btn{
+  width:100%;max-width:540px;margin:0 auto;display:block;
+  padding:15px;border-radius:var(--r);border:none;
+  font-family:inherit;font-size:16px;font-weight:600;
+  cursor:pointer;touch-action:manipulation;color:white;transition:all .15s;
+}
+.save-btn:active{transform:scale(.98)}
+.save-btn.lev{background:var(--lev)}
+.save-btn.mark{background:var(--mark)}
+.save-btn:disabled{opacity:.6}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--nav-h) + var(--safe-bot));
+  padding-bottom:var(--safe-bot);
+  background:var(--surface);border-top:.5px solid var(--border);
+  display:flex;z-index:99;
+}
+.bnav button{
+  flex:1;border:none;background:none;font-family:inherit;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--muted);touch-action:manipulation;padding:6px 4px;
+}
+.bnav button.active{color:var(--text)}
+.bnav .nv-ico{font-size:22px;line-height:1}
+.bnav .nv-ru{font-size:10px;font-weight:600;line-height:1.1}
+.bnav .nv-en{font-size:9px;color:var(--hint);line-height:1.1}
+
+/* ── STATS / DAILY SUMMARY ── */
+.ds-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.ds-stat{background:var(--bg);border-radius:var(--rsm);padding:9px 4px;text-align:center}
+.ds-n{font-size:18px;font-weight:700;color:var(--lev);line-height:1}
+.mark-active .ds-n{color:var(--mark)}
+.ds-l{font-size:9px;color:var(--hint);margin-top:3px;font-weight:500;line-height:1.2}
+
+.ds-eod-btn{
+  width:100%;margin-top:12px;padding:11px;border-radius:var(--r);
+  border:.5px solid var(--bmd);background:var(--bg);
+  font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;
+}
+.ds-eod-form{margin-top:12px;padding-top:12px;border-top:.5px solid var(--border)}
+.ds-eod-form .bi{margin-top:10px}
+.ds-eod-form .g2,.ds-eod-form .g3{margin-bottom:6px}
+
+/* ── MEDS ── */
+.med-card{
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);
+  padding:14px;margin-bottom:10px;
+}
+.med-card.has-given{background:var(--ok-bg);border-color:rgba(42,122,42,.25)}
+.med-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;gap:8px}
+.med-time-lbl{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.08em}
+.med-time-en{font-size:10px;color:var(--hint)}
+.med-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border:.5px solid var(--bmd);border-radius:var(--r);margin-bottom:6px;cursor:pointer;touch-action:manipulation}
+.med-row:last-child{margin-bottom:0}
+.med-row.given{background:var(--ok-bg);border-color:var(--ok)}
+.med-row .mr-icon{font-size:22px;width:28px;text-align:center;flex-shrink:0}
+.med-row .mr-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
+.med-row .mr-name .en{font-size:11px;color:var(--hint);font-weight:500;display:block;margin-top:1px}
+.med-row .mr-status{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);text-align:right;flex-shrink:0}
+.med-row.given .mr-status{color:var(--ok)}
+.med-summary{
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);
+  padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.ms-big{font-size:22px;font-weight:700;color:var(--ok)}
+.ms-big.miss{color:var(--bad)}
+.ms-lbl{font-size:11px;color:var(--muted);text-align:right;line-height:1.4}
+
+/* ── HISTORY ── */
+.hist-sub-tabs{display:flex;gap:6px;margin-bottom:12px}
+.hist-sub{
+  flex:1;padding:10px 8px;border-radius:var(--r);
+  border:.5px solid var(--bmd);background:var(--bg);
+  font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;
+}
+.hist-sub.on{background:var(--surface);border-color:var(--text);color:var(--text)}
+
+.day-strip{
+  display:flex;gap:6px;overflow-x:auto;padding:0 0 4px;margin-bottom:12px;
+  scroll-snap-type:x mandatory;
+}
+.day-strip::-webkit-scrollbar{display:none}
+.day-pill{
+  flex-shrink:0;scroll-snap-align:start;
+  padding:9px 12px;border-radius:var(--r);
+  border:.5px solid var(--bmd);background:var(--bg);
+  font-family:inherit;font-size:12px;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;text-align:center;line-height:1.3;
+}
+.day-pill .dp-day{font-weight:700;color:var(--text);font-size:13px;display:block}
+.day-pill .dp-mo{font-size:10px;color:var(--hint);display:block;margin-top:1px}
+.day-pill.on{background:var(--lev-bg);border-color:var(--lev)}
+.day-pill.on .dp-day{color:var(--lev)}
+.mark-active .day-pill.on{background:var(--mark-bg);border-color:var(--mark)}
+.mark-active .day-pill.on .dp-day{color:var(--mark)}
+
+.timeline-entry{
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);
+  margin-bottom:9px;overflow:hidden;
+}
+.te-view{display:flex;gap:10px;padding:13px}
+.te-time{min-width:46px;text-align:center;flex-shrink:0}
+.te-time-v{font-size:16px;font-weight:700;color:var(--text);line-height:1}
+.te-time-l{font-size:9px;color:var(--hint);margin-top:3px;line-height:1.2;text-transform:uppercase;letter-spacing:.05em}
+.te-body{flex:1;min-width:0}
+.te-kind{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.te-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
+.te-sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.te-note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.te-voice{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;font-style:italic}
+.pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.pill{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:500;line-height:1.3}
+.p-ok{background:var(--ok-bg);color:var(--ok)}
+.p-warn{background:var(--warn-bg);color:var(--warn)}
+.p-bad{background:var(--bad-bg);color:var(--bad)}
+.p-neu{background:var(--bg);color:var(--muted);border:.5px solid var(--bmd)}
+.p-lev{background:var(--lev-bg);color:var(--lev)}
+.p-mark{background:var(--mark-bg);color:var(--mark)}
+.te-photos{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.te-photos img{width:60px;height:60px;object-fit:cover;border-radius:var(--rsm);border:.5px solid var(--bmd)}
+.te-actions{display:flex;flex-direction:column;gap:2px;flex-shrink:0;align-self:flex-start}
+.act-btn{
+  background:none;border:none;cursor:pointer;font-size:18px;padding:6px 8px;
+  border-radius:8px;line-height:1;transition:all .15s;
+  touch-action:manipulation;min-width:34px;min-height:34px;
+  display:flex;align-items:center;justify-content:center;color:var(--hint);
+}
+.edit-btn:hover,.edit-btn:active{color:var(--lev);background:var(--lev-bg)}
+.del-btn:hover,.del-btn:active{color:var(--bad);background:var(--bad-bg)}
+
+/* ── EDIT FORM ── */
+.te-edit{border-top:.5px solid var(--border);padding:13px;background:var(--bg)}
+.te-edit .edit-row{margin-bottom:10px}
+.te-edit .edit-bi{display:flex;gap:5px;align-items:baseline;margin-bottom:5px}
+.edit-mini-inp,.edit-ta{
+  width:100%;padding:9px 12px;border:.5px solid var(--bmd);border-radius:var(--rsm);
+  font-family:inherit;font-size:16px;color:var(--text);background:var(--surface);
+  outline:none;-webkit-appearance:none;
+}
+.edit-ta{resize:none;min-height:54px}
+.edit-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.edit-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.etap{
+  border:.5px solid var(--bmd);background:var(--surface);border-radius:var(--rsm);
+  padding:9px 5px;text-align:center;cursor:pointer;touch-action:manipulation;
+  transition:all .12s;font-size:12px;font-weight:500;color:var(--muted);line-height:1.4;
+  min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.etap:active{transform:scale(.96)}
+.edit-actions{display:flex;gap:8px;margin-top:12px}
+.ebtn{
+  flex:1;padding:12px;border-radius:var(--rsm);border:.5px solid var(--bmd);
+  background:var(--surface);font-family:inherit;font-size:14px;font-weight:500;
+  cursor:pointer;touch-action:manipulation;transition:all .15s;color:var(--muted);
+}
+.ebtn-save{color:white;border-color:transparent}
+.ebtn-save.lev{background:var(--lev)}
+.ebtn-save.mark{background:var(--mark)}
+
+/* ── DIVIDER ── */
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0 10px}
+.dl{flex:1;height:.5px;background:var(--bmd)}
+.dt{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+
+/* ── EMPTY/LOAD ── */
+.empty{
+  text-align:center;padding:30px 20px;color:var(--muted);font-size:14px;
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);line-height:1.7;
+}
+.loading{text-align:center;padding:22px;color:var(--hint);font-size:13px}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:calc(var(--nav-h) + 80px + var(--safe-bot));
+  left:50%;transform:translateX(-50%);
+  background:#222;color:white;padding:10px 18px;border-radius:20px;
+  font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .2s;
+  white-space:nowrap;pointer-events:none;max-width:90vw;
+}
+.toast.show{opacity:1}
+
+/* ── CONN BAR ── */
+.conn-bar{text-align:center;padding:5px;font-size:11px;font-weight:500;display:none}
+.conn-bar.offline{display:block;background:var(--warn-bg);color:var(--warn)}
+.conn-bar.online{display:block;background:var(--ok-bg);color:var(--ok)}
+
+/* ── PROFILE ── */
+.prof-period{display:flex;gap:5px;margin-bottom:12px}
+.prof-period button{
+  flex:1;padding:9px;border-radius:var(--rsm);
+  border:.5px solid var(--bmd);background:var(--bg);
+  font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;
+}
+.prof-period button.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
+.mark-active .prof-period button.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
+
+.section-hdr{font-size:13px;font-weight:700;color:var(--text);margin:18px 4px 8px;display:flex;gap:8px;align-items:center}
+.section-hdr .sh-en{font-size:11px;color:var(--hint);font-weight:500}
+
+.chart-wrap{
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);
+  padding:14px;margin-bottom:10px;
+}
+.chart-wrap canvas{display:block;width:100%;height:170px}
+.chart-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted)}
+.chart-meta b{color:var(--text);font-weight:700}
+
+.color-dist{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.cd-item{display:flex;align-items:center;gap:5px;background:var(--bg);border-radius:14px;padding:5px 10px;font-size:12px}
+
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--rsm);background:var(--bg)}
+
+.weight-add{
+  display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-top:8px;
+}
+.weight-add input{
+  padding:9px 10px;border:.5px solid var(--bmd);border-radius:var(--rsm);
+  font-family:inherit;font-size:14px;background:var(--bg);outline:none;-webkit-appearance:none;
+}
+.weight-add button{
+  padding:9px 14px;border:none;border-radius:var(--rsm);
+  background:var(--lev);color:white;font-family:inherit;font-weight:600;font-size:13px;
+  cursor:pointer;touch-action:manipulation;
+}
+.mark-active .weight-add button{background:var(--mark)}
+
+/* parents mode hides nanny inputs */
+body.parents-mode .nanny-only{display:none!important}
+body.parents-mode .save-wrap{display:none!important}
+body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot))}
+
+/* save bar visibility is controlled in JS (updateSaveBar) */
+
+/* ══ HOME SCREEN ══ */
+.home-date{text-align:center;padding:4px 0 14px}
+.home-date .hd-ru{font-size:19px;font-weight:700;color:var(--text);line-height:1.25}
+.home-date .hd-en{font-size:12px;color:var(--hint);margin-top:3px}
+
+.dual{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);margin-bottom:14px;overflow:hidden}
+.dual-head{display:grid;grid-template-columns:1.1fr 1fr 1fr;align-items:end;padding:10px 8px;border-bottom:.5px solid var(--border)}
+.dual-head .dh{text-align:center;font-size:15px;font-weight:700;line-height:1.1}
+.dual-head .dh span{display:block;font-size:10px;font-weight:500;color:var(--hint);margin-top:1px}
+.dual-head .dh.lev{color:var(--lev)}
+.dual-head .dh.mark{color:var(--mark)}
+.dual-row{display:grid;grid-template-columns:1.1fr 1fr 1fr;align-items:center;padding:9px 8px;border-bottom:.5px solid var(--border)}
+.dual-row:last-child{border-bottom:none}
+.dr-l{font-size:12px;color:var(--muted);line-height:1.25;padding-left:2px}
+.dr-l span{display:block;font-size:10px;color:var(--hint)}
+.dr-v{text-align:center;font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
+.dr-v small{display:block;font-size:10px;font-weight:500;color:var(--hint);margin-top:1px}
+.dr-v.lev{color:var(--lev)}
+.dr-v.mark{color:var(--mark)}
+.dr-v.empty-v{color:var(--hint);font-weight:500}
+
+/* ══ TILES ══ */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.tile{min-height:140px;border:.5px solid var(--bmd);background:var(--surface);border-radius:var(--rlg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;touch-action:manipulation;transition:transform .12s;font-family:inherit}
+.tile:active{transform:scale(.97)}
+.tile .ti-ico{font-size:40px;line-height:1}
+.tile .ti-ru{font-size:16px;font-weight:700;color:var(--text)}
+.tile .ti-en{font-size:11px;color:var(--hint)}
+.tile.t-feeding{background:var(--lev-bg);border-color:rgba(42,107,136,.25)}
+.tile.t-water{background:#E9F4FB;border-color:rgba(42,107,136,.18)}
+.tile.t-solids{background:var(--ok-bg);border-color:rgba(42,122,42,.2)}
+.tile.t-meds{background:var(--warn-bg);border-color:rgba(138,95,26,.22)}
+
+.tile-wide{width:100%;min-height:64px;border:.5px solid var(--bmd);background:#EEE9F5;border-radius:var(--rlg);
+  display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;
+  cursor:pointer;touch-action:manipulation;transition:transform .12s;font-family:inherit}
+.tile-wide:active{transform:scale(.98)}
+.tile-wide .ti-ico{font-size:26px}
+.tile-wide .ti-ru{font-size:16px;font-weight:700;color:var(--text)}
+.tile-wide .ti-en{font-size:11px;color:var(--hint)}
+.tile-wide.t-eod{background:var(--bg)}
+
+/* ══ BACK BTN ══ */
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:600;
+  color:var(--muted);background:none;border:none;padding:4px 2px 12px;cursor:pointer;touch-action:manipulation}
+
+/* ══ CHILD PICK ══ */
+.child-pick-hint{text-align:center;font-size:14px;font-weight:600;color:var(--muted);margin:6px 0 12px}
+.child-pick-hint span{display:block;font-size:11px;font-weight:500;color:var(--hint);margin-top:2px}
+.child-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cp-btn{min-height:160px;border:1px solid var(--bmd);border-radius:var(--rlg);background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;touch-action:manipulation;transition:transform .12s;font-family:inherit}
+.cp-btn:active{transform:scale(.97)}
+.cp-btn .cp-ava{font-size:48px;line-height:1}
+.cp-btn .cp-ru{font-size:22px;font-weight:700}
+.cp-btn .cp-en{font-size:12px;color:var(--hint)}
+.cp-btn.lev{background:var(--lev-bg);border-color:var(--lev)}
+.cp-btn.lev .cp-ru{color:var(--lev)}
+.cp-btn.mark{background:var(--mark-bg);border-color:var(--mark)}
+.cp-btn.mark .cp-ru{color:var(--mark)}
+
+/* current child chip shown above a form */
+.cur-child{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px}
+.cur-child .cc-badge{font-weight:700;padding:5px 12px;border-radius:16px;font-size:14px}
+.cur-child .cc-badge.lev{background:var(--lev-bg);color:var(--lev)}
+.cur-child .cc-badge.mark{background:var(--mark-bg);color:var(--mark)}
+.cur-child .cc-switch{margin-left:auto;font-family:inherit;font-size:12px;color:var(--muted);background:none;
+  border:.5px solid var(--bmd);border-radius:14px;padding:6px 12px;cursor:pointer;touch-action:manipulation}
+
+/* ══ SLEEP ══ */
+.sleep-now{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sleep-now button{font-family:inherit;font-size:15px;font-weight:700;padding:16px 10px;border-radius:var(--r);
+  border:.5px solid var(--bmd);background:var(--bg);cursor:pointer;touch-action:manipulation;transition:transform .12s;color:var(--text);
+  display:flex;flex-direction:column;align-items:center;gap:4px;min-height:80px}
+.sleep-now button:active{transform:scale(.97)}
+.sleep-now .sn-sleep{background:#EEE9F5}
+.sleep-now .sn-wake{background:var(--warn-bg)}
+.sleep-now button:disabled{opacity:.4}
+.sleep-now .sn-sub{font-size:11px;font-weight:500;color:var(--muted)}
+.sleep-status{text-align:center;font-size:13px;color:var(--muted);margin-top:12px;line-height:1.4}
+.sleep-status b{color:var(--text)}
+.sleep-list-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg);border:.5px solid var(--bmd);border-radius:var(--r);margin-top:8px}
+.sli-time{font-size:15px;font-weight:700;color:var(--text)}
+.sli-dur{font-size:12px;color:var(--muted);margin-top:2px}
+.sli-open{color:var(--warn);font-weight:600}
+.sli-actions{margin-left:auto;display:flex;gap:2px;flex-shrink:0}
+
+/* manual time pair */
+.time-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.time-pair label{font-size:11px;color:var(--hint);display:block;margin-bottom:4px}
+.time-pair input{width:100%;padding:11px;border:.5px solid var(--bmd);border-radius:var(--r);font-family:inherit;font-size:16px;background:var(--bg);outline:none;-webkit-appearance:none}
+.btn-secondary{width:100%;margin-top:10px;padding:13px;border-radius:var(--r);border:.5px solid var(--bmd);background:var(--bg);font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;touch-action:manipulation}
+
+/* ══ EXPORT ══ */
+.export-bar{margin-top:16px;padding-top:14px;border-top:.5px solid var(--border)}
+.export-period{display:flex;gap:5px;margin-bottom:10px}
+.export-period button{flex:1;padding:9px;border-radius:var(--rsm);border:.5px solid var(--bmd);background:var(--bg);font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;touch-action:manipulation}
+.export-period button.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
+.mark-active .export-period button.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
+.export-btn{width:100%;padding:14px;border-radius:var(--r);border:none;background:var(--text);color:white;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;touch-action:manipulation}
+</style>
+</head>
+<body data-view="home">
+
+<header class="topbar">
+  <div class="tb-row">
+    <div class="brand">
+      Lev & Mark
+      <span class="b-sub" id="date-strip">—</span>
+    </div>
+    <button class="mode-btn" id="mode-btn" onclick="toggleMode()">
+      <span id="mode-ico">👶</span>
+      <span id="mode-lbl">Няня / Nanny</span>
+    </button>
+  </div>
+</header>
+
+<div class="conn-bar" id="conn-bar"></div>
+
+<main class="main">
+
+  <!-- ═══ HOME / ГЛАВНАЯ ═══ -->
+  <section class="tab-pane active" data-view="home" id="pane-home">
+    <div class="home-date" id="home-date">—</div>
+    <div class="dual" id="dual-summary"><div class="loading">Загрузка... / Loading...</div></div>
+    <div class="nanny-only">
+      <div class="tiles">
+        <button class="tile t-feeding" onclick="goView('feeding')"><span class="ti-ico">🍼</span><span class="ti-ru">Кормление</span><span class="ti-en">Feeding</span></button>
+        <button class="tile t-water" onclick="goView('water')"><span class="ti-ico">💧</span><span class="ti-ru">Питьё</span><span class="ti-en">Water</span></button>
+        <button class="tile t-solids" onclick="goView('solids')"><span class="ti-ico">🥦</span><span class="ti-ru">Прикорм</span><span class="ti-en">Solids</span></button>
+        <button class="tile t-meds" onclick="goView('meds')"><span class="ti-ico">💊</span><span class="ti-ru">Лекарства</span><span class="ti-en">Meds</span></button>
+      </div>
+      <button class="tile-wide t-sleep" onclick="goView('sleep')"><span class="ti-ico">😴</span><span class="ti-ru">Сон</span><span class="ti-en">Sleep</span></button>
+      <button class="tile-wide t-eod" onclick="goView('eod')"><span class="ti-ico">🌙</span><span class="ti-ru">Итог дня</span><span class="ti-en">Daily summary</span></button>
+    </div>
+  </section>
+
+  <!-- ═══ КОРМЛЕНИЕ / FEEDING (formula) ═══ -->
+  <section class="tab-pane" data-view="feeding" id="pane-feeding">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="feeding-childpick"></div>
+    <div id="feeding-form" style="display:none">
+      <div class="cur-child" id="feeding-cur"></div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Время кормления</span><span class="bi-en">/ Feeding time</span></div>
+        <div class="time-row">
+          <input type="time" class="time-inp" id="f-time">
+          <div class="time-hint">Когда кормили<br>When fed</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">KABRITA</span><span class="bi-en">/ Kabrita formula (мл/ml)</span></div>
+        <div class="chips" id="kab-chips"></div>
+        <input type="number" class="ml-inp" id="kab-ml" placeholder="вручную / manual" inputmode="numeric" oninput="onMlInput('kab')">
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">NUTRILON</span><span class="bi-en">/ Nutrilon formula (мл/ml)</span></div>
+        <div class="chips" id="nut-chips"></div>
+        <input type="number" class="ml-inp" id="nut-ml" placeholder="вручную / manual" inputmode="numeric" oninput="onMlInput('nut')">
+      </div>
+
+      <div class="formula-total">
+        <div>
+          <div class="bi-ru" style="font-size:12px">Итого смеси</div>
+          <div class="bi-en">Total formula</div>
+        </div>
+        <div class="ft-n"><span id="f-total">0</span> мл / ml</div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Стул</span><span class="bi-en">/ Stool</span></div>
+        <div class="yesno">
+          <button id="stool-yes" onclick="setStool(true)">✅ Был / Yes</button>
+          <button id="stool-no" onclick="setStool(false)">❌ Не было / No</button>
+        </div>
+        <div id="stool-detail" style="display:none">
+          <div class="bi" style="margin-top:14px"><span class="bi-ru">Цвет</span><span class="bi-en">/ Color</span></div>
+          <div class="g5" id="stool-color-grid"></div>
+          <div class="bi" style="margin-top:12px"><span class="bi-ru">Консистенция</span><span class="bi-en">/ Consistency</span></div>
+          <div class="g2" id="stool-cons-grid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo (до 3 / up to 3)</span></div>
+        <label class="photo-btn">
+          📷 Добавить фото / Add photo
+          <input type="file" accept="image/*" multiple id="f-photos" onchange="onPhotosPicked(event,'formula')">
+        </label>
+        <div class="photo-preview" id="f-photo-preview"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Голосовая заметка</span><span class="bi-en">/ Voice note</span></div>
+        <button class="mic-btn" id="f-mic-btn" onclick="toggleMic('formula')">
+          <span class="mdot"></span>
+          <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
+        </button>
+        <div class="vstatus" id="f-vstatus"></div>
+        <div class="vtrans emp" id="f-vtrans">Голосовая заметка появится здесь · Voice note will appear here</div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Текстовая заметка</span><span class="bi-en">/ Note</span></div>
+        <textarea class="note-inp" id="f-note" rows="2" placeholder="Был активный, срыгнул / Active, spit up"></textarea>
+      </div>
+
+    </div><!-- /feeding-form -->
+  </section>
+
+  <!-- ═══ ПИТЬЁ / WATER ═══ -->
+  <section class="tab-pane" data-view="water" id="pane-water">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="water-childpick"></div>
+    <div id="water-form" style="display:none">
+      <div class="cur-child" id="water-cur"></div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Время</span><span class="bi-en">/ Time</span></div>
+        <div class="time-row">
+          <input type="time" class="time-inp" id="wa-time">
+          <div class="time-hint">Когда пил<br>When drank</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Объём воды</span><span class="bi-en">/ Water (мл/ml)</span></div>
+        <div class="chips" id="wa-presets"></div>
+        <input type="number" class="ml-inp" id="wa-ml" placeholder="вручную / manual" inputmode="numeric" oninput="onWaterInput()">
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+        <textarea class="note-inp" id="wa-note" rows="2" placeholder="Пил охотно / Drank willingly"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ЛЕКАРСТВА / MEDS ═══ -->
+  <section class="tab-pane" data-view="meds" id="pane-meds">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="meds-childpick"></div>
+    <div id="meds-form" style="display:none">
+      <div class="cur-child" id="meds-cur"></div>
+      <div id="med-summary"></div>
+      <div id="med-cards"></div>
+    </div>
+  </section>
+
+  <!-- ═══ СОН / SLEEP ═══ -->
+  <section class="tab-pane" data-view="sleep" id="pane-sleep">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="sleep-childpick"></div>
+    <div id="sleep-form" style="display:none">
+      <div class="cur-child" id="sleep-cur"></div>
+
+      <div class="card">
+        <div class="sleep-now">
+          <button class="sn-sleep" id="sn-sleep" onclick="sleepNow()">😴 Заснул сейчас<span class="sn-sub">Fell asleep</span></button>
+          <button class="sn-wake" id="sn-wake" onclick="wakeNow()">☀️ Проснулся сейчас<span class="sn-sub">Woke up</span></button>
+        </div>
+        <div class="sleep-status" id="sleep-status"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Ручной ввод интервала</span><span class="bi-en">/ Manual interval</span></div>
+        <div class="time-pair">
+          <div><label>Заснул / From</label><input type="time" id="sl-start"></div>
+          <div><label>Проснулся / To</label><input type="time" id="sl-end"></div>
+        </div>
+        <textarea class="note-inp" id="sl-note" rows="2" placeholder="Заметка / Note" style="margin-top:10px"></textarea>
+        <button class="btn-secondary" onclick="addSleepManual()">＋ Добавить интервал / Add interval</button>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Интервалы сегодня</span><span class="bi-en">/ Today's intervals</span></div>
+        <div id="sleep-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ИТОГ ДНЯ / DAILY SUMMARY ═══ -->
+  <section class="tab-pane" data-view="eod" id="pane-eod">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="eod-childpick"></div>
+    <div id="eod-form-wrap" style="display:none">
+      <div class="cur-child" id="eod-cur"></div>
+      <div class="card">
+        <div class="bi"><span class="bi-ru">🌙 Итог дня</span><span class="bi-en">/ Daily summary</span></div>
+        <div class="bi"><span class="bi-ru">Самочувствие</span><span class="bi-en">/ Overall</span></div>
+        <div class="g3" id="eod-mood"></div>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Сон</span><span class="bi-en">/ Sleep</span></div>
+        <div class="g2" id="eod-sleep"></div>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Претензии / симптомы</span><span class="bi-en">/ Concerns</span></div>
+        <textarea class="note-inp" id="eod-concerns" rows="2" placeholder="Что беспокоит / What concerns"></textarea>
+        <div class="bi" style="margin-top:8px"><span class="bi-ru">Комментарий няни</span><span class="bi-en">/ Nanny note</span></div>
+        <textarea class="note-inp" id="eod-note" rows="2" placeholder="Свободный комментарий / Free comment"></textarea>
+        <button class="save-btn lev" id="eod-save" onclick="saveEod()" style="margin-top:10px">Сохранить итог / Save summary</button>
+      </div>
+      <div id="ds-eod-view"></div>
+    </div>
+  </section>
+
+  <!-- ═══ ПРИКОРМ / SOLIDS ═══ -->
+  <section class="tab-pane" data-view="solids" id="pane-solids">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="solids-childpick"></div>
+    <div id="solids-form" style="display:none">
+      <div class="cur-child" id="solids-cur"></div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Время кормления</span><span class="bi-en">/ Feeding time</span></div>
+        <div class="time-row">
+          <input type="time" class="time-inp" id="s-time">
+          <div class="time-hint">Когда кормили<br>When fed</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Продукт</span><span class="bi-en">/ Food</span></div>
+        <input class="prod-inp" id="s-product" placeholder="Кабачок / Zucchini" autocomplete="off" autocorrect="off">
+        <div class="chips" id="prod-chips" style="margin-top:9px"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Объём порции</span><span class="bi-en">/ Portion size</span></div>
+        <div class="g3" id="amt-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Как поел</span><span class="bi-en">/ How they ate</span></div>
+        <div class="g2" id="acc-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Реакция</span><span class="bi-en">/ Reaction</span></div>
+        <div class="g2" id="rea-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="tog-row">
+          <div>
+            <div style="font-size:14px;font-weight:500">Новый продукт / New food</div>
+            <div style="font-size:11px;color:var(--hint);margin-top:2px">Первый раз / First time trying</div>
+          </div>
+          <label class="tog-sw lev-tog" id="tog-new-wrap">
+            <input type="checkbox" id="chk-new">
+            <span class="tog-tr"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo</span></div>
+        <label class="photo-btn">
+          📷 Добавить фото / Add photo
+          <input type="file" accept="image/*" multiple id="s-photos" onchange="onPhotosPicked(event,'solids')">
+        </label>
+        <div class="photo-preview" id="s-photo-preview"></div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Голосовая заметка</span><span class="bi-en">/ Voice note</span></div>
+        <button class="mic-btn" id="s-mic-btn" onclick="toggleMic('solids')">
+          <span class="mdot"></span>
+          <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
+        </button>
+        <div class="vstatus" id="s-vstatus"></div>
+        <div class="vtrans emp" id="s-vtrans">Голосовая заметка появится здесь · Voice note will appear here</div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Текстовая заметка</span><span class="bi-en">/ Note</span></div>
+        <textarea class="note-inp" id="s-note" rows="2" placeholder="Морщился, но съел / Made faces but ate it"></textarea>
+      </div>
+
+    </div><!-- /solids-form -->
+  </section>
+
+  <!-- ═══ ИСТОРИЯ / HISTORY ═══ -->
+  <section class="tab-pane" data-view="history" id="pane-history">
+    <div class="hist-sub-tabs">
+      <button class="hist-sub on" id="hsub-byday" onclick="setHistorySub('byday')">📅 По дням / By day</button>
+      <button class="hist-sub" id="hsub-profile" onclick="setHistorySub('profile')">👶 Профиль / Profile</button>
+    </div>
+
+    <div class="child-tabs inline-tabs">
+      <button class="ctab lev active" id="htab-lev" onclick="setChild('lev')">
+        <span class="ctab-main">Лев</span><span class="ctab-sub">Lev</span>
+      </button>
+      <button class="ctab mark" id="htab-mark" onclick="setChild('mark')">
+        <span class="ctab-main">Марк</span><span class="ctab-sub">Mark</span>
+      </button>
+    </div>
+
+    <div id="history-content"><div class="loading">Загрузка... / Loading...</div></div>
+  </section>
+
+</main>
+
+<!-- Sticky save -->
+<div class="save-wrap">
+  <button class="save-btn lev" id="save-btn" onclick="onSave()">Сохранить · Save</button>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bnav">
+  <button class="active" data-nav="home" onclick="goView('home')">
+    <span class="nv-ico">🏠</span><span class="nv-ru">Главная</span><span class="nv-en">Home</span>
+  </button>
+  <button data-nav="history" onclick="goView('history')">
+    <span class="nv-ico">📊</span><span class="nv-ru">История</span><span class="nv-en">History</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://oqlnsqtveilnphvchwtn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_DL0kGfHLr_l3sX-KjMkbqg_lyIS8oMu';
+const BUCKET       = 'baby-photos';
+
+const T_FORMULA = 'formula_entries';
+const T_MEDS    = 'medication_entries';
+const T_SUMMARY = 'daily_summaries';
+const T_WEIGHT  = 'weight_entries';
+const T_SOLIDS  = 'feeding_entries';
+const T_WATER   = 'water_entries';
+const T_SLEEP   = 'sleep_entries';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let mode = 'nanny';     // 'nanny' | 'parents'
+let view = 'home';      // home|feeding|water|solids|meds|sleep|eod|history
+let viewStep = 'form';  // 'child' | 'form'  (for input screens)
+let child = 'lev';
+let historySub = 'byday';
+let historyDate = todayISO();
+let profilePeriod = 7;
+let exportPeriod = 7;
+
+// input screens that require a child-selection step
+const CHILD_VIEWS = ['feeding','water','solids','meds','sleep','eod'];
+// water form
+let wSel = { ml:0 };
+
+// formula form
+let fForm = resetFormula();
+function resetFormula(){
+  return {
+    kab:0, nut:0, water:0,
+    stool:null, stoolColor:null, stoolCons:null,
+    photos:[], photoUrls:[],
+  };
+}
+
+// solids form (existing logic)
+let sSel = { amount:null, accept:null, reactions:new Set(), photos:[], photoUrls:[] };
+
+// eod summary form
+let eodSel = { mood:null, sleep:null };
+
+// voice
+let recognition = null;
+let isRec = false;
+let voiceTarget = null;  // 'formula' | 'solids'
+
+// edit state for history
+let expandedEdit = null; // entry composite id "kind:id"
+let editBuf = {};
+
+// in-memory caches refreshed on every render
+let lastEntries = {};
+
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const ML_PRESETS = [50,80,100,120,150,160];
+const WATER_PRESETS = [10,20,30,50];
+
+const STOOL_COLORS = [
+  {k:'yellow',  ico:'🟡', ru:'Жёлтый',     en:'Yellow'},
+  {k:'brown',   ico:'🟤', ru:'Коричневый', en:'Brown'},
+  {k:'green',   ico:'🟢', ru:'Зелёный',    en:'Green'},
+  {k:'white',   ico:'⚪', ru:'Белый',      en:'White'},
+  {k:'red',     ico:'🔴', ru:'Красный',    en:'Red'},
+];
+const STOOL_CONS = [
+  {k:'loose',   ru:'Жидкий',    en:'Loose'},
+  {k:'mushy',   ru:'Кашицей',   en:'Mushy'},
+  {k:'normal',  ru:'Нормальный',en:'Normal'},
+  {k:'hard',    ru:'Твёрдый',   en:'Hard'},
+];
+
+const MOODS = [
+  {k:'good',ico:'😊',ru:'Хорошо',en:'Good'},
+  {k:'norm',ico:'😐',ru:'Норма',en:'Normal'},
+  {k:'rest',ico:'😟',ru:'Беспокойный',en:'Restless'},
+];
+const SLEEPS = [
+  {k:'good',ico:'😴',ru:'Хорошо',en:'Slept well'},
+  {k:'bad', ico:'🙄',ru:'Плохо',en:'Slept poorly'},
+];
+
+// Meds schedule per dose-time card
+const MED_DOSE = (c) => c==='lev' ? '4 капли / 4 drops' : '7 капель / 7 drops';
+const MED_SCHEDULE = {
+  morning:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)},
+              {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ таб / ¼ tab'}],
+  afternoon: [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
+  evening:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
+};
+const DOSE_TIME_LBL = {
+  morning:   {ru:'УТРО',ен:'Morning',ico:'☀️'},
+  afternoon: {ru:'ДЕНЬ',ен:'Afternoon',ico:'🌤'},
+  evening:   {ru:'ВЕЧЕР',ен:'Evening',ico:'🌙'},
+};
+
+// Solids constants (existing)
+const PRODS = [
+  ['Кабачок','Zucchini'],['Цв. капуста','Cauliflower'],['Брокколи','Broccoli'],
+  ['Тыква','Pumpkin'],['Морковь','Carrot'],['Картофель','Potato'],
+  ['Банан','Banana'],['Яблоко','Apple'],['Груша','Pear'],
+  ['Гречка','Buckwheat'],['Рис','Rice'],['Кукуруза','Corn'],
+  ['Индейка','Turkey'],['Кролик','Rabbit'],['Говядина','Beef'],
+  ['Кефир','Kefir'],['Творог','Cottage ch.'],['Хек','Hake'],
+];
+const AMTS = [
+  {v:'0.5',ru:'½ ч.л.',en:'½ tsp', s:'~2 г'},
+  {v:'1',  ru:'1 ч.л.',en:'1 tsp', s:'~5 г'},
+  {v:'2',  ru:'2 ч.л.',en:'2 tsp', s:'~10 г'},
+  {v:'3',  ru:'1 ст.л.',en:'1 tbsp',s:'~15 г'},
+  {v:'10', ru:'50 г',  en:'50 g',  s:'10 ч.л.'},
+  {v:'20', ru:'100 г', en:'100 g', s:'~½ порц.'},
+  {v:'30', ru:'150 г', en:'150 g', s:'полн.'},
+];
+const ACCS = [
+  {k:'all',     ico:'😋', ru:'Съел всё',  en:'Ate all'},
+  {k:'half',    ico:'🙂', ru:'Половину',  en:'Half'},
+  {k:'little',  ico:'😐', ru:'Немного',   en:'A little'},
+  {k:'refused', ico:'🙅', ru:'Отказался', en:'Refused'},
+];
+const REAS = [
+  {k:'skin_ok',  cls:'ok',  ru:'Кожа чистая',     en:'Skin clear'},
+  {k:'skin_bad', cls:'bad', ru:'Сыпь / краснота',  en:'Rash / redness'},
+  {k:'stool_ok', cls:'ok',  ru:'Стул норма',       en:'Stool normal'},
+  {k:'stool_bad',cls:'warn',ru:'Стул изменился',   en:'Stool changed'},
+  {k:'calm',     cls:'ok',  ru:'Спокойный',        en:'Calm / happy'},
+  {k:'gas',      cls:'warn',ru:'Газики / колики',  en:'Gas / colic'},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function nowHHMM(){ return new Date().toTimeString().slice(0,5); }
+function sc(){ return child==='lev' ? 'sl' : 'sm'; }
+function colorVar(){ return child==='lev' ? 'var(--lev)' : 'var(--mark)'; }
+function colorBg(){ return child==='lev' ? 'var(--lev-bg)' : 'var(--mark-bg)'; }
+function newId(){ return Date.now()*1000 + Math.floor(Math.random()*1000); }
+function escH(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function fmtDateRU(iso){
+  const d = new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'long'})
+    +' · '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+function fmtDateShortRU(iso){
+  const d = new Date(iso+'T12:00:00');
+  return {
+    day:String(d.getDate()),
+    mo: d.toLocaleDateString('ru-RU',{month:'short'}).replace('.',''),
+  };
+}
+function setDateStrip(){
+  const n = new Date();
+  const ru = n.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  const en = n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('date-strip').textContent = ru.charAt(0).toUpperCase()+ru.slice(1)+'  ·  '+en;
+}
+function fmtFullDate(){
+  const n = new Date();
+  let ru = n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  ru = ru.charAt(0).toUpperCase()+ru.slice(1);
+  const en = n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  return { ru, en };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMAGE COMPRESS + UPLOAD
+// ═══════════════════════════════════════════════════════════════
+async function compressImage(file, maxW=1280, quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width*scale);
+      const h = Math.round(img.height*scale);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(b => { URL.revokeObjectURL(url); resolve(b); }, 'image/jpeg', quality);
+    };
+    img.onerror = e => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+
+async function uploadPhotos(files, kind, entryId){
+  const urls = [];
+  for (let i=0; i<files.length; i++){
+    const blob = await compressImage(files[i]);
+    const fname = `${kind}/${child}/${entryId}_${i}.jpg`;
+    const { error } = await db.storage.from(BUCKET).upload(fname, blob, {
+      contentType:'image/jpeg', upsert:true,
+    });
+    if (error) { console.error('Photo upload error', error); continue; }
+    const { data } = db.storage.from(BUCKET).getPublicUrl(fname);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODE / TAB / CHILD
+// ═══════════════════════════════════════════════════════════════
+function toggleMode(){
+  mode = mode==='nanny' ? 'parents' : 'nanny';
+  const b = document.getElementById('mode-btn');
+  document.body.classList.toggle('parents-mode', mode==='parents');
+  if (mode==='parents'){
+    b.classList.add('on');
+    document.getElementById('mode-ico').textContent = '👨‍👩‍👦';
+    document.getElementById('mode-lbl').textContent = 'Родители / Parents';
+    historySub='profile';
+    goView('history'); renderHistorySubs();
+  } else {
+    b.classList.remove('on');
+    document.getElementById('mode-ico').textContent = '👶';
+    document.getElementById('mode-lbl').textContent = 'Няня / Nanny';
+    goView('home');
+  }
+}
+
+function goHome(){ goView('home'); }
+
+function goView(v){
+  view = v;
+  document.body.setAttribute('data-view', v);
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.dataset.view===v));
+  document.querySelectorAll('.bnav button').forEach(b => b.classList.toggle('active', b.dataset.nav===v));
+  window.scrollTo(0,0);
+  if (CHILD_VIEWS.includes(v)){
+    viewStep = 'child';
+    renderChildPick(v);
+  } else {
+    viewStep = 'form';
+  }
+  updateSaveBar();
+  if (v==='home') renderHome();
+  if (v==='history') renderHistory();
+}
+
+function formEl(v){ return document.getElementById(v+'-form') || document.getElementById(v+'-form-wrap'); }
+
+window.renderChildPick = function(v){
+  const pick = document.getElementById(v+'-childpick');
+  const form = formEl(v);
+  if (form) form.style.display='none';
+  updateSaveBar();
+  if (!pick) return;
+  pick.style.display='block';
+  pick.innerHTML = `
+    <div class="child-pick-hint">Кто? <span>Choose child</span></div>
+    <div class="child-pick">
+      <button class="cp-btn lev" onclick="chooseChild('lev','${v}')"><span class="cp-ava">👶</span><span class="cp-ru">Лев</span><span class="cp-en">Lev</span></button>
+      <button class="cp-btn mark" onclick="chooseChild('mark','${v}')"><span class="cp-ava">👶</span><span class="cp-ru">Марк</span><span class="cp-en">Mark</span></button>
+    </div>`;
+};
+
+window.chooseChild = function(c, v){
+  setChild(c);
+  viewStep = 'form';
+  const pick = document.getElementById(v+'-childpick');
+  const form = formEl(v);
+  if (pick) pick.style.display='none';
+  if (form) form.style.display='block';
+  const cur = document.getElementById(v+'-cur');
+  if (cur){
+    const ru = c==='lev'?'Лев':'Марк', en = c==='lev'?'Lev':'Mark';
+    cur.innerHTML = `<span class="cc-badge ${c}">👶 ${ru} / ${en}</span>
+      <button class="cc-switch" onclick="renderChildPick('${v}')">↔ Сменить / Switch</button>`;
+  }
+  updateSaveBar();
+  if (v==='feeding') resetFeedingForm();
+  if (v==='solids')  resetSolidsForm();
+  if (v==='water')   resetWaterForm();
+  if (v==='meds')    renderMeds();
+  if (v==='sleep'){  resetSleepForm(); renderSleepList(); }
+  if (v==='eod')     openEod();
+};
+
+function setChild(c){
+  child = c;
+  document.body.classList.toggle('mark-active', c==='mark');
+  ['htab'].forEach(prefix => {
+    const elL = document.getElementById(prefix+'-lev');
+    const elM = document.getElementById(prefix+'-mark');
+    if (elL) elL.classList.toggle('active', c==='lev');
+    if (elM) elM.classList.toggle('active', c==='mark');
+  });
+  const sb = document.getElementById('save-btn');
+  sb.classList.remove('lev','mark'); sb.classList.add(c);
+  const togWrap = document.getElementById('tog-new-wrap');
+  if (togWrap) togWrap.className = 'tog-sw '+(c==='lev'?'lev':'mark')+'-tog';
+  renderAllChips();
+  renderStoolColor();
+  if (view==='history') renderHistory();
+}
+window.setChild = setChild;
+
+function updateSaveBar(){
+  const w = document.querySelector('.save-wrap');
+  const sb = document.getElementById('save-btn');
+  const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water'].includes(view);
+  w.style.display = show ? 'block' : 'none';
+  if (view==='feeding')      sb.textContent = '💾 Сохранить кормление · Save feeding';
+  else if (view==='solids')  sb.textContent = '💾 Сохранить прикорм · Save solids';
+  else if (view==='water')   sb.textContent = '💾 Сохранить питьё · Save water';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEEDING (formula) — chips + stool + form
+// ═══════════════════════════════════════════════════════════════
+function renderMlChips(targetId, presets, key){
+  const root = document.getElementById(targetId);
+  if (!root) return;
+  root.innerHTML = '';
+  presets.forEach(v => {
+    const c = document.createElement('span');
+    c.className = 'chip ml-chip'+(fForm[key]===v?' on':'');
+    c.textContent = v;
+    c.onclick = () => {
+      fForm[key] = fForm[key]===v ? 0 : v;
+      const inp = document.getElementById(key+'-ml');
+      if (inp) inp.value = fForm[key]||'';
+      renderMlChips(targetId, presets, key);
+      updateTotal();
+    };
+    root.appendChild(c);
+  });
+}
+function renderAllChips(){
+  renderMlChips('kab-chips',   ML_PRESETS,    'kab');
+  renderMlChips('nut-chips',   ML_PRESETS,    'nut');
+}
+function onMlInput(key){
+  const v = parseInt(document.getElementById(key+'-ml').value, 10);
+  fForm[key] = isNaN(v) ? 0 : v;
+  renderMlChips(key+'-chips', key==='water'?WATER_PRESETS:ML_PRESETS, key);
+  if (key!=='water') updateTotal();
+}
+function updateTotal(){
+  document.getElementById('f-total').textContent = (fForm.kab||0) + (fForm.nut||0);
+}
+
+function setStool(yes){
+  fForm.stool = yes;
+  document.getElementById('stool-yes').className = yes ? 'on-yes' : '';
+  document.getElementById('stool-no').className  = yes===false ? 'on-no' : '';
+  document.getElementById('stool-detail').style.display = yes ? 'block' : 'none';
+  if (!yes){ fForm.stoolColor=null; fForm.stoolCons=null; }
+  renderStoolColor();
+}
+
+function renderStoolColor(){
+  const g = document.getElementById('stool-color-grid');
+  if (!g) return;
+  g.innerHTML = STOOL_COLORS.map(c => `
+    <div class="tap${fForm.stoolColor===c.k?' '+sc():''}" data-stc="${c.k}">
+      <span class="t1" style="font-size:18px">${c.ico}</span>
+      <span class="t2">${c.ru}</span>
+      <span class="t3">${c.en}</span>
+    </div>`).join('');
+  g.querySelectorAll('[data-stc]').forEach(el => {
+    el.onclick = () => {
+      const k = el.dataset.stc;
+      fForm.stoolColor = fForm.stoolColor===k ? null : k;
+      renderStoolColor();
+    };
+  });
+  const g2 = document.getElementById('stool-cons-grid');
+  g2.innerHTML = STOOL_CONS.map(c => `
+    <div class="tap${fForm.stoolCons===c.k?' '+sc():''}" data-stk="${c.k}">
+      <span class="t1">${c.ru}</span>
+      <span class="t2">${c.en}</span>
+    </div>`).join('');
+  g2.querySelectorAll('[data-stk]').forEach(el => {
+    el.onclick = () => {
+      const k = el.dataset.stk;
+      fForm.stoolCons = fForm.stoolCons===k ? null : k;
+      renderStoolColor();
+    };
+  });
+}
+
+function resetFeedingForm(){
+  fForm = resetFormula();
+  ['kab-ml','nut-ml','water-ml','f-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
+  document.getElementById('f-time').value = nowHHMM();
+  document.getElementById('stool-yes').className = '';
+  document.getElementById('stool-no').className = '';
+  document.getElementById('stool-detail').style.display = 'none';
+  const vt = document.getElementById('f-vtrans');
+  if (vt){ vt.textContent='Голосовая заметка появится здесь · Voice note will appear here'; vt.className='vtrans emp'; }
+  document.getElementById('f-photo-preview').innerHTML='';
+  renderAllChips(); updateTotal();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHOTOS
+// ═══════════════════════════════════════════════════════════════
+function onPhotosPicked(ev, kind){
+  const files = Array.from(ev.target.files || []);
+  const bucket = kind==='formula' ? fForm : sSel;
+  const max = 3 - bucket.photos.length;
+  files.slice(0, max).forEach(f => bucket.photos.push(f));
+  renderPhotoPreview(kind);
+  ev.target.value = '';
+}
+function renderPhotoPreview(kind){
+  const previewId = kind==='formula' ? 'f-photo-preview' : 's-photo-preview';
+  const root = document.getElementById(previewId);
+  const bucket = kind==='formula' ? fForm : sSel;
+  root.innerHTML = '';
+  bucket.photos.forEach((f, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-thumb';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(f);
+    img.onload = () => URL.revokeObjectURL(img.src);
+    const x = document.createElement('button');
+    x.className='px'; x.innerHTML='×';
+    x.onclick = (e) => { e.preventDefault(); bucket.photos.splice(idx,1); renderPhotoPreview(kind); };
+    wrap.appendChild(img); wrap.appendChild(x);
+    root.appendChild(wrap);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SOLIDS form (existing logic)
+// ═══════════════════════════════════════════════════════════════
+function renderProdChips(){
+  const pc = document.getElementById('prod-chips'); pc.innerHTML = '';
+  PRODS.forEach(([ru,en]) => {
+    const s = document.createElement('span');
+    s.className = 'chip';
+    s.innerHTML = `<span class="cru">${ru}</span><span class="cen">${en}</span>`;
+    s.onclick = () => { document.getElementById('s-product').value = ru+' / '+en; };
+    pc.appendChild(s);
+  });
+}
+function renderAmts(){
+  const g = document.getElementById('amt-grid'); g.innerHTML='';
+  AMTS.forEach(a => {
+    const d = document.createElement('div');
+    d.className = 'tap' + (sSel.amount===a.v ? ' '+sc() : '');
+    d.innerHTML = `<span class="t1">${a.ru}</span><span class="t2">${a.en}</span><span class="t3">${a.s}</span>`;
+    d.onclick = () => { sSel.amount = sSel.amount===a.v ? null : a.v; renderAmts(); };
+    g.appendChild(d);
+  });
+}
+function renderAccs(){
+  const g = document.getElementById('acc-grid'); g.innerHTML='';
+  ACCS.forEach(a => {
+    const d = document.createElement('div');
+    d.className = 'acc' + (sSel.accept===a.k ? ' '+sc() : '');
+    d.innerHTML = `<span class="a-ico">${a.ico}</span><span class="a-ru">${a.ru}</span><span class="a-en">${a.en}</span>`;
+    d.onclick = () => { sSel.accept = sSel.accept===a.k ? null : a.k; renderAccs(); };
+    g.appendChild(d);
+  });
+}
+function renderReas(){
+  const g = document.getElementById('rea-grid'); g.innerHTML='';
+  REAS.forEach(r => {
+    const on = sSel.reactions.has(r.k);
+    const d = document.createElement('div');
+    d.className = 'rea' + (on ? ' s-'+r.cls : '');
+    d.innerHTML = `<span class="r-ru">${r.ru}</span><span class="r-en">${r.en}</span>`;
+    d.onclick = () => { on ? sSel.reactions.delete(r.k) : sSel.reactions.add(r.k); renderReas(); };
+    g.appendChild(d);
+  });
+}
+function resetSolidsForm(){
+  sSel = { amount:null, accept:null, reactions:new Set(), photos:[], photoUrls:[] };
+  ['s-product','s-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
+  document.getElementById('s-time').value = nowHHMM();
+  document.getElementById('chk-new').checked = false;
+  const vt = document.getElementById('s-vtrans');
+  if (vt){ vt.textContent='Голосовая заметка появится здесь · Voice note will appear here'; vt.className='vtrans emp'; }
+  document.getElementById('s-photo-preview').innerHTML='';
+  renderAmts(); renderAccs(); renderReas();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SAVE (router)
+// ═══════════════════════════════════════════════════════════════
+async function onSave(){
+  if (view==='feeding') await saveFeeding();
+  else if (view==='solids') await saveSolids();
+  else if (view==='water') await saveWater();
+}
+
+async function saveFeeding(){
+  const time = document.getElementById('f-time').value || nowHHMM();
+  const kab = fForm.kab||0;
+  const nut = fForm.nut||0;
+  const water = 0; // вода теперь отдельный экран Питьё / water is a separate screen
+  const note = document.getElementById('f-note').value.trim();
+  const vt = document.getElementById('f-vtrans');
+  const voiceNote = vt.classList.contains('emp') ? '' : vt.textContent.trim();
+
+  if (kab===0 && nut===0 && water===0 && fForm.stool===null && !note && !voiceNote && fForm.photos.length===0){
+    showToast('Заполните хоть одно поле / Fill at least one field'); return;
+  }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  const id = newId();
+  let photoUrls = [];
+  if (fForm.photos.length){
+    btn.textContent = 'Загрузка фото... / Uploading photos...';
+    photoUrls = await uploadPhotos(fForm.photos, 'formula', id);
+  }
+
+  const entry = {
+    id, child,
+    date: todayISO(), time,
+    kabrita_ml: kab, nutrilon_ml: nut, water_ml: water,
+    stool: fForm.stool===true,
+    stool_color: fForm.stoolColor,
+    stool_consistency: fForm.stoolCons,
+    photo_urls: photoUrls,
+    note, voice_note: voiceNote,
+  };
+  const { error } = await db.from(T_FORMULA).insert([entry]);
+  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
+  else { showToast('Сохранено ✓ / Saved ✓'); resetFeedingForm(); goHome(); }
+  btn.disabled = false; btn.textContent = '💾 Сохранить кормление · Save feeding';
+}
+
+async function saveSolids(){
+  const product = document.getElementById('s-product').value.trim();
+  if (!product){ document.getElementById('s-product').focus(); showToast('Укажите продукт / Enter food'); return; }
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  const id = newId();
+  let photoUrls = [];
+  if (sSel.photos.length){
+    btn.textContent = 'Загрузка фото... / Uploading photos...';
+    photoUrls = await uploadPhotos(sSel.photos, 'solids', id);
+  }
+  const vt = document.getElementById('s-vtrans');
+  const voiceNote = vt.classList.contains('emp') ? '' : vt.textContent.trim();
+  const entry = {
+    id, child,
+    date: todayISO(),
+    time: document.getElementById('s-time').value || nowHHMM(),
+    product,
+    amount: sSel.amount, accept: sSel.accept,
+    reactions: [...sSel.reactions],
+    is_new: document.getElementById('chk-new').checked,
+    note: document.getElementById('s-note').value.trim(),
+    voice_note: voiceNote,
+    photo_urls: photoUrls,
+  };
+  const { error } = await db.from(T_SOLIDS).insert([entry]);
+  if (error){ showToast('Ошибка / Error'); console.error(error); }
+  else { showToast('Сохранено ✓ / Saved ✓'); resetSolidsForm(); goHome(); }
+  btn.disabled = false; btn.textContent = '💾 Сохранить прикорм · Save solids';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WATER / ПИТЬЁ
+// ═══════════════════════════════════════════════════════════════
+function renderWaterPresets(){
+  const root = document.getElementById('wa-presets');
+  if (!root) return;
+  root.innerHTML = '';
+  WATER_PRESETS.forEach(v => {
+    const c = document.createElement('span');
+    c.className = 'chip ml-chip'+(wSel.ml===v?' on':'');
+    c.textContent = v;
+    c.onclick = () => {
+      wSel.ml = wSel.ml===v ? 0 : v;
+      const inp = document.getElementById('wa-ml'); if (inp) inp.value = wSel.ml||'';
+      renderWaterPresets();
+    };
+    root.appendChild(c);
+  });
+}
+function onWaterInput(){
+  const v = parseInt(document.getElementById('wa-ml').value, 10);
+  wSel.ml = isNaN(v) ? 0 : v;
+  renderWaterPresets();
+}
+function resetWaterForm(){
+  wSel = { ml:0 };
+  ['wa-ml','wa-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
+  const t = document.getElementById('wa-time'); if (t) t.value = nowHHMM();
+  renderWaterPresets();
+}
+async function saveWater(){
+  const ml = wSel.ml || parseInt(document.getElementById('wa-ml').value,10) || 0;
+  if (!ml){ showToast('Укажите объём / Enter amount'); return; }
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  const entry = {
+    child, date: todayISO(),
+    time: document.getElementById('wa-time').value || nowHHMM(),
+    ml, note: document.getElementById('wa-note').value.trim(),
+  };
+  const { error } = await db.from(T_WATER).insert([entry]);
+  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
+  else { showToast('Сохранено ✓ / Saved ✓'); resetWaterForm(); goHome(); }
+  btn.disabled = false; btn.textContent = '💾 Сохранить питьё · Save water';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SLEEP / СОН
+// ═══════════════════════════════════════════════════════════════
+async function getOpenSleep(){
+  const { data } = await db.from(T_SLEEP).select('*')
+    .eq('child',child).is('end_time',null)
+    .order('start_time',{ascending:false}).limit(1);
+  return (data && data.length) ? data[0] : null;
+}
+function resetSleepForm(){
+  ['sl-start','sl-end','sl-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
+}
+async function sleepNow(){
+  if (await getOpenSleep()){ showToast('Уже спит / Already asleep'); return; }
+  const { error } = await db.from(T_SLEEP).insert([{
+    child, date: todayISO(), start_time: new Date().toISOString(), end_time: null, note: ''
+  }]);
+  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); return; }
+  showToast('Заснул ✓ / Asleep ✓'); renderSleepList();
+}
+async function wakeNow(){
+  const open = await getOpenSleep();
+  if (!open){ showToast('Нет открытого сна / No open sleep'); return; }
+  const { error } = await db.from(T_SLEEP).update({ end_time: new Date().toISOString() }).eq('id', open.id);
+  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  showToast('Проснулся ✓ / Woke up ✓'); renderSleepList();
+}
+async function addSleepManual(){
+  const sv = document.getElementById('sl-start').value;
+  const ev = document.getElementById('sl-end').value;
+  if (!sv){ showToast('Укажите время засыпания / Enter start time'); return; }
+  const d = todayISO();
+  const start = new Date(d+'T'+sv+':00');
+  let end = null;
+  if (ev){ end = new Date(d+'T'+ev+':00'); if (end < start) end.setDate(end.getDate()+1); }
+  const { error } = await db.from(T_SLEEP).insert([{
+    child, date: d, start_time: start.toISOString(),
+    end_time: end ? end.toISOString() : null,
+    note: document.getElementById('sl-note').value.trim(),
+  }]);
+  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); return; }
+  showToast('Интервал добавлен ✓ / Added ✓'); resetSleepForm(); renderSleepList();
+}
+function sleepDurMin(e){ return (e.start_time && e.end_time) ? Math.max(0,(new Date(e.end_time)-new Date(e.start_time))/60000) : 0; }
+async function renderSleepList(){
+  const root = document.getElementById('sleep-list');
+  const statusEl = document.getElementById('sleep-status');
+  if (!root) return;
+  const { data } = await db.from(T_SLEEP).select('*')
+    .eq('child',child).eq('date',todayISO()).order('start_time',{ascending:true});
+  const list = data || [];
+  const open = list.find(e=>!e.end_time);
+  const snSleep = document.getElementById('sn-sleep'), snWake = document.getElementById('sn-wake');
+  if (snSleep) snSleep.disabled = !!open;
+  if (snWake)  snWake.disabled  = !open;
+  const totalMin = list.reduce((s,e)=>s+sleepDurMin(e),0);
+  if (statusEl){
+    statusEl.innerHTML = open
+      ? `🟣 Сейчас спит с <b>${tsHHMM(open.start_time)}</b><br>Currently asleep`
+      : `Всего за день: <b>${fmtDur(totalMin)}</b><br>Total today`;
+  }
+  if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">Нет интервалов / No intervals</div>'; return; }
+  root.innerHTML = list.map(e => {
+    const timeStr = e.end_time ? `${tsHHMM(e.start_time)} – ${tsHHMM(e.end_time)}` : `${tsHHMM(e.start_time)} – …`;
+    const durStr  = e.end_time ? fmtDur(sleepDurMin(e)) : 'спит сейчас / asleep';
+    return `<div class="sleep-list-item">
+      <div>
+        <div class="sli-time">${timeStr}</div>
+        <div class="sli-dur ${e.end_time?'':'sli-open'}">${durStr}${e.note?' · '+escH(e.note):''}</div>
+      </div>
+      <div class="sli-actions">
+        <button class="act-btn edit-btn" onclick="editSleepInline(${e.id})">✏️</button>
+        <button class="act-btn del-btn" onclick="delSleep(${e.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.delSleep = async function(id){
+  if (!confirm('Удалить интервал? / Delete interval?')) return;
+  await db.from(T_SLEEP).delete().eq('id', id);
+  renderSleepList();
+};
+window.editSleepInline = async function(id){
+  const { data } = await db.from(T_SLEEP).select('*').eq('id',id).limit(1);
+  if (!data || !data.length) return;
+  const e = data[0];
+  const ns = prompt('Заснул (ЧЧ:ММ) / From (HH:MM):', tsHHMM(e.start_time));
+  if (ns===null) return;
+  const ne = prompt('Проснулся (ЧЧ:ММ, пусто = ещё спит) / To (HH:MM, empty = still asleep):', e.end_time?tsHHMM(e.end_time):'');
+  if (ne===null) return;
+  const d = e.date || todayISO();
+  const start = new Date(d+'T'+ns+':00');
+  let end = null;
+  if (ne.trim()){ end = new Date(d+'T'+ne.trim()+':00'); if (end < start) end.setDate(end.getDate()+1); }
+  const { error } = await db.from(T_SLEEP).update({
+    start_time: start.toISOString(), end_time: end ? end.toISOString() : null
+  }).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); return; }
+  renderSleepList();
+};
+
+// ═══════════════════════════════════════════════════════════════
+// EOD SUMMARY
+// ═══════════════════════════════════════════════════════════════
+function openEod(){
+  eodSel = { mood:null, sleep:null };
+  document.getElementById('eod-concerns').value='';
+  document.getElementById('eod-note').value='';
+  document.getElementById('eod-save').className='save-btn '+child;
+  renderEodGrids();
+  loadExistingEod();
+  refreshEodView();
+}
+async function refreshEodView(){
+  const v = document.getElementById('ds-eod-view');
+  if (!v) return;
+  const { data: eod } = await db.from(T_SUMMARY)
+    .select('*').eq('child',child).eq('date',todayISO())
+    .order('created_at',{ascending:false}).limit(1);
+  if (eod && eod.length){
+    const e = eod[0];
+    const moodObj = MOODS.find(m=>m.k===e.mood);
+    const sleepObj = SLEEPS.find(s=>s.k===e.sleep);
+    v.innerHTML = `<div class="card" style="font-size:13px;line-height:1.5">
+      <div style="font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Сохранённый итог · Saved summary</div>
+      ${moodObj?`<div>${moodObj.ico} ${moodObj.ru} / ${moodObj.en}</div>`:''}
+      ${sleepObj?`<div>${sleepObj.ico} ${sleepObj.ru} / ${sleepObj.en}</div>`:''}
+      ${e.concerns?`<div style="color:var(--bad);margin-top:4px">⚠️ ${escH(e.concerns)}</div>`:''}
+      ${e.nanny_note?`<div style="color:var(--muted);margin-top:4px;font-style:italic">💬 ${escH(e.nanny_note)}</div>`:''}
+    </div>`;
+  } else v.innerHTML='';
+}
+function renderEodGrids(){
+  const m = document.getElementById('eod-mood');
+  m.innerHTML = MOODS.map(x => `
+    <div class="acc${eodSel.mood===x.k?' '+sc():''}" data-mood="${x.k}">
+      <span class="a-ico">${x.ico}</span><span class="a-ru">${x.ru}</span><span class="a-en">${x.en}</span>
+    </div>`).join('');
+  m.querySelectorAll('[data-mood]').forEach(el => {
+    el.onclick = () => { eodSel.mood = eodSel.mood===el.dataset.mood ? null : el.dataset.mood; renderEodGrids(); };
+  });
+  const s = document.getElementById('eod-sleep');
+  s.innerHTML = SLEEPS.map(x => `
+    <div class="acc${eodSel.sleep===x.k?' '+sc():''}" data-sleep="${x.k}">
+      <span class="a-ico">${x.ico}</span><span class="a-ru">${x.ru}</span><span class="a-en">${x.en}</span>
+    </div>`).join('');
+  s.querySelectorAll('[data-sleep]').forEach(el => {
+    el.onclick = () => { eodSel.sleep = eodSel.sleep===el.dataset.sleep ? null : el.dataset.sleep; renderEodGrids(); };
+  });
+}
+async function loadExistingEod(){
+  const { data } = await db.from(T_SUMMARY)
+    .select('*').eq('child',child).eq('date',todayISO())
+    .order('created_at',{ascending:false}).limit(1);
+  if (data && data.length){
+    const e = data[0];
+    eodSel.mood = e.mood; eodSel.sleep = e.sleep;
+    document.getElementById('eod-concerns').value = e.concerns||'';
+    document.getElementById('eod-note').value = e.nanny_note||'';
+    renderEodGrids();
+  }
+}
+async function saveEod(){
+  const entry = {
+    id: newId(), child, date: todayISO(),
+    mood: eodSel.mood, sleep: eodSel.sleep,
+    concerns: document.getElementById('eod-concerns').value.trim(),
+    nanny_note: document.getElementById('eod-note').value.trim(),
+  };
+  const { error } = await db.from(T_SUMMARY).insert([entry]);
+  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  showToast('Итог дня сохранён ✓ / Summary saved ✓');
+  goHome();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HOME SCREEN — dual summary for both children today
+// ═══════════════════════════════════════════════════════════════
+function fmtDur(min){
+  min = Math.round(min);
+  const h = Math.floor(min/60), m = min%60;
+  if (h && m) return h+'ч '+m+'м';
+  if (h) return h+'ч';
+  return m+'м';
+}
+function tsHHMM(ts){ return ts ? new Date(ts).toTimeString().slice(0,5) : ''; }
+
+async function renderHome(){
+  const hd = document.getElementById('home-date');
+  if (hd){ const f = fmtFullDate(); hd.innerHTML = `<div class="hd-ru">${f.ru}</div><div class="hd-en">${f.en}</div>`; }
+  const root = document.getElementById('dual-summary');
+  if (!root) return;
+  const today = todayISO();
+  const [feeds, water, solids, meds, sleep] = await Promise.all([
+    db.from(T_FORMULA).select('*').eq('date',today),
+    db.from(T_WATER  ).select('*').eq('date',today),
+    db.from(T_SOLIDS ).select('*').eq('date',today),
+    db.from(T_MEDS   ).select('*').eq('date',today),
+    db.from(T_SLEEP  ).select('*').eq('date',today),
+  ]);
+  const F=feeds.data||[], WA=water.data||[], S=solids.data||[], M=meds.data||[], SL=sleep.data||[];
+  const totalExp = totalExpectedMeds();
+
+  const col = (c) => {
+    const f = F.filter(e=>e.child===c);
+    const kab = f.reduce((s,e)=>s+(e.kabrita_ml||0),0);
+    const nut = f.reduce((s,e)=>s+(e.nutrilon_ml||0),0);
+    const wMl = WA.filter(e=>e.child===c).reduce((s,e)=>s+(e.ml||0),0);
+    const sList = S.filter(e=>e.child===c).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    const lastSolid = sList.length ? sList[sList.length-1] : null;
+    const poo = f.filter(e=>e.stool).length;
+    const gm = {}; M.filter(e=>e.child===c && e.given).forEach(e=>{ gm[e.medication+'|'+e.dose_time]=1; });
+    const given = Object.keys(gm).length;
+    const sl = SL.filter(e=>e.child===c);
+    let totalMin = 0, last = null;
+    sl.forEach(e=>{
+      if (!e.start_time) return;
+      if (!last || e.start_time > last.start_time) last = e;
+      if (e.end_time) totalMin += Math.max(0,(new Date(e.end_time)-new Date(e.start_time))/60000);
+    });
+    return {fCount:f.length, kab, nut, wMl, lastSolid, poo, given, slCount:sl.length, totalMin, last};
+  };
+  const D = { lev: col('lev'), mark: col('mark') };
+
+  const cFeed  = d => d.fCount ? `${d.fCount} раз<small>${d.kab+d.nut} мл · K${d.kab}+N${d.nut}</small>` : '—';
+  const cWater = d => d.wMl ? `${d.wMl} мл` : '—';
+  const cSolid = d => d.lastSolid ? `${escH((d.lastSolid.product||'').split(' / ')[0])}<small>${escH(d.lastSolid.time||'')}</small>` : '—';
+  const cMeds  = d => `${d.given} / ${totalExp}`;
+  const cStool = d => d.poo ? `${d.poo} раз` : 'нет';
+  const cSleep = d => {
+    if (!d.slCount) return '—';
+    let sub = '';
+    if (d.last){ sub = d.last.end_time ? tsHHMM(d.last.start_time)+'–'+tsHHMM(d.last.end_time) : 'спит с '+tsHHMM(d.last.start_time); }
+    return `${fmtDur(d.totalMin)}<small>${sub}</small>`;
+  };
+  const row = (label, en, fn) => {
+    const lv = fn(D.lev), mv = fn(D.mark);
+    const cls = v => v==='—' ? 'dr-v empty-v' : 'dr-v';
+    return `<div class="dual-row">
+      <div class="dr-l">${label}<span>${en}</span></div>
+      <div class="${cls(lv)} lev">${lv}</div>
+      <div class="${cls(mv)} mark">${mv}</div>
+    </div>`;
+  };
+
+  root.innerHTML = `
+    <div class="dual-head">
+      <div></div>
+      <div class="dh lev">Лев<span>Lev</span></div>
+      <div class="dh mark">Марк<span>Mark</span></div>
+    </div>
+    ${row('🍼 Кормления','Feeding', cFeed)}
+    ${row('💧 Питьё','Water', cWater)}
+    ${row('🥦 Прикорм','Solids', cSolid)}
+    ${row('💊 Лекарства','Meds', cMeds)}
+    ${row('💩 Стул','Stool', cStool)}
+    ${row('😴 Сон','Sleep', cSleep)}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MEDS TAB
+// ═══════════════════════════════════════════════════════════════
+async function loadMedsToday(){
+  const { data } = await db.from(T_MEDS)
+    .select('*').eq('child',child).eq('date',todayISO());
+  return data || [];
+}
+function medKey(med, dt){ return med+'|'+dt; }
+function totalExpectedMeds(){
+  return Object.values(MED_SCHEDULE).reduce((s,arr)=>s+arr.length,0);
+}
+async function renderMeds(){
+  const sum = document.getElementById('med-summary');
+  const cards = document.getElementById('med-cards');
+  cards.innerHTML = '<div class="loading">Загрузка... / Loading...</div>';
+  const existing = await loadMedsToday();
+  const givenMap = {};
+  existing.forEach(e => { if (e.given) givenMap[medKey(e.medication, e.dose_time)] = e; });
+  const totalExp = totalExpectedMeds();
+  const totalGiven = Object.keys(givenMap).length;
+  const missing = totalExp - totalGiven;
+  sum.innerHTML = `<div class="med-summary">
+    <div>
+      <div class="ms-big ${missing>0?'miss':''}" style="display:inline">${totalGiven}</div>
+      <span style="font-size:14px;color:var(--muted)"> из ${totalExp} / of ${totalExp}</span>
+    </div>
+    <div class="ms-lbl">${missing===0?'✓ Все дозы дано<br>All doses given':'осталось '+missing+'<br>'+missing+' left'}</div>
+  </div>`;
+
+  let html = '';
+  ['morning','afternoon','evening'].forEach(dt => {
+    const lbl = DOSE_TIME_LBL[dt];
+    const cardGiven = MED_SCHEDULE[dt].every(m => givenMap[medKey(m.k, dt)]);
+    html += `<div class="med-card${cardGiven?' has-given':''}">
+      <div class="med-hdr">
+        <div>
+          <div class="med-time-lbl">${lbl.ico} ${lbl.ru}</div>
+          <div class="med-time-en">${lbl.ен}</div>
+        </div>
+        ${cardGiven?'<div style="font-size:12px;color:var(--ok);font-weight:600">✓ Готово / Done</div>':''}
+      </div>`;
+    MED_SCHEDULE[dt].forEach(m => {
+      const e = givenMap[medKey(m.k, dt)];
+      const given = !!e;
+      html += `<div class="med-row${given?' given':''}" onclick="toggleMed('${m.k}','${dt}')">
+        <div class="mr-icon">${m.ico}</div>
+        <div>
+          <div class="mr-name">${m.ru} ${m.dose(child)}<span class="en">${m.en}</span></div>
+        </div>
+        <div class="mr-status">${given ? '✅ '+e.given_at : '⬜ Не дано<br>Not given'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  cards.innerHTML = html;
+}
+async function toggleMed(medK, doseT){
+  const { data } = await db.from(T_MEDS)
+    .select('*').eq('child',child).eq('date',todayISO())
+    .eq('medication',medK).eq('dose_time',doseT).limit(1);
+  const time = nowHHMM();
+  if (data && data.length){
+    const e = data[0];
+    // toggle off
+    await db.from(T_MEDS).delete().eq('id', e.id);
+  } else {
+    await db.from(T_MEDS).insert([{
+      id: newId(), child, date: todayISO(),
+      medication: medK, dose_time: doseT,
+      given: true, given_at: time,
+    }]);
+  }
+  renderMeds();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORY TAB
+// ═══════════════════════════════════════════════════════════════
+function setHistorySub(s){ historySub = s; renderHistorySubs(); renderHistory(); }
+function renderHistorySubs(){
+  document.getElementById('hsub-byday').classList.toggle('on', historySub==='byday');
+  document.getElementById('hsub-profile').classList.toggle('on', historySub==='profile');
+}
+
+async function renderHistory(){
+  const root = document.getElementById('history-content');
+  root.innerHTML = '<div class="loading">Загрузка... / Loading...</div>';
+  if (historySub==='byday') await renderHistoryByDay(root);
+  else await renderProfile(root);
+}
+
+// ─── BY DAY ───────────────────────────────────────────────
+async function renderHistoryByDay(root){
+  // build day strip (last 30 days, today first)
+  const days = [];
+  for (let i=0;i<30;i++){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  let stripHtml = `<div class="day-strip">${days.map(d => {
+    const {day,mo} = fmtDateShortRU(d);
+    return `<button class="day-pill${d===historyDate?' on':''}" onclick="pickHistoryDate('${d}')">
+      <span class="dp-day">${day}</span><span class="dp-mo">${mo}</span>
+    </button>`;
+  }).join('')}</div>`;
+
+  // load all entries for selected day
+  const [feeds, meds, solids, summaries, weights, water, sleep] = await Promise.all([
+    db.from(T_FORMULA).select('*').eq('child',child).eq('date',historyDate),
+    db.from(T_MEDS   ).select('*').eq('child',child).eq('date',historyDate),
+    db.from(T_SOLIDS ).select('*').eq('child',child).eq('date',historyDate),
+    db.from(T_SUMMARY).select('*').eq('child',child).eq('date',historyDate),
+    db.from(T_WEIGHT ).select('*').eq('child',child).eq('date',historyDate),
+    db.from(T_WATER  ).select('*').eq('child',child).eq('date',historyDate),
+    db.from(T_SLEEP  ).select('*').eq('child',child).eq('date',historyDate),
+  ]);
+  const events = [];
+  (feeds.data||[]).forEach(e => events.push({kind:'formula', time:e.time||'00:00', e}));
+  (water.data||[]).forEach(e => events.push({kind:'water',   time:e.time||'00:00', e}));
+  (meds.data ||[]).forEach(e => events.push({kind:'med',     time:e.given_at||'00:00', e}));
+  (solids.data||[]).forEach(e => events.push({kind:'solids',  time:e.time||'00:00', e}));
+  (sleep.data||[]).forEach(e => events.push({kind:'sleep',   time:tsHHMM(e.start_time)||'00:00', e}));
+  (weights.data||[]).forEach(e => events.push({kind:'weight',  time:e.time||'00:00', e}));
+  (summaries.data||[]).forEach(e => events.push({kind:'summary', time:'23:59',          e}));
+  events.sort((a,b) => a.time.localeCompare(b.time));
+
+  let bodyHtml = '';
+  if (!events.length){
+    bodyHtml = `<div class="empty">📓 В этот день записей нет<br>No entries for this day</div>`;
+  } else {
+    bodyHtml = events.map(ev => renderTimelineEntry(ev)).join('');
+  }
+  const exportBar = `<div class="export-bar">
+    <div class="bi"><span class="bi-ru">Экспорт за период</span><span class="bi-en">/ Export period</span></div>
+    <div class="export-period">
+      ${[7,14,30].map(p=>`<button class="${exportPeriod===p?'on':''}" onclick="setExportPeriod(${p})">${p} дн</button>`).join('')}
+      <button class="${exportPeriod==='all'?'on':''}" onclick="setExportPeriod('all')">Всё / All</button>
+    </div>
+    <button class="export-btn" onclick="exportPDF()">📄 Экспорт в PDF / Export to PDF</button>
+  </div>`;
+  root.innerHTML = stripHtml + bodyHtml + exportBar;
+}
+window.setExportPeriod = function(p){ exportPeriod = p; renderHistory(); };
+
+window.exportPDF = async function(){
+  const days = exportPeriod==='all' ? 3650 : exportPeriod;
+  const start = new Date(); start.setDate(start.getDate()-(days-1));
+  const startISO = start.toISOString().slice(0,10);
+  const endISO = todayISO();
+  showToast('Готовлю PDF... / Preparing...');
+  const [F,M,S,DS,WA,SL] = await Promise.all([
+    db.from(T_FORMULA).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_MEDS   ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_SOLIDS ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_SUMMARY).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_WATER  ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_SLEEP  ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+  ]);
+  const ev = [];
+  (F.data||[]).forEach(e=>ev.push({date:e.date,time:e.time||'00:00',txt:`🍼 ${e.time||''} — ${(e.kabrita_ml||0)+(e.nutrilon_ml||0)} мл (KABRITA ${e.kabrita_ml||0} + NUTRILON ${e.nutrilon_ml||0})${e.stool?' · 💩 стул':''}${e.note?' · '+e.note:''}${e.voice_note?' · 🎤 '+e.voice_note:''}`}));
+  (WA.data||[]).forEach(e=>ev.push({date:e.date,time:e.time||'00:00',txt:`💧 ${e.time||''} — ${e.ml||0} мл${e.note?' · '+e.note:''}`}));
+  (S.data||[]).forEach(e=>{ const ac=ACCS.find(x=>x.k===e.accept); ev.push({date:e.date,time:e.time||'00:00',txt:`🥦 ${e.time||''} — ${e.product||''}${ac?' ('+ac.ru+')':''}${e.is_new?' ★new':''}${e.note?' · '+e.note:''}`}); });
+  (M.data||[]).forEach(e=>{ const m=(MED_SCHEDULE.morning.concat(MED_SCHEDULE.afternoon,MED_SCHEDULE.evening)).find(x=>x.k===e.medication); ev.push({date:e.date,time:e.given_at||'00:00',txt:`💊 ${e.given_at||''} — ${m?m.ru:e.medication} (${DOSE_TIME_LBL[e.dose_time]?.ru||e.dose_time})`}); });
+  (SL.data||[]).forEach(e=>ev.push({date:e.date,time:tsHHMM(e.start_time)||'00:00',txt:`😴 ${tsHHMM(e.start_time)}${e.end_time?'–'+tsHHMM(e.end_time)+' ('+fmtDur(sleepDurMin(e))+')':' (спит)'}${e.note?' · '+e.note:''}`}));
+  (DS.data||[]).forEach(e=>{ const mo=MOODS.find(x=>x.k===e.mood), sp=SLEEPS.find(x=>x.k===e.sleep); ev.push({date:e.date,time:'23:59',txt:`🌙 Итог: ${mo?mo.ru:''} ${sp?sp.ru:''}${e.concerns?' · ⚠️ '+e.concerns:''}${e.nanny_note?' · 💬 '+e.nanny_note:''}`}); });
+
+  const byDate = {};
+  ev.forEach(x=>{ (byDate[x.date]=byDate[x.date]||[]).push(x); });
+  const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  const childName = child==='lev'?'Лев / Lev':'Марк / Mark';
+  const periodLbl = exportPeriod==='all'?'всё время / all time':exportPeriod+' дней / days';
+
+  let bodyH = '';
+  if (!dates.length) bodyH = '<p>Нет записей за период. / No entries for this period.</p>';
+  dates.forEach(d=>{
+    const items = byDate[d].slice().sort((a,b)=>a.time.localeCompare(b.time));
+    bodyH += `<h2>${escH(fmtDateRU(d))}</h2><ul>${items.map(i=>`<li>${escH(i.txt)}</li>`).join('')}</ul>`;
+  });
+
+  const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Дневник — ${childName}</title>
+  <style>
+    body{font-family:-apple-system,Arial,sans-serif;color:#111;margin:24px;font-size:13px;line-height:1.5}
+    h1{font-size:20px;margin:0 0 2px}
+    .meta{color:#666;font-size:12px;margin-bottom:18px}
+    h2{font-size:14px;margin:18px 0 4px;border-bottom:1px solid #ccc;padding-bottom:3px}
+    ul{margin:0 0 10px;padding-left:18px} li{margin:2px 0}
+    @media print{.noprint{display:none}}
+    .noprint{position:fixed;top:10px;right:10px}
+    .noprint button{padding:10px 16px;font-size:14px;cursor:pointer}
+  </style></head><body>
+    <div class="noprint"><button onclick="window.print()">🖨 Печать / Сохранить PDF</button></div>
+    <h1>Дневник близнецов · ${childName}</h1>
+    <div class="meta">Период: ${periodLbl} (${escH(fmtDateRU(startISO))} — ${escH(fmtDateRU(endISO))})<br>Сформировано: ${escH(new Date().toLocaleString('ru-RU'))}</div>
+    ${bodyH}
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w){ showToast('Разрешите всплывающие окна / Allow popups'); return; }
+  w.document.write(html); w.document.close();
+  setTimeout(()=>{ try { w.focus(); w.print(); } catch(_){} }, 600);
+};
+
+window.pickHistoryDate = function(d){ historyDate = d; renderHistory(); };
+
+function renderTimelineEntry(ev){
+  const {kind, time, e} = ev;
+  const compId = kind+':'+e.id;
+  const isEdit = expandedEdit===compId;
+  let kindLbl='', title='', sub='', pills='', noteH='', voiceH='', photosH='';
+  switch (kind){
+    case 'formula':{
+      kindLbl = '🍼 Кормление / Feeding';
+      const total = (e.kabrita_ml||0)+(e.nutrilon_ml||0);
+      title = total>0 ? `${total} мл смеси / ml formula` : 'Кормление / Feeding';
+      const parts = [];
+      if (e.kabrita_ml) parts.push(`KABRITA ${e.kabrita_ml}мл`);
+      if (e.nutrilon_ml) parts.push(`NUTRILON ${e.nutrilon_ml}мл`);
+      if (e.water_ml) parts.push(`💧 ${e.water_ml}мл / ml`);
+      sub = parts.join(' · ');
+      if (e.stool){
+        const c = STOOL_COLORS.find(x=>x.k===e.stool_color);
+        const cs = STOOL_CONS.find(x=>x.k===e.stool_consistency);
+        pills += `<span class="pill p-warn">💩 Стул / Stool${c?' '+c.ico:''}${cs?' '+cs.ru:''}</span>`;
+      }
+      break;
+    }
+    case 'water':{
+      kindLbl = '💧 Питьё / Water';
+      title = `${e.ml||0} мл / ml`;
+      break;
+    }
+    case 'sleep':{
+      kindLbl = '😴 Сон / Sleep';
+      title = e.end_time
+        ? `${tsHHMM(e.start_time)} – ${tsHHMM(e.end_time)}`
+        : `Заснул в ${tsHHMM(e.start_time)} · спит / asleep`;
+      if (e.end_time) sub = fmtDur(sleepDurMin(e));
+      break;
+    }
+    case 'med':{
+      kindLbl = '💊 Лекарство / Medication';
+      const m = (MED_SCHEDULE.morning.concat(MED_SCHEDULE.afternoon,MED_SCHEDULE.evening))
+                  .find(x=>x.k===e.medication);
+      title = m ? `${m.ru} ${m.dose(child)}` : e.medication;
+      sub = `${DOSE_TIME_LBL[e.dose_time]?.ru || e.dose_time} — ${m?m.en:''}`;
+      break;
+    }
+    case 'solids':{
+      kindLbl = '🥦 Прикорм / Solids';
+      title = e.product;
+      const a = AMTS.find(x=>x.v===e.amount);
+      const ac = ACCS.find(x=>x.k===e.accept);
+      sub = [a?`${a.ru} / ${a.en}`:'', ac?`${ac.ico} ${ac.ru}`:''].filter(Boolean).join(' · ');
+      if (e.is_new) pills += `<span class="pill p-warn">★ Новый / New</span>`;
+      (e.reactions||[]).forEach(rk => {
+        const r = REAS.find(x=>x.k===rk);
+        if (r) pills += `<span class="pill p-${r.cls}">${r.ru} / ${r.en}</span>`;
+      });
+      break;
+    }
+    case 'weight':{
+      kindLbl = '⚖️ Вес / Weight';
+      title = `${e.weight_kg} кг / kg`;
+      break;
+    }
+    case 'summary':{
+      kindLbl = '🌙 Итог дня / Daily summary';
+      const moodObj = MOODS.find(m=>m.k===e.mood);
+      const sleepObj = SLEEPS.find(s=>s.k===e.sleep);
+      title = [moodObj?moodObj.ico+' '+moodObj.ru:'', sleepObj?sleepObj.ico+' '+sleepObj.ru:''].filter(Boolean).join(' · ') || 'Итог / Summary';
+      if (e.concerns) sub = '⚠️ '+e.concerns;
+      break;
+    }
+  }
+  if (e.note)       noteH  = `<div class="te-note">✏️ ${escH(e.note)}</div>`;
+  if (e.voice_note) voiceH = `<div class="te-voice">🎤 ${escH(e.voice_note)}</div>`;
+  if (e.nanny_note) noteH += `<div class="te-note">💬 ${escH(e.nanny_note)}</div>`;
+  if (e.photo_urls && e.photo_urls.length){
+    photosH = `<div class="te-photos">${e.photo_urls.map(u=>`<img src="${escH(u)}" loading="lazy" onclick="openPhoto('${escH(u)}')">`).join('')}</div>`;
+  }
+  const editable = kind!=='summary'; // summary edit not implemented
+  return `<div class="timeline-entry">
+    <div class="te-view">
+      <div class="te-time"><div class="te-time-v">${escH(time)}</div><div class="te-time-l">time</div></div>
+      <div class="te-body">
+        <div class="te-kind">${kindLbl}</div>
+        <div class="te-title">${escH(title)}</div>
+        ${sub?`<div class="te-sub">${escH(sub)}</div>`:''}
+        ${pills?`<div class="pills">${pills}</div>`:''}
+        ${noteH}${voiceH}${photosH}
+      </div>
+      <div class="te-actions nanny-only">
+        ${editable?`<button class="act-btn edit-btn" onclick="openEdit('${kind}',${e.id})">✏️</button>`:''}
+        <button class="act-btn del-btn" onclick="delEntry('${kind}',${e.id})">✕</button>
+      </div>
+    </div>
+    ${isEdit ? buildEditBlock(kind, e) : ''}
+  </div>`;
+}
+
+window.openPhoto = function(url){
+  const w = window.open('', '_blank');
+  if (w) w.document.write(`<title>Photo</title><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${url}" style="max-width:100%;max-height:100vh"></body>`);
+};
+
+window.openEdit = function(kind, id){ expandedEdit = kind+':'+id; editBuf = {}; renderHistory(); };
+window.cancelEdit = function(){ expandedEdit = null; editBuf = {}; renderHistory(); };
+
+window.delEntry = async function(kind, id){
+  if (!confirm('Удалить запись? / Delete entry?')) return;
+  const t = kind==='formula'?T_FORMULA : kind==='med'?T_MEDS : kind==='solids'?T_SOLIDS
+          : kind==='weight'?T_WEIGHT : kind==='water'?T_WATER : kind==='sleep'?T_SLEEP : T_SUMMARY;
+  await db.from(t).delete().eq('id', id);
+  expandedEdit = null;
+  renderHistory();
+};
+
+function buildEditBlock(kind, e){
+  if (kind==='formula') return buildEditFormula(e);
+  if (kind==='solids')  return buildEditSolids(e);
+  if (kind==='weight')  return buildEditWeight(e);
+  if (kind==='med')     return buildEditMed(e);
+  if (kind==='water')   return buildEditWater(e);
+  if (kind==='sleep')   return buildEditSleepHist(e);
+  return '';
+}
+function buildEditWater(e){
+  return `<div class="te-edit">
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span><span class="bi-en">/ Time</span></div>
+      <input type="time" class="edit-mini-inp" id="ewa-time-${e.id}" value="${e.time||''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Объём мл</span><span class="bi-en">/ ml</span></div>
+      <input type="number" inputmode="numeric" class="edit-mini-inp" id="ewa-ml-${e.id}" value="${e.ml||0}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+      <textarea class="edit-ta" id="ewa-note-${e.id}">${escH(e.note||'')}</textarea></div>
+    <div class="edit-actions">
+      <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveEditWater(${e.id})">Сохранить / Save</button>
+    </div>
+  </div>`;
+}
+window.saveEditWater = async (id) => {
+  const ch = {
+    time: document.getElementById('ewa-time-'+id).value,
+    ml: parseInt(document.getElementById('ewa-ml-'+id).value,10)||0,
+    note: document.getElementById('ewa-note-'+id).value.trim(),
+  };
+  const { error } = await db.from(T_WATER).update(ch).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); return; }
+  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+};
+function buildEditSleepHist(e){
+  const d = e.date || todayISO();
+  return `<div class="te-edit">
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заснул</span><span class="bi-en">/ From</span></div>
+      <input type="time" class="edit-mini-inp" id="esl-start-${e.id}" value="${tsHHMM(e.start_time)}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Проснулся (пусто = спит)</span><span class="bi-en">/ To (empty = asleep)</span></div>
+      <input type="time" class="edit-mini-inp" id="esl-end-${e.id}" value="${e.end_time?tsHHMM(e.end_time):''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+      <textarea class="edit-ta" id="esl-note-${e.id}">${escH(e.note||'')}</textarea></div>
+    <div class="edit-actions">
+      <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveEditSleep(${e.id},'${d}')">Сохранить / Save</button>
+    </div>
+  </div>`;
+}
+window.saveEditSleep = async (id, d) => {
+  const sv = document.getElementById('esl-start-'+id).value;
+  const ev = document.getElementById('esl-end-'+id).value;
+  if (!sv){ showToast('Укажите время / Enter time'); return; }
+  const start = new Date(d+'T'+sv+':00');
+  let end = null;
+  if (ev){ end = new Date(d+'T'+ev+':00'); if (end < start) end.setDate(end.getDate()+1); }
+  const { error } = await db.from(T_SLEEP).update({
+    start_time: start.toISOString(),
+    end_time: end ? end.toISOString() : null,
+    note: document.getElementById('esl-note-'+id).value.trim(),
+  }).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); return; }
+  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+};
+
+function buildEditFormula(e){
+  if (!editBuf.f) editBuf.f = {
+    stool: e.stool, stoolColor: e.stool_color, stoolCons: e.stool_consistency,
+  };
+  const stcHtml = STOOL_COLORS.map(c =>
+    `<div class="etap${editBuf.f.stoolColor===c.k?' '+sc():''}" onclick="eFStcol('${c.k}')">${c.ico} ${c.ru}</div>`).join('');
+  const consHtml = STOOL_CONS.map(c =>
+    `<div class="etap${editBuf.f.stoolCons===c.k?' '+sc():''}" onclick="eFCons('${c.k}')">${c.ru}<br><span style="font-size:9px;opacity:.6">${c.en}</span></div>`).join('');
+  return `<div class="te-edit" id="te-edit-${e.id}">
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span><span class="bi-en">/ Time</span></div>
+      <input type="time" class="edit-mini-inp" id="ef-time-${e.id}" value="${e.time||''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">KABRITA мл</span><span class="bi-en">/ ml</span></div>
+      <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-kab-${e.id}" value="${e.kabrita_ml||0}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">NUTRILON мл</span><span class="bi-en">/ ml</span></div>
+      <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-nut-${e.id}" value="${e.nutrilon_ml||0}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Вода мл</span><span class="bi-en">/ Water ml</span></div>
+      <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-wat-${e.id}" value="${e.water_ml||0}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Стул</span><span class="bi-en">/ Stool</span></div>
+      <div class="edit-g2">
+        <div class="etap${editBuf.f.stool===true?' s-ok':''}" onclick="eFStool(true)">✅ Был / Yes</div>
+        <div class="etap${editBuf.f.stool===false?' s-bad':''}" onclick="eFStool(false)">❌ Не было / No</div>
+      </div></div>
+    ${editBuf.f.stool ? `
+      <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Цвет</span><span class="bi-en">/ Color</span></div>
+        <div class="edit-g3">${stcHtml}</div></div>
+      <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Консистенция</span><span class="bi-en">/ Consistency</span></div>
+        <div class="edit-g2">${consHtml}</div></div>` : ''}
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+      <textarea class="edit-ta" id="ef-note-${e.id}">${escH(e.note||'')}</textarea></div>
+    <div class="edit-actions">
+      <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveEditFormula(${e.id})">Сохранить / Save</button>
+    </div>
+  </div>`;
+}
+window.eFStool = (v) => { editBuf.f.stool=v; if(!v){editBuf.f.stoolColor=null;editBuf.f.stoolCons=null;} renderHistory(); };
+window.eFStcol = (k) => { editBuf.f.stoolColor=editBuf.f.stoolColor===k?null:k; renderHistory(); };
+window.eFCons  = (k) => { editBuf.f.stoolCons=editBuf.f.stoolCons===k?null:k; renderHistory(); };
+window.saveEditFormula = async (id) => {
+  const ch = {
+    time: document.getElementById('ef-time-'+id).value,
+    kabrita_ml: parseInt(document.getElementById('ef-kab-'+id).value,10)||0,
+    nutrilon_ml: parseInt(document.getElementById('ef-nut-'+id).value,10)||0,
+    water_ml:    parseInt(document.getElementById('ef-wat-'+id).value,10)||0,
+    stool: editBuf.f.stool===true,
+    stool_color: editBuf.f.stoolColor,
+    stool_consistency: editBuf.f.stoolCons,
+    note: document.getElementById('ef-note-'+id).value.trim(),
+  };
+  const { error } = await db.from(T_FORMULA).update(ch).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; editBuf={}; renderHistory();
+};
+
+function buildEditSolids(e){
+  if (!editBuf.s) editBuf.s = { amount:e.amount, accept:e.accept, reactions:new Set(e.reactions||[]) };
+  const amtH = AMTS.map(a => `<div class="etap${editBuf.s.amount===a.v?' '+sc():''}" onclick="eSAmt('${a.v}')">${a.ru}<br><span style="font-size:9px;opacity:.6">${a.en}</span></div>`).join('');
+  const accH = ACCS.map(a => `<div class="etap${editBuf.s.accept===a.k?' '+sc():''}" onclick="eSAcc('${a.k}')">${a.ico} ${a.ru}</div>`).join('');
+  const reaH = REAS.map(r => `<div class="etap${editBuf.s.reactions.has(r.k)?' s-'+r.cls:''}" onclick="eSRea('${r.k}')">${r.ru}<br><span style="font-size:9px;opacity:.6">${r.en}</span></div>`).join('');
+  return `<div class="te-edit">
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span></div>
+      <input type="time" class="edit-mini-inp" id="es-time-${e.id}" value="${e.time||''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Продукт</span></div>
+      <input class="edit-mini-inp" id="es-prod-${e.id}" value="${escH(e.product||'')}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Объём</span></div><div class="edit-g3">${amtH}</div></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Как поел</span></div><div class="edit-g2">${accH}</div></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Реакция</span></div><div class="edit-g2">${reaH}</div></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span></div>
+      <textarea class="edit-ta" id="es-note-${e.id}">${escH(e.note||'')}</textarea></div>
+    <div class="edit-actions">
+      <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveEditSolids(${e.id})">Сохранить / Save</button>
+    </div>
+  </div>`;
+}
+window.eSAmt = (v) => { editBuf.s.amount = editBuf.s.amount===v?null:v; renderHistory(); };
+window.eSAcc = (k) => { editBuf.s.accept = editBuf.s.accept===k?null:k; renderHistory(); };
+window.eSRea = (k) => { editBuf.s.reactions.has(k)?editBuf.s.reactions.delete(k):editBuf.s.reactions.add(k); renderHistory(); };
+window.saveEditSolids = async (id) => {
+  const ch = {
+    time: document.getElementById('es-time-'+id).value,
+    product: document.getElementById('es-prod-'+id).value.trim(),
+    amount: editBuf.s.amount, accept: editBuf.s.accept,
+    reactions: [...editBuf.s.reactions],
+    note: document.getElementById('es-note-'+id).value.trim(),
+  };
+  const { error } = await db.from(T_SOLIDS).update(ch).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); return; }
+  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; editBuf={}; renderHistory();
+};
+
+function buildEditWeight(e){
+  return `<div class="te-edit">
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Дата</span></div>
+      <input type="date" class="edit-mini-inp" id="ew-date-${e.id}" value="${e.date||''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span></div>
+      <input type="time" class="edit-mini-inp" id="ew-time-${e.id}" value="${e.time||''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Вес (кг)</span></div>
+      <input type="number" step="0.001" inputmode="decimal" class="edit-mini-inp" id="ew-kg-${e.id}" value="${e.weight_kg||''}"></div>
+    <div class="edit-actions">
+      <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveEditWeight(${e.id})">Сохранить / Save</button>
+    </div>
+  </div>`;
+}
+window.saveEditWeight = async (id) => {
+  const ch = {
+    date: document.getElementById('ew-date-'+id).value,
+    time: document.getElementById('ew-time-'+id).value,
+    weight_kg: parseFloat(document.getElementById('ew-kg-'+id).value)||null,
+  };
+  const { error } = await db.from(T_WEIGHT).update(ch).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); return; }
+  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+};
+
+function buildEditMed(e){
+  return `<div class="te-edit">
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время приёма</span><span class="bi-en">/ Given at</span></div>
+      <input type="time" class="edit-mini-inp" id="em-time-${e.id}" value="${e.given_at||''}"></div>
+    <div class="edit-actions">
+      <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveEditMed(${e.id})">Сохранить / Save</button>
+    </div>
+  </div>`;
+}
+window.saveEditMed = async (id) => {
+  const ch = { given_at: document.getElementById('em-time-'+id).value };
+  const { error } = await db.from(T_MEDS).update(ch).eq('id', id);
+  if (error){ showToast('Ошибка / Error'); return; }
+  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+};
+
+// ─── PROFILE ──────────────────────────────────────────────
+async function renderProfile(root){
+  const days = profilePeriod==='all' ? 365 : profilePeriod;
+  const start = new Date(); start.setDate(start.getDate()-(days-1));
+  const startISO = start.toISOString().slice(0,10);
+  const endISO   = todayISO();
+
+  const [feeds, meds, solids, summaries, weights] = await Promise.all([
+    db.from(T_FORMULA).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_MEDS   ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_SOLIDS ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_SUMMARY).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
+    db.from(T_WEIGHT ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO).order('date',{ascending:true}),
+  ]);
+  const F = feeds.data||[], M = meds.data||[], S = solids.data||[], DS = summaries.data||[], W = weights.data||[];
+
+  // build day buckets
+  const dates = [];
+  for (let i=days-1;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+  const mlByDay = dates.map(d => F.filter(e=>e.date===d).reduce((s,e)=>s+(e.kabrita_ml||0)+(e.nutrilon_ml||0),0));
+  const stoolByDay = dates.map(d => F.filter(e=>e.date===d && e.stool).length);
+  // среднее только по дням с записями / average over days that have entries only
+  const feedDays = mlByDay.filter(x=>x>0);
+  const avg = feedDays.length ? Math.round(feedDays.reduce((a,b)=>a+b,0)/feedDays.length) : 0;
+  const maxV = Math.max(...mlByDay, 0);
+  const minV = Math.min(...mlByDay.filter(x=>x>0), maxV);
+
+  const colorCounts = {};
+  F.filter(e=>e.stool && e.stool_color).forEach(e => { colorCounts[e.stool_color]=(colorCounts[e.stool_color]||0)+1; });
+
+  // пропуски считаем только начиная с medication_entries.start_date / count misses only from regimen start
+  let regimenStart = null;
+  M.forEach(e => { const sd = e.start_date || e.date; if (sd && (!regimenStart || sd < regimenStart)) regimenStart = sd; });
+  const effDates = regimenStart ? dates.filter(d => d >= regimenStart) : [];
+  const totalExp = totalExpectedMeds() * effDates.length;
+  const medGivenCount = M.filter(e=>e.given).length;
+  const medPct = totalExp>0 ? Math.round(medGivenCount/totalExp*100) : 0;
+  // missed days = past days (within regimen) where 0 meds given; today excluded (ongoing)
+  const medDays = effDates.filter(d => d < endISO && M.filter(e=>e.date===d && e.given).length===0);
+
+  const periodBtns = `
+    <div class="prof-period">
+      ${[7,14,30,'all'].map(p => `<button class="${profilePeriod===p?'on':''}" onclick="setProfilePeriod(${typeof p==='string'?`'${p}'`:p})">${p==='all'?'Всё / All':p+' дн'}</button>`).join('')}
+    </div>`;
+
+  // Weights
+  const weightAddH = `
+    <div class="card tight">
+      <div class="bi"><span class="bi-ru">Добавить замер</span><span class="bi-en">/ Add measurement</span></div>
+      <div class="weight-add">
+        <input type="date" id="w-date" value="${todayISO()}">
+        <input type="time" id="w-time" value="${nowHHMM()}">
+        <input type="number" step="0.001" inputmode="decimal" placeholder="кг / kg" id="w-kg">
+        <button onclick="addWeight()">+</button>
+      </div>
+    </div>`;
+
+  let weightChart = '<div class="empty" style="padding:16px">Нет замеров / No measurements</div>';
+  if (W.length>=1){
+    weightChart = `<div class="chart-wrap"><canvas id="weight-chart"></canvas>
+      <div class="chart-meta">
+        <span>мин <b>${Math.min(...W.map(w=>w.weight_kg))} кг</b></span>
+        <span>макс <b>${Math.max(...W.map(w=>w.weight_kg))} кг</b></span>
+        <span>замеров <b>${W.length}</b></span>
+      </div></div>`;
+  }
+
+  // Solids list
+  const solidProducts = [...new Set(S.map(s=>s.product))];
+  const newProducts = [...new Set(S.filter(s=>s.is_new).map(s=>s.product))];
+  const reactCount = S.filter(s => (s.reactions||[]).some(r => r.includes('bad') || r==='gas')).length;
+  const solidsH = !S.length ? '<div class="empty" style="padding:16px">Записей нет / No entries</div>' : `
+    <div class="card tight">
+      <div style="font-size:13px;margin-bottom:8px"><b>${S.length}</b> записей / entries · <b>${solidProducts.length}</b> продуктов / foods · <b style="color:${reactCount>0?'var(--bad)':'var(--ok)'}">${reactCount}</b> реакций / reactions</div>
+      ${newProducts.length?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px">★ Новые продукты / New foods:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${newProducts.map(p=>`<span class="pill p-warn">${escH(p)}</span>`).join('')}</div>`:''}
+    </div>`;
+
+  // Photos gallery
+  const allPhotos = [...F, ...S].flatMap(e => (e.photo_urls||[]).map(u=>({u, t:e.created_at})));
+  allPhotos.sort((a,b)=>(b.t||'').localeCompare(a.t||''));
+  const photosH = allPhotos.length
+    ? `<div class="gallery">${allPhotos.slice(0,30).map(p=>`<img src="${escH(p.u)}" loading="lazy" onclick="openPhoto('${escH(p.u)}')">`).join('')}</div>`
+    : `<div class="empty" style="padding:16px">Фото нет / No photos</div>`;
+
+  // Notes timeline
+  const notes = [
+    ...F.filter(e=>e.note||e.voice_note).map(e=>({date:e.date,time:e.time||'',txt:[e.note,e.voice_note].filter(Boolean).join(' · '),src:'🍼'})),
+    ...S.filter(e=>e.note||e.voice_note).map(e=>({date:e.date,time:e.time||'',txt:[e.note,e.voice_note].filter(Boolean).join(' · '),src:'🥦'})),
+    ...DS.map(e=>({date:e.date,time:'23:59',txt:[e.concerns?'⚠️ '+e.concerns:'',e.nanny_note?'💬 '+e.nanny_note:''].filter(Boolean).join('  ·  '),src:'🌙'})),
+  ].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const notesH = !notes.length ? '<div class="empty" style="padding:16px">Заметок нет / No notes</div>' : `
+    <div class="card tight">
+      ${notes.slice(0,20).map(n=>`<div style="padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px;line-height:1.5">
+        <div style="font-size:11px;color:var(--hint);font-weight:600">${escH(n.date)} ${escH(n.time)} ${n.src}</div>
+        <div style="color:var(--text)">${escH(n.txt)}</div>
+      </div>`).join('')}
+    </div>`;
+
+  root.innerHTML = `
+    ${periodBtns}
+
+    <div class="section-hdr">🍼 Питание <span class="sh-en">/ Nutrition</span></div>
+    <div class="chart-wrap">
+      <canvas id="nutri-chart"></canvas>
+      <div class="chart-meta">
+        <span>средн. <b>${avg} мл/день</b></span>
+        <span>макс <b>${maxV} мл</b></span>
+        <span>мин <b>${minV} мл</b></span>
+      </div>
+    </div>
+
+    <div class="section-hdr">💩 Стул <span class="sh-en">/ Stool</span></div>
+    <div class="chart-wrap">
+      <canvas id="stool-chart"></canvas>
+      <div class="color-dist">
+        ${Object.entries(colorCounts).map(([k,v])=>{const c=STOOL_COLORS.find(x=>x.k===k);return c?`<div class="cd-item">${c.ico} ${c.ru}: <b>${v}</b></div>`:'';}).join('') || '<span style="color:var(--hint);font-size:12px">Нет данных / No data</span>'}
+      </div>
+    </div>
+
+    <div class="section-hdr">💊 Лекарства <span class="sh-en">/ Medications</span></div>
+    <div class="card tight">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div><span style="font-size:24px;font-weight:700;color:${medPct>=90?'var(--ok)':medPct>=60?'var(--warn)':'var(--bad)'}">${medPct}%</span><span style="font-size:12px;color:var(--muted);margin-left:6px">выполнено / completed</span></div>
+        <div style="font-size:11px;color:var(--muted);text-align:right">${medGivenCount} из ${totalExp}<br>${medGivenCount} of ${totalExp}</div>
+      </div>
+      ${medDays.length?`<div style="margin-top:8px;font-size:11px;color:var(--bad)">Пропущенные дни / Missed: ${medDays.slice(0,5).map(d=>fmtDateShortRU(d).day+' '+fmtDateShortRU(d).mo).join(', ')}${medDays.length>5?' +'+(medDays.length-5):''}</div>`:''}
+    </div>
+
+    <div class="section-hdr">⚖️ Вес <span class="sh-en">/ Weight</span></div>
+    ${weightAddH}
+    ${weightChart}
+
+    <div class="section-hdr">🥦 Прикорм <span class="sh-en">/ Solids</span></div>
+    ${solidsH}
+
+    <div class="section-hdr">📷 Фото <span class="sh-en">/ Photos</span></div>
+    ${photosH}
+
+    <div class="section-hdr">💬 Заметки и итоги <span class="sh-en">/ Notes & summaries</span></div>
+    ${notesH}
+  `;
+
+  // draw charts after DOM
+  setTimeout(()=>{
+    drawBarChart('nutri-chart', dates, mlByDay, colorVar(), 'мл');
+    drawBarChart('stool-chart', dates, stoolByDay, 'var(--warn)', 'раз');
+    if (W.length>=1){
+      drawLineChart('weight-chart', W.map(w=>w.date), W.map(w=>parseFloat(w.weight_kg)), colorVar(), 'кг');
+    }
+  }, 30);
+}
+
+window.setProfilePeriod = function(p){ profilePeriod = p; renderHistory(); };
+window.addWeight = async function(){
+  const date = document.getElementById('w-date').value;
+  const time = document.getElementById('w-time').value;
+  const kg   = parseFloat(document.getElementById('w-kg').value);
+  if (!date || !kg){ showToast('Заполните дату и вес / Fill date & weight'); return; }
+  const { error } = await db.from(T_WEIGHT).insert([{
+    id:newId(), child, date, time, weight_kg:kg
+  }]);
+  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  showToast('Вес сохранён ✓ / Weight saved ✓');
+  document.getElementById('w-kg').value='';
+  renderHistory();
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CANVAS CHARTS
+// ═══════════════════════════════════════════════════════════════
+function getCssColor(v){
+  if (!v.startsWith('var(')) return v;
+  const name = v.match(/var\((--[^)]+)\)/)[1];
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function drawBarChart(canvasId, labels, data, color, unit){
+  const c = document.getElementById(canvasId); if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = c.clientWidth, H = c.clientHeight;
+  c.width = W*dpr; c.height = H*dpr;
+  const ctx = c.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+
+  const padL=28, padR=8, padT=10, padB=22;
+  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const max = Math.max(...data, 1);
+  const barGap = 2;
+  const barW = Math.max(2, innerW/data.length - barGap);
+  const col = getCssColor(color);
+  const muted = getCssColor('var(--hint)');
+  const text = getCssColor('var(--muted)');
+
+  // axis
+  ctx.strokeStyle = muted; ctx.globalAlpha = .25;
+  ctx.beginPath();
+  for (let i=0;i<=3;i++){
+    const y = padT + (innerH/3)*i;
+    ctx.moveTo(padL, y); ctx.lineTo(W-padR, y);
+  }
+  ctx.stroke(); ctx.globalAlpha = 1;
+  // Y-axis labels
+  ctx.fillStyle = muted; ctx.font = '9px Inter,sans-serif'; ctx.textAlign='right';
+  for (let i=0;i<=3;i++){
+    const v = Math.round(max - max/3*i);
+    ctx.fillText(v, padL-4, padT + (innerH/3)*i + 3);
+  }
+  // bars
+  data.forEach((v,i) => {
+    const h = max ? (v/max)*innerH : 0;
+    const x = padL + i*(innerW/data.length) + barGap/2;
+    const y = padT + innerH - h;
+    ctx.fillStyle = v>0 ? col : muted;
+    ctx.globalAlpha = v>0 ? 1 : .25;
+    ctx.fillRect(x, y, barW, h);
+  });
+  ctx.globalAlpha = 1;
+  // X-axis: show every N-th label
+  const step = Math.ceil(data.length/6);
+  ctx.fillStyle = text; ctx.font = '9px Inter,sans-serif'; ctx.textAlign='center';
+  labels.forEach((d,i)=>{
+    if (i%step!==0 && i!==labels.length-1) return;
+    const x = padL + i*(innerW/data.length) + barW/2;
+    const date = new Date(d+'T12:00:00');
+    const lbl = String(date.getDate())+'/'+(date.getMonth()+1);
+    ctx.fillText(lbl, x, H-6);
+  });
+}
+function drawLineChart(canvasId, labels, data, color, unit){
+  const c = document.getElementById(canvasId); if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = c.clientWidth, H = c.clientHeight;
+  c.width = W*dpr; c.height = H*dpr;
+  const ctx = c.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+
+  const padL=34, padR=10, padT=12, padB=22;
+  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const max = Math.max(...data, 0);
+  const min = Math.min(...data, max);
+  const range = max-min || 1;
+  const col = getCssColor(color);
+  const muted = getCssColor('var(--hint)');
+  const text = getCssColor('var(--muted)');
+
+  ctx.strokeStyle = muted; ctx.globalAlpha=.25; ctx.beginPath();
+  for (let i=0;i<=3;i++){
+    const y = padT + (innerH/3)*i;
+    ctx.moveTo(padL,y); ctx.lineTo(W-padR,y);
+  }
+  ctx.stroke(); ctx.globalAlpha=1;
+  ctx.fillStyle=muted; ctx.font='9px Inter,sans-serif'; ctx.textAlign='right';
+  for (let i=0;i<=3;i++){
+    const v = max - range/3*i;
+    ctx.fillText(v.toFixed(2), padL-4, padT + (innerH/3)*i + 3);
+  }
+
+  const xs = data.map((_,i) => padL + (data.length===1 ? innerW/2 : i*(innerW/(data.length-1))));
+  const ys = data.map(v => padT + innerH - ((v-min)/range)*innerH);
+
+  ctx.strokeStyle = col; ctx.lineWidth=2; ctx.beginPath();
+  xs.forEach((x,i)=>{ if (i===0) ctx.moveTo(x,ys[i]); else ctx.lineTo(x,ys[i]); });
+  ctx.stroke();
+  ctx.fillStyle = col;
+  xs.forEach((x,i)=>{ ctx.beginPath(); ctx.arc(x,ys[i],4,0,Math.PI*2); ctx.fill(); });
+  ctx.fillStyle = text; ctx.font='9px Inter,sans-serif'; ctx.textAlign='center';
+  labels.forEach((d,i)=>{
+    const date = new Date(d+'T12:00:00');
+    const lbl = String(date.getDate())+'/'+(date.getMonth()+1);
+    ctx.fillText(lbl, xs[i], H-6);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VOICE
+// ═══════════════════════════════════════════════════════════════
+function toggleMic(target){
+  if (isRec){ stopMic(); return; }
+  voiceTarget = target;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR){
+    setVTxt(target, 'vstatus', 'Не поддерживается / Not supported'); return;
+  }
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'ru-RU';
+
+  const btnId  = target==='formula' ? 'f-mic-btn' : 's-mic-btn';
+  const vtId   = target==='formula' ? 'f-vtrans'  : 's-vtrans';
+  const vsId   = target==='formula' ? 'f-vstatus' : 's-vstatus';
+  const btn = document.getElementById(btnId);
+  const vt  = document.getElementById(vtId);
+  const vs  = document.getElementById(vsId);
+  let finalText = vt.classList.contains('emp') ? '' : vt.textContent;
+
+  recognition.onstart = () => {
+    isRec = true;
+    btn.className = 'mic-btn rec';
+    btn.querySelector('.mic-txt').textContent = 'Запись... / Recording... — нажмите стоп';
+    vs.textContent = '🔴 Говорите / Speak now';
+  };
+  recognition.onresult = ev => {
+    let interim = '', fin = finalText;
+    for (let i=ev.resultIndex; i<ev.results.length; i++){
+      const t = ev.results[i][0].transcript;
+      ev.results[i].isFinal ? (fin += (fin?' ':'')+t) : (interim += t);
+    }
+    finalText = fin;
+    vt.className = 'vtrans';
+    vt.textContent = fin + (interim?' '+interim+'...':'');
+  };
+  recognition.onerror = ev => { vs.textContent = 'Ошибка / Error: '+ev.error; stopMic(); };
+  recognition.onend   = () => { if (isRec) recognition.start(); };
+  recognition.start();
+}
+function setVTxt(target, kind, txt){
+  const id = (target==='formula'?'f-':'s-')+kind;
+  const el = document.getElementById(id); if (el) el.textContent = txt;
+}
+function stopMic(){
+  isRec = false;
+  if (recognition){ recognition.onend = null; recognition.stop(); }
+  const t = voiceTarget;
+  if (!t) return;
+  const btnId = t==='formula'?'f-mic-btn':'s-mic-btn';
+  const vsId  = t==='formula'?'f-vstatus':'s-vstatus';
+  const btn = document.getElementById(btnId);
+  btn.className = 'mic-btn';
+  btn.querySelector('.mic-txt').textContent = 'Нажмите и говорите / Tap and speak';
+  const vs = document.getElementById(vsId);
+  vs.textContent = '✓ Сохранено / Saved';
+  setTimeout(()=>vs.textContent='', 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REALTIME
+// ═══════════════════════════════════════════════════════════════
+function subscribeRealtime(){
+  const ch = db.channel('all-changes');
+  [T_FORMULA, T_MEDS, T_SOLIDS, T_SUMMARY, T_WEIGHT, T_WATER, T_SLEEP].forEach(t => {
+    ch.on('postgres_changes', { event:'*', schema:'public', table:t }, () => {
+      if (view==='home') renderHome();
+      else if (view==='meds' && viewStep==='form') renderMeds();
+      else if (view==='sleep' && viewStep==='form') renderSleepList();
+      else if (view==='history') renderHistory();
+    });
+  });
+  ch.subscribe();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST / CONN
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+function updateConnBar(online){
+  const bar = document.getElementById('conn-bar');
+  if (online){
+    bar.textContent = '✓ Подключено · Connected';
+    bar.className = 'conn-bar online';
+    setTimeout(()=>{ bar.className='conn-bar'; }, 2500);
+  } else {
+    bar.textContent = '⚠ Нет соединения · No connection';
+    bar.className = 'conn-bar offline';
+  }
+}
+window.addEventListener('online',  () => updateConnBar(true));
+window.addEventListener('offline', () => updateConnBar(false));
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+setDateStrip();
+setInterval(setDateStrip, 60000);
+renderAllChips();
+renderStoolColor();
+renderProdChips();
+renderAmts(); renderAccs(); renderReas();
+resetFeedingForm();
+resetSolidsForm();
+renderHome();
+updateSaveBar();
+subscribeRealtime();
+</script>
+</body>
+</html>
