@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ffffff">
 <title>Lev & Mark · Дневник близнецов</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -136,7 +139,7 @@ body{
 .chip:active{transform:scale(.94);opacity:.8}
 .chip .cru{font-size:13px;font-weight:500;color:var(--text);display:block}
 .chip .cen{font-size:10px;color:var(--hint);display:block;margin-top:1px}
-.chip.ml-chip{font-size:15px;font-weight:600;padding:9px 14px;min-width:54px;text-align:center}
+.chip.ml-chip{font-size:15px;font-weight:600;padding:12px 16px;min-width:58px;min-height:44px;text-align:center;display:inline-flex;align-items:center;justify-content:center}
 .chip.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
 .mark .chip.on,.tab-pane[data-child="mark"] .chip.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
 
@@ -1636,7 +1639,7 @@ async function saveSolids(){
     photo_urls: photoUrls,
   };
   const { error } = await db.from(T_SOLIDS).insert([entry]);
-  if (error){ showToast('Ошибка / Error'); console.error(error); }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); }
   else { showToast('Сохранено ✓ / Saved ✓'); resetSolidsForm(); goHome(); }
   btn.disabled = false; btn.textContent = '💾 Сохранить прикорм · Save solids';
 }
@@ -1826,7 +1829,7 @@ async function wakeNow(){
   const open = await getOpenSleep();
   if (!open){ showToast('Нет открытого сна / No open sleep'); return; }
   const { error } = await db.from(T_SLEEP).update({ end_time: new Date().toISOString() }).eq('id', open.id);
-  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
   showToast('Проснулся ✓ / Woke up ✓'); renderSleepList();
 }
 async function addSleepManual(){
@@ -1899,7 +1902,7 @@ window.editSleepInline = async function(id){
   const { error } = await db.from(T_SLEEP).update({
     start_time: start.toISOString(), end_time: end ? end.toISOString() : null
   }).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
   renderSleepList();
 };
 
@@ -1997,7 +2000,7 @@ async function saveEod(){
     voice_note: voiceNote,
   };
   const { error } = await db.from(T_SUMMARY).insert([entry]);
-  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
   showToast('Итог дня сохранён ✓ / Summary saved ✓');
   goHome();
 }
@@ -2449,7 +2452,7 @@ window.saveEditWater = async (id) => {
     note: document.getElementById('ewa-note-'+id).value.trim(),
   };
   const { error } = await db.from(T_WATER).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
   showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
 };
 function buildEditSleepHist(e){
@@ -2479,7 +2482,7 @@ window.saveEditSleep = async (id, d) => {
     end_time: end ? end.toISOString() : null,
     note: document.getElementById('esl-note-'+id).value.trim(),
   }).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
   showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
 };
 
@@ -2533,7 +2536,7 @@ window.saveEditFormula = async (id) => {
     note: document.getElementById('ef-note-'+id).value.trim(),
   };
   const { error } = await db.from(T_FORMULA).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
   showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; editBuf={}; renderHistory();
 };
 
@@ -2570,7 +2573,7 @@ window.saveEditSolids = async (id) => {
     note: document.getElementById('es-note-'+id).value.trim(),
   };
   const { error } = await db.from(T_SOLIDS).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
   showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; editBuf={}; renderHistory();
 };
 
@@ -2595,7 +2598,7 @@ window.saveEditWeight = async (id) => {
     weight_kg: parseFloat(document.getElementById('ew-kg-'+id).value)||null,
   };
   const { error } = await db.from(T_WEIGHT).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
   showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
 };
 
@@ -2612,7 +2615,7 @@ function buildEditMed(e){
 window.saveEditMed = async (id) => {
   const ch = { given_at: document.getElementById('em-time-'+id).value };
   const { error } = await db.from(T_MEDS).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error'); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
   showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
 };
 
@@ -2666,7 +2669,7 @@ async function renderProfile(root){
   const avgStoolPerDay = feedDays.length ? (totalStool/feedDays.length).toFixed(1) : '—';
 
   // weight: latest + trend
-  let weightLatest = '—', weightTrend = '', weightDelta = '';
+  let weightLatest = 'Нет', weightHint = '', weightTrend = '', weightDelta = '';
   if (W.length){
     const sorted = [...W].sort((a,b)=>((a.date+a.time)||'').localeCompare((b.date+b.time)||''));
     weightLatest = `${sorted[sorted.length-1].weight_kg} кг`;
@@ -2675,6 +2678,8 @@ async function renderProfile(root){
       weightDelta = (d>=0?'+':'') + d.toFixed(3) + ' кг';
       weightTrend = d>0 ? '↑' : d<0 ? '↓' : '→';
     }
+  } else {
+    weightHint = 'Добавь на главной ⚖️';
   }
 
   // total color distribution (max for bars)
@@ -2692,9 +2697,9 @@ async function renderProfile(root){
     <div class="hero-grid">
       <div class="hero-stat">
         <div class="hs-ico">⚖️</div>
-        <div class="hs-num">${weightLatest}</div>
+        <div class="hs-num" ${!W.length?'style="font-size:14px;color:var(--hint)"':''}>${weightLatest}</div>
         <div class="hs-lbl">Текущий вес / Latest weight</div>
-        ${weightDelta?`<div class="hs-trend">${weightTrend} ${weightDelta}</div>`:''}
+        ${weightDelta?`<div class="hs-trend">${weightTrend} ${weightDelta}</div>`:weightHint?`<div class="hs-trend" style="color:var(--hint)">${weightHint}</div>`:''}
       </div>
       <div class="hero-stat">
         <div class="hs-ico">💊</div>
@@ -2847,7 +2852,7 @@ window.addWeight = async function(){
   const { error } = await db.from(T_WEIGHT).insert([{
     id:newId(), child, date, time, weight_kg:kg
   }]);
-  if (error){ showToast('Ошибка / Error'); console.error(error); return; }
+  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
   showToast('Вес сохранён ✓ / Weight saved ✓');
   document.getElementById('w-kg').value='';
   renderHistory();
