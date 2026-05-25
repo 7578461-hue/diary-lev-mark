@@ -686,7 +686,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     </div>
     <button class="mode-btn" id="mode-btn" onclick="toggleMode()">
       <span id="mode-ico">👶</span>
-      <span id="mode-lbl">Няня / Nanny</span>
+      <span id="mode-lbl">Nanny / Няня</span>
     </button>
   </div>
 </header>
@@ -700,56 +700,56 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div class="home-date" id="home-date">—</div>
     <div class="dual" id="dual-summary"><div class="loading">Загрузка... / Loading...</div></div>
     <div class="nanny-only">
-      <button class="tile-wide t-sleep" onclick="goView('sleep')"><span class="ti-ico">😴</span><span class="ti-ru">Сон</span><span class="ti-en">Sleep</span></button>
+      <button class="tile-wide t-sleep" onclick="goView('sleep')"><span class="ti-ico">😴</span><span class="ti-ru">Sleep</span><span class="ti-en">Сон</span></button>
       <div class="tiles">
-        <button class="tile t-feeding" onclick="goView('feeding')"><span class="ti-ico">🍼</span><span class="ti-ru">Кормление</span><span class="ti-en">Feeding</span></button>
-        <button class="tile t-water" onclick="goView('water')"><span class="ti-ico">💧</span><span class="ti-ru">Питьё</span><span class="ti-en">Water</span></button>
-        <button class="tile t-stool" onclick="goView('stool')"><span class="ti-ico">💩</span><span class="ti-ru">Стул</span><span class="ti-en">Stool</span></button>
-        <button class="tile t-solids" onclick="goView('solids')"><span class="ti-ico">🥦</span><span class="ti-ru">Прикорм</span><span class="ti-en">Solids</span></button>
-        <button class="tile t-meds" onclick="goView('meds')"><span class="ti-ico">💊</span><span class="ti-ru">Лекарства</span><span class="ti-en">Meds</span></button>
-        <button class="tile t-weight" onclick="goView('weight')"><span class="ti-ico">⚖️</span><span class="ti-ru">Вес</span><span class="ti-en">Weight</span></button>
+        <button class="tile t-feeding" onclick="goView('feeding')"><span class="ti-ico">🍼</span><span class="ti-ru">Feeding</span><span class="ti-en">Кормление</span></button>
+        <button class="tile t-water" onclick="goView('water')"><span class="ti-ico">💧</span><span class="ti-ru">Water</span><span class="ti-en">Питьё</span></button>
+        <button class="tile t-stool" onclick="goView('stool')"><span class="ti-ico">💩</span><span class="ti-ru">Stool</span><span class="ti-en">Стул</span></button>
+        <button class="tile t-solids" onclick="goView('solids')"><span class="ti-ico">🥦</span><span class="ti-ru">Solids</span><span class="ti-en">Прикорм</span></button>
+        <button class="tile t-meds" onclick="goView('meds')"><span class="ti-ico">💊</span><span class="ti-ru">Meds</span><span class="ti-en">Лекарства</span></button>
+        <button class="tile t-weight" onclick="goView('weight')"><span class="ti-ico">⚖️</span><span class="ti-ru">Weight</span><span class="ti-en">Вес</span></button>
       </div>
-      <button class="tile-wide t-eod" onclick="goView('eod')"><span class="ti-ico">🌙</span><span class="ti-ru">Итог дня</span><span class="ti-en">Daily summary</span></button>
+      <button class="tile-wide t-eod" onclick="goView('eod')"><span class="ti-ico">🌙</span><span class="ti-ru">Daily summary</span><span class="ti-en">Итог дня</span></button>
     </div>
   </section>
 
   <!-- ═══ КОРМЛЕНИЕ / FEEDING (formula) ═══ -->
   <section class="tab-pane" data-view="feeding" id="pane-feeding">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="feeding-childpick"></div>
     <div id="feeding-form" style="display:none">
       <div class="cur-child" id="feeding-cur"></div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Время кормления</span><span class="bi-en">/ Feeding time</span></div>
+        <div class="bi"><span class="bi-ru">Feeding time</span><span class="bi-en">/ Время кормления</span></div>
         <div class="time-row">
           <input type="time" class="time-inp" id="f-time">
-          <div class="time-hint">Когда кормили<br>When fed</div>
+          <div class="time-hint">When fed<br>Когда кормили</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">KABRITA</span><span class="bi-en">/ Kabrita formula (мл/ml)</span></div>
+        <div class="bi"><span class="bi-ru">Kabrita formula (мл/ml)</span><span class="bi-en">/ KABRITA</span></div>
         <div class="chips" id="kab-chips"></div>
-        <input type="number" class="ml-inp" id="kab-ml" placeholder="вручную / manual" inputmode="numeric" oninput="onMlInput('kab')">
+        <input type="number" class="ml-inp" id="kab-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onMlInput('kab')">
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">NUTRILON</span><span class="bi-en">/ Nutrilon formula (мл/ml)</span></div>
+        <div class="bi"><span class="bi-ru">Nutrilon formula (мл/ml)</span><span class="bi-en">/ NUTRILON</span></div>
         <div class="chips" id="nut-chips"></div>
-        <input type="number" class="ml-inp" id="nut-ml" placeholder="вручную / manual" inputmode="numeric" oninput="onMlInput('nut')">
+        <input type="number" class="ml-inp" id="nut-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onMlInput('nut')">
       </div>
 
       <div class="formula-total">
         <div>
-          <div class="bi-ru" style="font-size:12px">Итого смеси</div>
-          <div class="bi-en">Total formula</div>
+          <div class="bi-ru" style="font-size:12px">Total formula</div>
+          <div class="bi-en">Итого смеси</div>
         </div>
-        <div class="ft-n"><span id="f-total">0</span> мл / ml</div>
+        <div class="ft-n"><span id="f-total">0</span> ml / мл</div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo (до 3 / up to 3)</span></div>
+        <div class="bi"><span class="bi-ru">Photo (до 3 / up to 3)</span><span class="bi-en">/ Фото</span></div>
         <label class="photo-btn">
           📷 Добавить фото / Add photo
           <input type="file" accept="image/*" multiple id="f-photos" onchange="onPhotosPicked(event,'formula')">
@@ -758,8 +758,8 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Текстовая заметка</span><span class="bi-en">/ Note</span></div>
-        <textarea class="note-inp" id="f-note" rows="2" placeholder="Был активный, срыгнул / Active, spit up"></textarea>
+        <div class="bi"><span class="bi-ru">Note</span><span class="bi-en">/ Текстовая заметка</span></div>
+        <textarea class="note-inp" id="f-note" rows="2" placeholder="Active, spit up / Был активный, срыгнул"></textarea>
       </div>
 
       <!-- скрытые элементы для совместимости с saveFeeding (стул не используется тут) -->
@@ -775,59 +775,59 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
   <!-- ═══ ПИТЬЁ / WATER ═══ -->
   <section class="tab-pane" data-view="water" id="pane-water">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="water-childpick"></div>
     <div id="water-form" style="display:none">
       <div class="cur-child" id="water-cur"></div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Время</span><span class="bi-en">/ Time</span></div>
+        <div class="bi"><span class="bi-ru">Time</span><span class="bi-en">/ Время</span></div>
         <div class="time-row">
           <input type="time" class="time-inp" id="wa-time">
-          <div class="time-hint">Когда пил<br>When drank</div>
+          <div class="time-hint">When drank<br>Когда пил</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Объём воды</span><span class="bi-en">/ Water (мл/ml)</span></div>
+        <div class="bi"><span class="bi-ru">Water (мл/ml)</span><span class="bi-en">/ Объём воды</span></div>
         <div class="chips" id="wa-presets"></div>
-        <input type="number" class="ml-inp" id="wa-ml" placeholder="вручную / manual" inputmode="numeric" oninput="onWaterInput()">
+        <input type="number" class="ml-inp" id="wa-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onWaterInput()">
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
-        <textarea class="note-inp" id="wa-note" rows="2" placeholder="Пил охотно / Drank willingly"></textarea>
+        <div class="bi"><span class="bi-ru">Note</span><span class="bi-en">/ Заметка</span></div>
+        <textarea class="note-inp" id="wa-note" rows="2" placeholder="Drank willingly / Пил охотно"></textarea>
       </div>
     </div>
   </section>
 
   <!-- ═══ СТУЛ / STOOL (standalone) ═══ -->
   <section class="tab-pane" data-view="stool" id="pane-stool">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="stool-childpick"></div>
     <div id="stool-form" style="display:none">
       <div class="cur-child" id="stool-cur"></div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Время стула</span><span class="bi-en">/ Stool time</span></div>
+        <div class="bi"><span class="bi-ru">Stool time</span><span class="bi-en">/ Время стула</span></div>
         <div class="time-row">
           <input type="time" class="time-inp" id="so-time">
-          <div class="time-hint">Когда покакал<br>When pooped</div>
+          <div class="time-hint">When pooped<br>Когда покакал</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Цвет</span><span class="bi-en">/ Color</span></div>
+        <div class="bi"><span class="bi-ru">Color</span><span class="bi-en">/ Цвет</span></div>
         <div class="g5" id="so-color-grid"></div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Консистенция</span><span class="bi-en">/ Consistency</span></div>
+        <div class="bi"><span class="bi-ru">Consistency</span><span class="bi-en">/ Консистенция</span></div>
         <div class="g2" id="so-cons-grid"></div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo (до 3 / up to 3)</span></div>
+        <div class="bi"><span class="bi-ru">Photo (до 3 / up to 3)</span><span class="bi-en">/ Фото</span></div>
         <label class="photo-btn">
           📷 Добавить фото / Add photo
           <input type="file" accept="image/*" multiple id="so-photos" onchange="onPhotosPicked(event,'stool')">
@@ -836,21 +836,21 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
-        <textarea class="note-inp" id="so-note" rows="2" placeholder="Спокойно, без напряжения / Calm, no straining"></textarea>
+        <div class="bi"><span class="bi-ru">Note</span><span class="bi-en">/ Заметка</span></div>
+        <textarea class="note-inp" id="so-note" rows="2" placeholder="Calm, no straining / Спокойно, без напряжения"></textarea>
       </div>
     </div>
   </section>
 
   <!-- ═══ ВЕС / WEIGHT (standalone) ═══ -->
   <section class="tab-pane" data-view="weight" id="pane-weight">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="weight-childpick"></div>
     <div id="weight-form" style="display:none">
       <div class="cur-child" id="weight-cur"></div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Дата и время</span><span class="bi-en">/ Date & time</span></div>
+        <div class="bi"><span class="bi-ru">Date & time</span><span class="bi-en">/ Дата и время</span></div>
         <div class="weight-when">
           <input type="date" id="we-date" class="edit-mini-inp">
           <input type="time" id="we-time" class="edit-mini-inp">
@@ -858,12 +858,12 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Вес (кг)</span><span class="bi-en">/ Weight (kg)</span></div>
-        <input type="number" step="0.001" inputmode="decimal" class="ml-inp" id="we-kg" placeholder="например 3.450 / e.g. 3.450">
+        <div class="bi"><span class="bi-ru">Weight (kg)</span><span class="bi-en">/ Вес (кг)</span></div>
+        <input type="number" step="0.001" inputmode="decimal" class="ml-inp" id="we-kg" placeholder="e.g. 3.450 / например 3.450">
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">История веса</span><span class="bi-en">/ Weight log</span></div>
+        <div class="bi"><span class="bi-ru">Weight log</span><span class="bi-en">/ История веса</span></div>
         <div id="we-list"><div class="loading">Загрузка / Loading...</div></div>
       </div>
     </div>
@@ -871,7 +871,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
   <!-- ═══ ЛЕКАРСТВА / MEDS ═══ -->
   <section class="tab-pane" data-view="meds" id="pane-meds">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="meds-childpick"></div>
     <div id="meds-form" style="display:none">
       <div class="cur-child" id="meds-cur"></div>
@@ -882,7 +882,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
   <!-- ═══ СОН / SLEEP ═══ -->
   <section class="tab-pane" data-view="sleep" id="pane-sleep">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="sleep-childpick"></div>
     <div id="sleep-form" style="display:none">
       <div class="cur-child" id="sleep-cur"></div>
@@ -896,17 +896,17 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Ручной ввод интервала</span><span class="bi-en">/ Manual interval</span></div>
+        <div class="bi"><span class="bi-ru">Manual interval</span><span class="bi-en">/ Ручной ввод интервала</span></div>
         <div class="time-pair">
           <div><label>Заснул / From</label><input type="time" id="sl-start"></div>
           <div><label>Проснулся / To</label><input type="time" id="sl-end"></div>
         </div>
-        <textarea class="note-inp" id="sl-note" rows="2" placeholder="Заметка / Note" style="margin-top:10px"></textarea>
+        <textarea class="note-inp" id="sl-note" rows="2" placeholder="Note / Заметка" style="margin-top:10px"></textarea>
         <button class="btn-secondary" onclick="addSleepManual()">＋ Добавить интервал / Add interval</button>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Интервалы сегодня</span><span class="bi-en">/ Today's intervals</span></div>
+        <div class="bi"><span class="bi-ru">Today's intervals</span><span class="bi-en">/ Интервалы сегодня</span></div>
         <div id="sleep-list"></div>
       </div>
     </div>
@@ -914,23 +914,23 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
   <!-- ═══ ИТОГ ДНЯ / DAILY SUMMARY ═══ -->
   <section class="tab-pane" data-view="eod" id="pane-eod">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="eod-childpick"></div>
     <div id="eod-form-wrap" style="display:none">
       <div class="cur-child" id="eod-cur"></div>
       <div class="card">
-        <div class="bi"><span class="bi-ru">🌙 Итог дня</span><span class="bi-en">/ Daily summary</span></div>
-        <div class="bi"><span class="bi-ru">Самочувствие</span><span class="bi-en">/ Overall</span></div>
+        <div class="bi"><span class="bi-ru">Daily summary</span><span class="bi-en">/ 🌙 Итог дня</span></div>
+        <div class="bi"><span class="bi-ru">Overall</span><span class="bi-en">/ Самочувствие</span></div>
         <div class="g3" id="eod-mood"></div>
-        <div class="bi" style="margin-top:10px"><span class="bi-ru">Сон</span><span class="bi-en">/ Sleep</span></div>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Sleep</span><span class="bi-en">/ Сон</span></div>
         <div class="g2" id="eod-sleep"></div>
-        <div class="bi" style="margin-top:10px"><span class="bi-ru">Реакция за день</span><span class="bi-en">/ Reactions today</span></div>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Reactions today</span><span class="bi-en">/ Реакция за день</span></div>
         <div class="g2" id="eod-rea"></div>
-        <div class="bi" style="margin-top:10px"><span class="bi-ru">Претензии / симптомы</span><span class="bi-en">/ Concerns</span></div>
-        <textarea class="note-inp" id="eod-concerns" rows="2" placeholder="Что беспокоит / What concerns"></textarea>
-        <div class="bi" style="margin-top:8px"><span class="bi-ru">Комментарий няни</span><span class="bi-en">/ Nanny note</span></div>
-        <textarea class="note-inp" id="eod-note" rows="2" placeholder="Свободный комментарий / Free comment"></textarea>
-        <div class="bi" style="margin-top:10px"><span class="bi-ru">🎤 Голосовая заметка</span><span class="bi-en">/ Voice note</span></div>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Concerns</span><span class="bi-en">/ Претензии / симптомы</span></div>
+        <textarea class="note-inp" id="eod-concerns" rows="2" placeholder="What concerns / Что беспокоит"></textarea>
+        <div class="bi" style="margin-top:8px"><span class="bi-ru">Nanny note</span><span class="bi-en">/ Комментарий няни</span></div>
+        <textarea class="note-inp" id="eod-note" rows="2" placeholder="Free comment / Свободный комментарий"></textarea>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Voice note</span><span class="bi-en">/ 🎤 Голосовая заметка</span></div>
         <button class="mic-btn" id="eod-mic-btn" onclick="toggleMic('eod')">
           <span class="mdot"></span>
           <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
@@ -945,32 +945,32 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
   <!-- ═══ ПРИКОРМ / SOLIDS ═══ -->
   <section class="tab-pane" data-view="solids" id="pane-solids">
-    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <button class="back-btn" onclick="goHome()">← Back / Назад</button>
     <div id="solids-childpick"></div>
     <div id="solids-form" style="display:none">
       <div class="cur-child" id="solids-cur"></div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Время кормления</span><span class="bi-en">/ Feeding time</span></div>
+        <div class="bi"><span class="bi-ru">Feeding time</span><span class="bi-en">/ Время кормления</span></div>
         <div class="time-row">
           <input type="time" class="time-inp" id="s-time">
-          <div class="time-hint">Когда кормили<br>When fed</div>
+          <div class="time-hint">When fed<br>Когда кормили</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Продукт</span><span class="bi-en">/ Food</span></div>
-        <input class="prod-inp" id="s-product" placeholder="Кабачок / Zucchini" autocomplete="off" autocorrect="off">
+        <div class="bi"><span class="bi-ru">Food</span><span class="bi-en">/ Продукт</span></div>
+        <input class="prod-inp" id="s-product" placeholder="Zucchini / Кабачок" autocomplete="off" autocorrect="off">
         <div class="chips" id="prod-chips" style="margin-top:9px"></div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Объём порции</span><span class="bi-en">/ Portion size</span></div>
+        <div class="bi"><span class="bi-ru">Portion size</span><span class="bi-en">/ Объём порции</span></div>
         <div class="g3" id="amt-grid"></div>
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Как поел</span><span class="bi-en">/ How they ate</span></div>
+        <div class="bi"><span class="bi-ru">How they ate</span><span class="bi-en">/ Как поел</span></div>
         <div class="g2" id="acc-grid"></div>
       </div>
 
@@ -988,7 +988,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo</span></div>
+        <div class="bi"><span class="bi-ru">Photo</span><span class="bi-en">/ Фото</span></div>
         <label class="photo-btn">
           📷 Добавить фото / Add photo
           <input type="file" accept="image/*" multiple id="s-photos" onchange="onPhotosPicked(event,'solids')">
@@ -997,8 +997,8 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Текстовая заметка</span><span class="bi-en">/ Note</span></div>
-        <textarea class="note-inp" id="s-note" rows="2" placeholder="Морщился, но съел / Made faces but ate it"></textarea>
+        <div class="bi"><span class="bi-ru">Note</span><span class="bi-en">/ Текстовая заметка</span></div>
+        <textarea class="note-inp" id="s-note" rows="2" placeholder="Made faces but ate it / Морщился, но съел"></textarea>
       </div>
 
       <!-- скрытые элементы для совместимости с saveSolids (реакции и голос перенесены в Итог дня) -->
@@ -1019,10 +1019,10 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
     <div class="child-tabs inline-tabs">
       <button class="ctab lev active" id="htab-lev" onclick="setChild('lev')">
-        <span class="ctab-main">Лев</span><span class="ctab-sub">Lev</span>
+        <span class="ctab-main">Lev</span><span class="ctab-sub">Лев</span>
       </button>
       <button class="ctab mark" id="htab-mark" onclick="setChild('mark')">
-        <span class="ctab-main">Марк</span><span class="ctab-sub">Mark</span>
+        <span class="ctab-main">Mark</span><span class="ctab-sub">Марк</span>
       </button>
     </div>
 
@@ -1039,10 +1039,10 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 <!-- Bottom nav -->
 <nav class="bnav">
   <button class="active" data-nav="home" onclick="goView('home')">
-    <span class="nv-ico">🏠</span><span class="nv-ru">Главная</span><span class="nv-en">Home</span>
+    <span class="nv-ico">🏠</span><span class="nv-ru">Home</span><span class="nv-en">Главная</span>
   </button>
   <button data-nav="history" onclick="goView('history')">
-    <span class="nv-ico">📊</span><span class="nv-ru">История</span><span class="nv-en">History</span>
+    <span class="nv-ico">📊</span><span class="nv-ru">History</span><span class="nv-en">История</span>
   </button>
 </nav>
 
@@ -1147,10 +1147,10 @@ const SLEEPS = [
 
 // Meds schedule per dose-time card
 // Обоим детям одинаковая доза Мальтофера (изменили с 4/7 на 7/7 капель)
-const MED_DOSE = (_c) => '7 капель / 7 drops';
+const MED_DOSE = (_c) => '7 drops / 7 капель';
 const MED_SCHEDULE = {
   morning:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)},
-              {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ таб / ¼ tab'}],
+              {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ tab / ¼ таб'}],
   afternoon: [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
   evening:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
 };
@@ -1223,7 +1223,7 @@ function setDateStrip(){
   const n = new Date();
   const ru = n.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
   const en = n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('date-strip').textContent = ru.charAt(0).toUpperCase()+ru.slice(1)+'  ·  '+en;
+  document.getElementById('date-strip').textContent = en+'  ·  '+ru.charAt(0).toUpperCase()+ru.slice(1);
 }
 function fmtFullDate(){
   const n = new Date();
@@ -1279,13 +1279,13 @@ function toggleMode(){
   if (mode==='parents'){
     b.classList.add('on');
     document.getElementById('mode-ico').textContent = '👨‍👩‍👦';
-    document.getElementById('mode-lbl').textContent = 'Родители / Parents';
+    document.getElementById('mode-lbl').textContent = 'Parents / Родители';
     historySub='profile';
     goView('history'); renderHistorySubs();
   } else {
     b.classList.remove('on');
     document.getElementById('mode-ico').textContent = '👶';
-    document.getElementById('mode-lbl').textContent = 'Няня / Nanny';
+    document.getElementById('mode-lbl').textContent = 'Nanny / Няня';
     goView('home');
   }
 }
@@ -1321,8 +1321,8 @@ window.renderChildPick = function(v){
   pick.innerHTML = `
     <div class="child-pick-hint">Кто? <span>Choose child</span></div>
     <div class="child-pick">
-      <button class="cp-btn lev" onclick="chooseChild('lev','${v}')"><span class="cp-ava">👶</span><span class="cp-ru">Лев</span><span class="cp-en">Lev</span></button>
-      <button class="cp-btn mark" onclick="chooseChild('mark','${v}')"><span class="cp-ava">👶</span><span class="cp-ru">Марк</span><span class="cp-en">Mark</span></button>
+      <button class="cp-btn lev" onclick="chooseChild('lev','${v}')"><span class="cp-ava">👶</span><span class="cp-ru">Lev</span><span class="cp-en">Лев</span></button>
+      <button class="cp-btn mark" onclick="chooseChild('mark','${v}')"><span class="cp-ava">👶</span><span class="cp-ru">Mark</span><span class="cp-en">Марк</span></button>
     </div>`;
 };
 
@@ -1336,8 +1336,9 @@ window.chooseChild = function(c, v){
   const cur = document.getElementById(v+'-cur');
   if (cur){
     const ru = c==='lev'?'Лев':'Марк', en = c==='lev'?'Lev':'Mark';
-    cur.innerHTML = `<span class="cc-badge ${c}">👶 ${ru} / ${en}</span>
-      <button class="cc-switch" onclick="renderChildPick('${v}')">↔ Сменить / Switch</button>`;
+    // EN-first label for nanny clarity (en is primary, ru is parenthetical)
+    cur.innerHTML = `<span class="cc-badge ${c}">👶 ${en} / ${ru}</span>
+      <button class="cc-switch" onclick="renderChildPick('${v}')">↔ Switch / Сменить</button>`;
   }
   updateSaveBar();
   if (v==='feeding') resetFeedingForm();
@@ -1374,11 +1375,11 @@ function updateSaveBar(){
   const sb = document.getElementById('save-btn');
   const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water','stool','weight'].includes(view);
   w.style.display = show ? 'block' : 'none';
-  if (view==='feeding')      sb.textContent = '💾 Сохранить кормление · Save feeding';
-  else if (view==='solids')  sb.textContent = '💾 Сохранить прикорм · Save solids';
-  else if (view==='water')   sb.textContent = '💾 Сохранить питьё · Save water';
-  else if (view==='stool')   sb.textContent = '💩 Записать стул · Save stool';
-  else if (view==='weight')  sb.textContent = '⚖️ Сохранить вес · Save weight';
+  if (view==='feeding')      sb.textContent = 'Save feeding · 💾 Сохранить кормление';
+  else if (view==='solids')  sb.textContent = 'Save solids · 💾 Сохранить прикорм';
+  else if (view==='water')   sb.textContent = 'Save water · 💾 Сохранить питьё';
+  else if (view==='stool')   sb.textContent = 'Save stool · 💩 Записать стул';
+  else if (view==='weight')  sb.textContent = 'Save weight · ⚖️ Сохранить вес';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1464,7 +1465,7 @@ function resetFeedingForm(){
   document.getElementById('stool-no').className = '';
   document.getElementById('stool-detail').style.display = 'none';
   const vt = document.getElementById('f-vtrans');
-  if (vt){ vt.textContent='Голосовая заметка появится здесь · Voice note will appear here'; vt.className='vtrans emp'; }
+  if (vt){ vt.textContent='Voice note will appear here · Голосовая заметка появится здесь'; vt.className='vtrans emp'; }
   document.getElementById('f-photo-preview').innerHTML='';
   renderAllChips(); updateTotal();
 }
@@ -1537,7 +1538,7 @@ function renderAccs(){
   ACCS.forEach(a => {
     const d = document.createElement('div');
     d.className = 'acc' + (sSel.accept===a.k ? ' '+sc() : '');
-    d.innerHTML = `<span class="a-ico">${a.ico}</span><span class="a-ru">${a.ru}</span><span class="a-en">${a.en}</span>`;
+    d.innerHTML = `<span class="a-ico">${a.ico}</span><span class="a-ru">${a.en}</span><span class="a-en">${a.ru}</span>`;
     d.onclick = () => { sSel.accept = sSel.accept===a.k ? null : a.k; renderAccs(); };
     g.appendChild(d);
   });
@@ -1548,7 +1549,7 @@ function renderReas(){
     const on = sSel.reactions.has(r.k);
     const d = document.createElement('div');
     d.className = 'rea' + (on ? ' s-'+r.cls : '');
-    d.innerHTML = `<span class="r-ru">${r.ru}</span><span class="r-en">${r.en}</span>`;
+    d.innerHTML = `<span class="r-ru">${r.en}</span><span class="r-en">${r.ru}</span>`;
     d.onclick = () => { on ? sSel.reactions.delete(r.k) : sSel.reactions.add(r.k); renderReas(); };
     g.appendChild(d);
   });
@@ -1559,7 +1560,7 @@ function resetSolidsForm(){
   document.getElementById('s-time').value = nowHHMM();
   document.getElementById('chk-new').checked = false;
   const vt = document.getElementById('s-vtrans');
-  if (vt){ vt.textContent='Голосовая заметка появится здесь · Voice note will appear here'; vt.className='vtrans emp'; }
+  if (vt){ vt.textContent='Voice note will appear here · Голосовая заметка появится здесь'; vt.className='vtrans emp'; }
   document.getElementById('s-photo-preview').innerHTML='';
   renderAmts(); renderAccs(); renderReas();
 }
@@ -1585,15 +1586,15 @@ async function saveFeeding(){
   const voiceNote = vt.classList.contains('emp') ? '' : vt.textContent.trim();
 
   if (kab===0 && nut===0 && water===0 && fForm.stool===null && !note && !voiceNote && fForm.photos.length===0){
-    showToast('Заполните хоть одно поле / Fill at least one field'); return;
+    showToast('Fill at least one field / Заполните хоть одно поле'); return;
   }
 
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const id = newId();
   let photoUrls = [];
   if (fForm.photos.length){
-    btn.textContent = 'Загрузка фото... / Uploading photos...';
+    btn.textContent = 'Uploading photos... / Загрузка фото...';
     photoUrls = await uploadPhotos(fForm.photos, 'formula', id);
   }
 
@@ -1608,20 +1609,20 @@ async function saveFeeding(){
     note, voice_note: voiceNote,
   };
   const { error } = await db.from(T_FORMULA).insert([entry]);
-  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
-  else { showToast('Сохранено ✓ / Saved ✓'); resetFeedingForm(); goHome(); }
-  btn.disabled = false; btn.textContent = '💾 Сохранить кормление · Save feeding';
+  if (error){ showToast('Error: / Ошибка'+error.message); console.error(error); }
+  else { showToast('Saved ✓ / Сохранено ✓'); resetFeedingForm(); goHome(); }
+  btn.disabled = false; btn.textContent = 'Save feeding · 💾 Сохранить кормление';
 }
 
 async function saveSolids(){
   const product = document.getElementById('s-product').value.trim();
-  if (!product){ document.getElementById('s-product').focus(); showToast('Укажите продукт / Enter food'); return; }
+  if (!product){ document.getElementById('s-product').focus(); showToast('Enter food / Укажите продукт'); return; }
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const id = newId();
   let photoUrls = [];
   if (sSel.photos.length){
-    btn.textContent = 'Загрузка фото... / Uploading photos...';
+    btn.textContent = 'Uploading photos... / Загрузка фото...';
     photoUrls = await uploadPhotos(sSel.photos, 'solids', id);
   }
   const vt = document.getElementById('s-vtrans');
@@ -1639,9 +1640,9 @@ async function saveSolids(){
     photo_urls: photoUrls,
   };
   const { error } = await db.from(T_SOLIDS).insert([entry]);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); }
-  else { showToast('Сохранено ✓ / Saved ✓'); resetSolidsForm(); goHome(); }
-  btn.disabled = false; btn.textContent = '💾 Сохранить прикорм · Save solids';
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); }
+  else { showToast('Saved ✓ / Сохранено ✓'); resetSolidsForm(); goHome(); }
+  btn.disabled = false; btn.textContent = 'Save solids · 💾 Сохранить прикорм';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1676,18 +1677,18 @@ function resetWaterForm(){
 }
 async function saveWater(){
   const ml = wSel.ml || parseInt(document.getElementById('wa-ml').value,10) || 0;
-  if (!ml){ showToast('Укажите объём / Enter amount'); return; }
+  if (!ml){ showToast('Enter amount / Укажите объём'); return; }
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const entry = {
     child, date: todayISO(),
     time: document.getElementById('wa-time').value || nowHHMM(),
     ml, note: document.getElementById('wa-note').value.trim(),
   };
   const { error } = await db.from(T_WATER).insert([entry]);
-  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
-  else { showToast('Сохранено ✓ / Saved ✓'); resetWaterForm(); goHome(); }
-  btn.disabled = false; btn.textContent = '💾 Сохранить питьё · Save water';
+  if (error){ showToast('Error: / Ошибка'+error.message); console.error(error); }
+  else { showToast('Saved ✓ / Сохранено ✓'); resetWaterForm(); goHome(); }
+  btn.disabled = false; btn.textContent = 'Save water · 💾 Сохранить питьё';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1732,14 +1733,14 @@ function resetStoolOnlyForm(){
 }
 async function saveStoolOnly(){
   if (!soForm.color && !soForm.cons && soForm.photos.length===0){
-    showToast('Выбери цвет или консистенцию / Pick color or consistency'); return;
+    showToast('Pick color or consistency / Выбери цвет или консистенцию'); return;
   }
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const id = newId();
   let photoUrls = [];
   if (soForm.photos.length){
-    btn.textContent = 'Загрузка фото... / Uploading photos...';
+    btn.textContent = 'Uploading photos... / Загрузка фото...';
     photoUrls = await uploadPhotos(soForm.photos, 'stool', id);
   }
   const entry = {
@@ -1755,9 +1756,9 @@ async function saveStoolOnly(){
     voice_note: '',
   };
   const { error } = await db.from(T_FORMULA).insert([entry]);
-  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
-  else { showToast('Стул записан ✓ / Stool saved ✓'); resetStoolOnlyForm(); goHome(); }
-  btn.disabled = false; btn.textContent = '💾 Записать стул · Save stool';
+  if (error){ showToast('Error: / Ошибка'+error.message); console.error(error); }
+  else { showToast('Stool saved ✓ / Стул записан ✓'); resetStoolOnlyForm(); goHome(); }
+  btn.disabled = false; btn.textContent = 'Save stool · 💾 Записать стул';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1782,27 +1783,27 @@ async function renderWeightList(){
     </div>`).join('');
 }
 window.delWeight = async function(id){
-  if (!confirm('Удалить замер? / Delete measurement?')) return;
+  if (!confirm('Delete measurement? / Удалить замер?')) return;
   const { error } = await db.from(T_WEIGHT).delete().eq('id', id);
-  if (!error){ showToast('Удалено / Deleted'); renderWeightList(); }
+  if (!error){ showToast('Deleted / Удалено'); renderWeightList(); }
 };
 async function saveWeight(){
   const date = document.getElementById('we-date').value;
   const time = document.getElementById('we-time').value;
   const kg   = parseFloat(document.getElementById('we-kg').value);
-  if (!date || !kg || isNaN(kg)){ showToast('Заполни дату и вес / Fill date & weight'); return; }
+  if (!date || !kg || isNaN(kg)){ showToast('Fill date & weight / Заполни дату и вес'); return; }
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const { error } = await db.from(T_WEIGHT).insert([{
     id: newId(), child, date, time, weight_kg: kg
   }]);
-  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
+  if (error){ showToast('Error: / Ошибка'+error.message); console.error(error); }
   else {
-    showToast('Вес сохранён ✓ / Weight saved ✓');
+    showToast('Weight saved ✓ / Вес сохранён ✓');
     resetWeightForm();
     renderWeightList();
   }
-  btn.disabled = false; btn.textContent = '⚖️ Сохранить вес · Save weight';
+  btn.disabled = false; btn.textContent = 'Save weight · ⚖️ Сохранить вес';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1818,24 +1819,24 @@ function resetSleepForm(){
   ['sl-start','sl-end','sl-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
 }
 async function sleepNow(){
-  if (await getOpenSleep()){ showToast('Уже спит / Already asleep'); return; }
+  if (await getOpenSleep()){ showToast('Already asleep / Уже спит'); return; }
   const { error } = await db.from(T_SLEEP).insert([{
     child, date: todayISO(), start_time: new Date().toISOString(), end_time: null, note: ''
   }]);
-  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); return; }
-  showToast('Заснул ✓ / Asleep ✓'); renderSleepList();
+  if (error){ showToast('Error: / Ошибка'+error.message); console.error(error); return; }
+  showToast('Asleep ✓ / Заснул ✓'); renderSleepList();
 }
 async function wakeNow(){
   const open = await getOpenSleep();
-  if (!open){ showToast('Нет открытого сна / No open sleep'); return; }
+  if (!open){ showToast('No open sleep / Нет открытого сна'); return; }
   const { error } = await db.from(T_SLEEP).update({ end_time: new Date().toISOString() }).eq('id', open.id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
-  showToast('Проснулся ✓ / Woke up ✓'); renderSleepList();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); return; }
+  showToast('Woke up ✓ / Проснулся ✓'); renderSleepList();
 }
 async function addSleepManual(){
   const sv = document.getElementById('sl-start').value;
   const ev = document.getElementById('sl-end').value;
-  if (!sv){ showToast('Укажите время засыпания / Enter start time'); return; }
+  if (!sv){ showToast('Enter start time / Укажите время засыпания'); return; }
   const d = todayISO();
   const start = new Date(d+'T'+sv+':00');
   let end = null;
@@ -1845,8 +1846,8 @@ async function addSleepManual(){
     end_time: end ? end.toISOString() : null,
     note: document.getElementById('sl-note').value.trim(),
   }]);
-  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); return; }
-  showToast('Интервал добавлен ✓ / Added ✓'); resetSleepForm(); renderSleepList();
+  if (error){ showToast('Error: / Ошибка'+error.message); console.error(error); return; }
+  showToast('Added ✓ / Интервал добавлен ✓'); resetSleepForm(); renderSleepList();
 }
 function sleepDurMin(e){ return (e.start_time && e.end_time) ? Math.max(0,(new Date(e.end_time)-new Date(e.start_time))/60000) : 0; }
 async function renderSleepList(){
@@ -1869,7 +1870,7 @@ async function renderSleepList(){
   if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">Нет интервалов / No intervals</div>'; return; }
   root.innerHTML = list.map(e => {
     const timeStr = e.end_time ? `${tsHHMM(e.start_time)} – ${tsHHMM(e.end_time)}` : `${tsHHMM(e.start_time)} – …`;
-    const durStr  = e.end_time ? fmtDur(sleepDurMin(e)) : 'спит сейчас / asleep';
+    const durStr  = e.end_time ? fmtDur(sleepDurMin(e)) : 'asleep / спит сейчас';
     return `<div class="sleep-list-item">
       <div>
         <div class="sli-time">${timeStr}</div>
@@ -1883,7 +1884,7 @@ async function renderSleepList(){
   }).join('');
 }
 window.delSleep = async function(id){
-  if (!confirm('Удалить интервал? / Delete interval?')) return;
+  if (!confirm('Delete interval? / Удалить интервал?')) return;
   await db.from(T_SLEEP).delete().eq('id', id);
   renderSleepList();
 };
@@ -1891,9 +1892,9 @@ window.editSleepInline = async function(id){
   const { data } = await db.from(T_SLEEP).select('*').eq('id',id).limit(1);
   if (!data || !data.length) return;
   const e = data[0];
-  const ns = prompt('Заснул (ЧЧ:ММ) / From (HH:MM):', tsHHMM(e.start_time));
+  const ns = prompt('From (HH:MM): / Заснул (ЧЧ:ММ)', tsHHMM(e.start_time));
   if (ns===null) return;
-  const ne = prompt('Проснулся (ЧЧ:ММ, пусто = ещё спит) / To (HH:MM, empty = still asleep):', e.end_time?tsHHMM(e.end_time):'');
+  const ne = prompt('To (HH:MM, empty = still asleep): / Проснулся (ЧЧ:ММ, пусто = ещё спит)', e.end_time?tsHHMM(e.end_time):'');
   if (ne===null) return;
   const d = e.date || todayISO();
   const start = new Date(d+'T'+ns+':00');
@@ -1902,7 +1903,7 @@ window.editSleepInline = async function(id){
   const { error } = await db.from(T_SLEEP).update({
     start_time: start.toISOString(), end_time: end ? end.toISOString() : null
   }).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
   renderSleepList();
 };
 
@@ -1914,7 +1915,7 @@ function openEod(){
   document.getElementById('eod-concerns').value='';
   document.getElementById('eod-note').value='';
   const vt = document.getElementById('eod-vtrans');
-  if (vt){ vt.textContent='Голосовая заметка появится здесь · Voice note will appear here'; vt.className='vtrans emp'; }
+  if (vt){ vt.textContent='Voice note will appear here · Голосовая заметка появится здесь'; vt.className='vtrans emp'; }
   document.getElementById('eod-save').className='save-btn '+child;
   renderEodGrids();
   loadExistingEod();
@@ -1932,8 +1933,8 @@ async function refreshEodView(){
     const sleepObj = SLEEPS.find(s=>s.k===e.sleep);
     v.innerHTML = `<div class="card" style="font-size:13px;line-height:1.5">
       <div style="font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Сохранённый итог · Saved summary</div>
-      ${moodObj?`<div>${moodObj.ico} ${moodObj.ru} / ${moodObj.en}</div>`:''}
-      ${sleepObj?`<div>${sleepObj.ico} ${sleepObj.ru} / ${sleepObj.en}</div>`:''}
+      ${moodObj?`<div>${moodObj.ico} ${moodObj.en} / ${moodObj.ru}</div>`:''}
+      ${sleepObj?`<div>${sleepObj.ico} ${sleepObj.en} / ${sleepObj.ru}</div>`:''}
       ${e.concerns?`<div style="color:var(--bad);margin-top:4px">⚠️ ${escH(e.concerns)}</div>`:''}
       ${e.nanny_note?`<div style="color:var(--muted);margin-top:4px;font-style:italic">💬 ${escH(e.nanny_note)}</div>`:''}
     </div>`;
@@ -1943,7 +1944,7 @@ function renderEodGrids(){
   const m = document.getElementById('eod-mood');
   m.innerHTML = MOODS.map(x => `
     <div class="acc${eodSel.mood===x.k?' '+sc():''}" data-mood="${x.k}">
-      <span class="a-ico">${x.ico}</span><span class="a-ru">${x.ru}</span><span class="a-en">${x.en}</span>
+      <span class="a-ico">${x.ico}</span><span class="a-ru">${x.en}</span><span class="a-en">${x.ru}</span>
     </div>`).join('');
   m.querySelectorAll('[data-mood]').forEach(el => {
     el.onclick = () => { eodSel.mood = eodSel.mood===el.dataset.mood ? null : el.dataset.mood; renderEodGrids(); };
@@ -1951,7 +1952,7 @@ function renderEodGrids(){
   const s = document.getElementById('eod-sleep');
   s.innerHTML = SLEEPS.map(x => `
     <div class="acc${eodSel.sleep===x.k?' '+sc():''}" data-sleep="${x.k}">
-      <span class="a-ico">${x.ico}</span><span class="a-ru">${x.ru}</span><span class="a-en">${x.en}</span>
+      <span class="a-ico">${x.ico}</span><span class="a-ru">${x.en}</span><span class="a-en">${x.ru}</span>
     </div>`).join('');
   s.querySelectorAll('[data-sleep]').forEach(el => {
     el.onclick = () => { eodSel.sleep = eodSel.sleep===el.dataset.sleep ? null : el.dataset.sleep; renderEodGrids(); };
@@ -1961,7 +1962,7 @@ function renderEodGrids(){
     r.innerHTML = REAS.map(x => {
       const on = eodSel.reactions.has(x.k);
       return `<div class="rea${on?' s-'+x.cls:''}" data-rea="${x.k}">
-        <span class="r-ru">${x.ru}</span><span class="r-en">${x.en}</span>
+        <span class="r-ru">${x.en}</span><span class="r-en">${x.ru}</span>
       </div>`;
     }).join('');
     r.querySelectorAll('[data-rea]').forEach(el => {
@@ -2000,8 +2001,8 @@ async function saveEod(){
     voice_note: voiceNote,
   };
   const { error } = await db.from(T_SUMMARY).insert([entry]);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
-  showToast('Итог дня сохранён ✓ / Summary saved ✓');
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); return; }
+  showToast('Summary saved ✓ / Итог дня сохранён ✓');
   goHome();
 }
 
@@ -2011,15 +2012,15 @@ async function saveEod(){
 function fmtDur(min){
   min = Math.round(min);
   const h = Math.floor(min/60), m = min%60;
-  if (h && m) return h+'ч '+m+'м';
-  if (h) return h+'ч';
-  return m+'м';
+  if (h && m) return h+'h '+m+'m';
+  if (h) return h+'h';
+  return m+'m';
 }
 function tsHHMM(ts){ return ts ? new Date(ts).toTimeString().slice(0,5) : ''; }
 
 async function renderHome(){
   const hd = document.getElementById('home-date');
-  if (hd){ const f = fmtFullDate(); hd.innerHTML = `<div class="hd-ru">${f.ru}</div><div class="hd-en">${f.en}</div>`; }
+  if (hd){ const f = fmtFullDate(); hd.innerHTML = `<div class="hd-ru">${f.en}</div><div class="hd-en">${f.ru}</div>`; }
   const root = document.getElementById('dual-summary');
   if (!root) return;
   const today = todayISO();
@@ -2054,22 +2055,29 @@ async function renderHome(){
   };
   const D = { lev: col('lev'), mark: col('mark') };
 
-  const cFeed  = d => d.fCount ? `${d.fCount} раз<small>${d.kab+d.nut} мл · K${d.kab}+N${d.nut}</small>` : '—';
-  const cWater = d => d.wMl ? `${d.wMl} мл` : '—';
-  const cSolid = d => d.lastSolid ? `${escH((d.lastSolid.product||'').split(' / ')[0])}<small>${escH(d.lastSolid.time||'')}</small>` : '—';
+  const cFeed  = d => d.fCount ? `${d.fCount} ${d.fCount===1?'time':'times'}<small>${d.kab+d.nut} ml · K${d.kab}+N${d.nut}</small>` : '—';
+  const cWater = d => d.wMl ? `${d.wMl} ml` : '—';
+  // for the solids product, prefer the EN side (after " / ") when present
+  const cSolid = d => {
+    if (!d.lastSolid) return '—';
+    const parts = (d.lastSolid.product||'').split(' / ');
+    const display = parts.length > 1 ? parts[1] : parts[0];
+    return `${escH(display)}<small>${escH(d.lastSolid.time||'')}</small>`;
+  };
   const cMeds  = d => `${d.given} / ${totalExp}`;
-  const cStool = d => d.poo ? `${d.poo} раз` : 'нет';
+  const cStool = d => d.poo ? `${d.poo} ${d.poo===1?'time':'times'}` : 'no';
   const cSleep = d => {
     if (!d.slCount) return '—';
     let sub = '';
-    if (d.last){ sub = d.last.end_time ? tsHHMM(d.last.start_time)+'–'+tsHHMM(d.last.end_time) : 'спит с '+tsHHMM(d.last.start_time); }
+    if (d.last){ sub = d.last.end_time ? tsHHMM(d.last.start_time)+'–'+tsHHMM(d.last.end_time) : 'sleeping since '+tsHHMM(d.last.start_time); }
     return `${fmtDur(d.totalMin)}<small>${sub}</small>`;
   };
-  const row = (label, en, fn) => {
+  // English label is primary (for nannies), Russian is secondary
+  const row = (ru, en, fn) => {
     const lv = fn(D.lev), mv = fn(D.mark);
     const cls = v => v==='—' ? 'dr-v empty-v' : 'dr-v';
     return `<div class="dual-row">
-      <div class="dr-l">${label}<span>${en}</span></div>
+      <div class="dr-l">${en}<span>${ru}</span></div>
       <div class="${cls(lv)} lev">${lv}</div>
       <div class="${cls(mv)} mark">${mv}</div>
     </div>`;
@@ -2078,15 +2086,15 @@ async function renderHome(){
   root.innerHTML = `
     <div class="dual-head">
       <div></div>
-      <div class="dh lev">Лев<span>Lev</span></div>
-      <div class="dh mark">Марк<span>Mark</span></div>
+      <div class="dh lev">Lev<span>Лев</span></div>
+      <div class="dh mark">Mark<span>Марк</span></div>
     </div>
-    ${row('🍼 Кормления','Feeding', cFeed)}
-    ${row('💧 Питьё','Water', cWater)}
-    ${row('🥦 Прикорм','Solids', cSolid)}
-    ${row('💊 Лекарства','Meds', cMeds)}
-    ${row('💩 Стул','Stool', cStool)}
-    ${row('😴 Сон','Sleep', cSleep)}
+    ${row('🍼 Кормления','🍼 Feeding', cFeed)}
+    ${row('💧 Питьё','💧 Water', cWater)}
+    ${row('🥦 Прикорм','🥦 Solids', cSolid)}
+    ${row('💊 Лекарства','💊 Meds', cMeds)}
+    ${row('💩 Стул','💩 Stool', cStool)}
+    ${row('😴 Сон','😴 Sleep', cSleep)}
   `;
 }
 
@@ -2138,7 +2146,7 @@ async function renderMeds(){
       html += `<div class="med-row${given?' given':''}" onclick="toggleMed('${m.k}','${dt}')">
         <div class="mr-icon">${m.ico}</div>
         <div>
-          <div class="mr-name">${m.ru} ${m.dose(child)}<span class="en">${m.en}</span></div>
+          <div class="mr-name">${m.en} ${m.dose(child)}<span class="en">${m.en}</span></div>
         </div>
         <div class="mr-status">${given ? '✅ '+e.given_at : '⬜ Не дано<br>Not given'}</div>
       </div>`;
@@ -2224,7 +2232,7 @@ async function renderHistoryByDay(root){
     bodyHtml = events.map(ev => renderTimelineEntry(ev)).join('');
   }
   const exportBar = `<div class="export-bar">
-    <div class="bi"><span class="bi-ru">Экспорт за период</span><span class="bi-en">/ Export period</span></div>
+    <div class="bi"><span class="bi-ru">Export period</span><span class="bi-en">/ Экспорт за период</span></div>
     <div class="export-period">
       ${[7,14,30].map(p=>`<button class="${exportPeriod===p?'on':''}" onclick="setExportPeriod(${p})">${p} дн</button>`).join('')}
       <button class="${exportPeriod==='all'?'on':''}" onclick="setExportPeriod('all')">Всё / All</button>
@@ -2240,7 +2248,7 @@ window.exportPDF = async function(){
   const start = new Date(); start.setDate(start.getDate()-(days-1));
   const startISO = dateISO(start);
   const endISO = todayISO();
-  showToast('Готовлю PDF... / Preparing...');
+  showToast('Preparing... / Готовлю PDF...');
   const [F,M,S,DS,WA,SL] = await Promise.all([
     db.from(T_FORMULA).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
     db.from(T_MEDS   ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
@@ -2260,8 +2268,8 @@ window.exportPDF = async function(){
   const byDate = {};
   ev.forEach(x=>{ (byDate[x.date]=byDate[x.date]||[]).push(x); });
   const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
-  const childName = child==='lev'?'Лев / Lev':'Марк / Mark';
-  const periodLbl = exportPeriod==='all'?'всё время / all time':exportPeriod+' дней / days';
+  const childName = child==='lev'?'Lev / Лев':'Mark / Марк';
+  const periodLbl = exportPeriod==='all'?'all time / всё время':exportPeriod+'days / дней';
 
   let bodyH = '';
   if (!dates.length) bodyH = '<p>Нет записей за период. / No entries for this period.</p>';
@@ -2288,7 +2296,7 @@ window.exportPDF = async function(){
   </body></html>`;
 
   const w = window.open('', '_blank');
-  if (!w){ showToast('Разрешите всплывающие окна / Allow popups'); return; }
+  if (!w){ showToast('Allow popups / Разрешите всплывающие окна'); return; }
   w.document.write(html); w.document.close();
   setTimeout(()=>{ try { w.focus(); w.print(); } catch(_){} }, 600);
 };
@@ -2306,14 +2314,14 @@ function renderTimelineEntry(ev){
       // standalone stool entry = no formula ml AND stool=true
       const isStoolOnly = total===0 && !e.water_ml && e.stool;
       if (isStoolOnly){
-        kindLbl = '💩 Стул / Stool';
+        kindLbl = 'Stool / 💩 Стул';
         const c = STOOL_COLORS.find(x=>x.k===e.stool_color);
         const cs = STOOL_CONS.find(x=>x.k===e.stool_consistency);
-        title = [c?c.ico+' '+c.ru:'', cs?cs.ru:''].filter(Boolean).join(' · ') || 'Стул / Stool';
+        title = [c?c.ico+' '+c.ru:'', cs?cs.ru:''].filter(Boolean).join(' · ') || 'Stool / Стул';
         sub = [c?c.en:'', cs?cs.en:''].filter(Boolean).join(' · ');
       } else {
-        kindLbl = '🍼 Кормление / Feeding';
-        title = total>0 ? `${total} мл смеси / ml formula` : 'Кормление / Feeding';
+        kindLbl = 'Feeding / 🍼 Кормление';
+        title = total>0 ? `${total} мл смеси / ml formula` : 'Feeding / Кормление';
         const parts = [];
         if (e.kabrita_ml) parts.push(`KABRITA ${e.kabrita_ml}мл`);
         if (e.nutrilon_ml) parts.push(`NUTRILON ${e.nutrilon_ml}мл`);
@@ -2328,12 +2336,12 @@ function renderTimelineEntry(ev){
       break;
     }
     case 'water':{
-      kindLbl = '💧 Питьё / Water';
+      kindLbl = 'Water / 💧 Питьё';
       title = `${e.ml||0} мл / ml`;
       break;
     }
     case 'sleep':{
-      kindLbl = '😴 Сон / Sleep';
+      kindLbl = 'Sleep / 😴 Сон';
       title = e.end_time
         ? `${tsHHMM(e.start_time)} – ${tsHHMM(e.end_time)}`
         : `Заснул в ${tsHHMM(e.start_time)} · спит / asleep`;
@@ -2341,36 +2349,36 @@ function renderTimelineEntry(ev){
       break;
     }
     case 'med':{
-      kindLbl = '💊 Лекарство / Medication';
+      kindLbl = 'Medication / 💊 Лекарство';
       const m = (MED_SCHEDULE.morning.concat(MED_SCHEDULE.afternoon,MED_SCHEDULE.evening))
                   .find(x=>x.k===e.medication);
-      title = m ? `${m.ru} ${m.dose(child)}` : e.medication;
+      title = m ? `${m.en} ${m.dose(child)}` : e.medication;
       sub = `${DOSE_TIME_LBL[e.dose_time]?.ru || e.dose_time} — ${m?m.en:''}`;
       break;
     }
     case 'solids':{
-      kindLbl = '🥦 Прикорм / Solids';
+      kindLbl = 'Solids / 🥦 Прикорм';
       title = e.product;
       const a = AMTS.find(x=>x.v===e.amount);
       const ac = ACCS.find(x=>x.k===e.accept);
-      sub = [a?`${a.ru} / ${a.en}`:'', ac?`${ac.ico} ${ac.ru}`:''].filter(Boolean).join(' · ');
+      sub = [a?`${a.en} / ${a.ru}`:'', ac?`${ac.ico} ${ac.ru}`:''].filter(Boolean).join(' · ');
       if (e.is_new) pills += `<span class="pill p-warn">★ Новый / New</span>`;
       (e.reactions||[]).forEach(rk => {
         const r = REAS.find(x=>x.k===rk);
-        if (r) pills += `<span class="pill p-${r.cls}">${r.ru} / ${r.en}</span>`;
+        if (r) pills += `<span class="pill p-${r.cls}">${r.en} / ${r.ru}</span>`;
       });
       break;
     }
     case 'weight':{
-      kindLbl = '⚖️ Вес / Weight';
+      kindLbl = 'Weight / ⚖️ Вес';
       title = `${e.weight_kg} кг / kg`;
       break;
     }
     case 'summary':{
-      kindLbl = '🌙 Итог дня / Daily summary';
+      kindLbl = 'Daily summary / 🌙 Итог дня';
       const moodObj = MOODS.find(m=>m.k===e.mood);
       const sleepObj = SLEEPS.find(s=>s.k===e.sleep);
-      title = [moodObj?moodObj.ico+' '+moodObj.ru:'', sleepObj?sleepObj.ico+' '+sleepObj.ru:''].filter(Boolean).join(' · ') || 'Итог / Summary';
+      title = [moodObj?moodObj.ico+' '+moodObj.ru:'', sleepObj?sleepObj.ico+' '+sleepObj.ru:''].filter(Boolean).join(' · ') || 'Summary / Итог';
       if (e.concerns) sub = '⚠️ '+e.concerns;
       (e.reactions||[]).forEach(rk => {
         const r = REAS.find(x=>x.k===rk);
@@ -2414,7 +2422,7 @@ window.openEdit = function(kind, id){ expandedEdit = kind+':'+id; editBuf = {}; 
 window.cancelEdit = function(){ expandedEdit = null; editBuf = {}; renderHistory(); };
 
 window.delEntry = async function(kind, id){
-  if (!confirm('Удалить запись? / Delete entry?')) return;
+  if (!confirm('Delete entry? / Удалить запись?')) return;
   const t = kind==='formula'?T_FORMULA : kind==='med'?T_MEDS : kind==='solids'?T_SOLIDS
           : kind==='weight'?T_WEIGHT : kind==='water'?T_WATER : kind==='sleep'?T_SLEEP : T_SUMMARY;
   await db.from(t).delete().eq('id', id);
@@ -2433,11 +2441,11 @@ function buildEditBlock(kind, e){
 }
 function buildEditWater(e){
   return `<div class="te-edit">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span><span class="bi-en">/ Time</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Time</span><span class="bi-en">/ Время</span></div>
       <input type="time" class="edit-mini-inp" id="ewa-time-${e.id}" value="${e.time||''}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Объём мл</span><span class="bi-en">/ ml</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">ml</span><span class="bi-en">/ Объём мл</span></div>
       <input type="number" inputmode="numeric" class="edit-mini-inp" id="ewa-ml-${e.id}" value="${e.ml||0}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Note</span><span class="bi-en">/ Заметка</span></div>
       <textarea class="edit-ta" id="ewa-note-${e.id}">${escH(e.note||'')}</textarea></div>
     <div class="edit-actions">
       <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
@@ -2452,17 +2460,17 @@ window.saveEditWater = async (id) => {
     note: document.getElementById('ewa-note-'+id).value.trim(),
   };
   const { error } = await db.from(T_WATER).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
-  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓'); expandedEdit=null; renderHistory();
 };
 function buildEditSleepHist(e){
   const d = e.date || todayISO();
   return `<div class="te-edit">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заснул</span><span class="bi-en">/ From</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">From</span><span class="bi-en">/ Заснул</span></div>
       <input type="time" class="edit-mini-inp" id="esl-start-${e.id}" value="${tsHHMM(e.start_time)}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Проснулся (пусто = спит)</span><span class="bi-en">/ To (empty = asleep)</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">To (empty = asleep)</span><span class="bi-en">/ Проснулся (пусто = спит)</span></div>
       <input type="time" class="edit-mini-inp" id="esl-end-${e.id}" value="${e.end_time?tsHHMM(e.end_time):''}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Note</span><span class="bi-en">/ Заметка</span></div>
       <textarea class="edit-ta" id="esl-note-${e.id}">${escH(e.note||'')}</textarea></div>
     <div class="edit-actions">
       <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
@@ -2473,7 +2481,7 @@ function buildEditSleepHist(e){
 window.saveEditSleep = async (id, d) => {
   const sv = document.getElementById('esl-start-'+id).value;
   const ev = document.getElementById('esl-end-'+id).value;
-  if (!sv){ showToast('Укажите время / Enter time'); return; }
+  if (!sv){ showToast('Enter time / Укажите время'); return; }
   const start = new Date(d+'T'+sv+':00');
   let end = null;
   if (ev){ end = new Date(d+'T'+ev+':00'); if (end < start) end.setDate(end.getDate()+1); }
@@ -2482,8 +2490,8 @@ window.saveEditSleep = async (id, d) => {
     end_time: end ? end.toISOString() : null,
     note: document.getElementById('esl-note-'+id).value.trim(),
   }).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
-  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓'); expandedEdit=null; renderHistory();
 };
 
 function buildEditFormula(e){
@@ -2491,29 +2499,29 @@ function buildEditFormula(e){
     stool: e.stool, stoolColor: e.stool_color, stoolCons: e.stool_consistency,
   };
   const stcHtml = STOOL_COLORS.map(c =>
-    `<div class="etap${editBuf.f.stoolColor===c.k?' '+sc():''}" onclick="eFStcol('${c.k}')">${c.ico} ${c.ru}</div>`).join('');
+    `<div class="etap${editBuf.f.stoolColor===c.k?' '+sc():''}" onclick="eFStcol('${c.k}')">${c.ico} ${c.en}</div>`).join('');
   const consHtml = STOOL_CONS.map(c =>
     `<div class="etap${editBuf.f.stoolCons===c.k?' '+sc():''}" onclick="eFCons('${c.k}')">${c.ru}<br><span style="font-size:9px;opacity:.6">${c.en}</span></div>`).join('');
   return `<div class="te-edit" id="te-edit-${e.id}">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span><span class="bi-en">/ Time</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Time</span><span class="bi-en">/ Время</span></div>
       <input type="time" class="edit-mini-inp" id="ef-time-${e.id}" value="${e.time||''}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">KABRITA мл</span><span class="bi-en">/ ml</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">ml</span><span class="bi-en">/ KABRITA мл</span></div>
       <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-kab-${e.id}" value="${e.kabrita_ml||0}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">NUTRILON мл</span><span class="bi-en">/ ml</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">ml</span><span class="bi-en">/ NUTRILON мл</span></div>
       <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-nut-${e.id}" value="${e.nutrilon_ml||0}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Вода мл</span><span class="bi-en">/ Water ml</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Water ml</span><span class="bi-en">/ Вода мл</span></div>
       <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-wat-${e.id}" value="${e.water_ml||0}"></div>
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Стул</span><span class="bi-en">/ Stool</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Stool</span><span class="bi-en">/ Стул</span></div>
       <div class="edit-g2">
         <div class="etap${editBuf.f.stool===true?' s-ok':''}" onclick="eFStool(true)">✅ Был / Yes</div>
         <div class="etap${editBuf.f.stool===false?' s-bad':''}" onclick="eFStool(false)">❌ Не было / No</div>
       </div></div>
     ${editBuf.f.stool ? `
-      <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Цвет</span><span class="bi-en">/ Color</span></div>
+      <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Color</span><span class="bi-en">/ Цвет</span></div>
         <div class="edit-g3">${stcHtml}</div></div>
-      <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Консистенция</span><span class="bi-en">/ Consistency</span></div>
+      <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Consistency</span><span class="bi-en">/ Консистенция</span></div>
         <div class="edit-g2">${consHtml}</div></div>` : ''}
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Заметка</span><span class="bi-en">/ Note</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Note</span><span class="bi-en">/ Заметка</span></div>
       <textarea class="edit-ta" id="ef-note-${e.id}">${escH(e.note||'')}</textarea></div>
     <div class="edit-actions">
       <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
@@ -2536,8 +2544,8 @@ window.saveEditFormula = async (id) => {
     note: document.getElementById('ef-note-'+id).value.trim(),
   };
   const { error } = await db.from(T_FORMULA).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
-  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; editBuf={}; renderHistory();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); return; }
+  showToast('Updated ✓ / Обновлено ✓'); expandedEdit=null; editBuf={}; renderHistory();
 };
 
 function buildEditSolids(e){
@@ -2546,7 +2554,7 @@ function buildEditSolids(e){
   const accH = ACCS.map(a => `<div class="etap${editBuf.s.accept===a.k?' '+sc():''}" onclick="eSAcc('${a.k}')">${a.ico} ${a.ru}</div>`).join('');
   const reaH = REAS.map(r => `<div class="etap${editBuf.s.reactions.has(r.k)?' s-'+r.cls:''}" onclick="eSRea('${r.k}')">${r.ru}<br><span style="font-size:9px;opacity:.6">${r.en}</span></div>`).join('');
   return `<div class="te-edit">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Given at</span><span class="bi-en">/ Время</span></div>
       <input type="time" class="edit-mini-inp" id="es-time-${e.id}" value="${e.time||''}"></div>
     <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Продукт</span></div>
       <input class="edit-mini-inp" id="es-prod-${e.id}" value="${escH(e.product||'')}"></div>
@@ -2573,8 +2581,8 @@ window.saveEditSolids = async (id) => {
     note: document.getElementById('es-note-'+id).value.trim(),
   };
   const { error } = await db.from(T_SOLIDS).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
-  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; editBuf={}; renderHistory();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓'); expandedEdit=null; editBuf={}; renderHistory();
 };
 
 function buildEditWeight(e){
@@ -2598,13 +2606,13 @@ window.saveEditWeight = async (id) => {
     weight_kg: parseFloat(document.getElementById('ew-kg-'+id).value)||null,
   };
   const { error } = await db.from(T_WEIGHT).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
-  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓'); expandedEdit=null; renderHistory();
 };
 
 function buildEditMed(e){
   return `<div class="te-edit">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время приёма</span><span class="bi-en">/ Given at</span></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Время приёма</span></div>
       <input type="time" class="edit-mini-inp" id="em-time-${e.id}" value="${e.given_at||''}"></div>
     <div class="edit-actions">
       <button class="ebtn" onclick="cancelEdit()">Отмена / Cancel</button>
@@ -2615,8 +2623,8 @@ function buildEditMed(e){
 window.saveEditMed = async (id) => {
   const ch = { given_at: document.getElementById('em-time-'+id).value };
   const { error } = await db.from(T_MEDS).update(ch).eq('id', id);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); return; }
-  showToast('Обновлено ✓ / Updated ✓'); expandedEdit=null; renderHistory();
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓'); expandedEdit=null; renderHistory();
 };
 
 // ─── PROFILE ──────────────────────────────────────────────
@@ -2688,7 +2696,7 @@ async function renderProfile(root){
   // ─── PERIOD SELECTOR ───
   const periodBtns = `
     <div class="prof-period">
-      ${[7,14,30,'all'].map(p => `<button class="${profilePeriod===p?'on':''}" onclick="setProfilePeriod(${typeof p==='string'?`'${p}'`:p})">${p==='all'?'Всё / All':p+' дн / d'}</button>`).join('')}
+      ${[7,14,30,'all'].map(p => `<button class="${profilePeriod===p?'on':''}" onclick="setProfilePeriod(${typeof p==='string'?`'${p}'`:p})">${p==='all'?'All / Всё':p+'d / дн'}</button>`).join('')}
     </div>`;
 
   // ─── HERO STATS (2x2) ───
@@ -2750,7 +2758,7 @@ async function renderProfile(root){
           const v = colorCounts[c.k] || 0;
           const pct = Math.round(v*100/totalColorsN);
           return `<div class="col-row">
-            <div class="cr-name">${c.ico} ${c.ru}</div>
+            <div class="cr-name">${c.ico} ${c.en}</div>
             <div class="cr-bar"><span style="width:${pct}%;background:${c.k==='yellow'?'#E5C94B':c.k==='brown'?'#7A5030':c.k==='green'?'#5C8B6F':c.k==='white'?'#CFCFCF':'#B04545'}"></span></div>
             <div class="cr-val"><b>${v}</b> <span style="color:var(--hint)">·${pct}%</span></div>
           </div>`;
@@ -2848,12 +2856,12 @@ window.addWeight = async function(){
   const date = document.getElementById('w-date').value;
   const time = document.getElementById('w-time').value;
   const kg   = parseFloat(document.getElementById('w-kg').value);
-  if (!date || !kg){ showToast('Заполните дату и вес / Fill date & weight'); return; }
+  if (!date || !kg){ showToast('Fill date & weight / Заполните дату и вес'); return; }
   const { error } = await db.from(T_WEIGHT).insert([{
     id:newId(), child, date, time, weight_kg:kg
   }]);
-  if (error){ showToast('Ошибка / Error: '+(error?.message||'unknown')); console.error(error); return; }
-  showToast('Вес сохранён ✓ / Weight saved ✓');
+  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); return; }
+  showToast('Weight saved ✓ / Вес сохранён ✓');
   document.getElementById('w-kg').value='';
   renderHistory();
 };
@@ -2971,7 +2979,7 @@ function toggleMic(target){
   voiceTarget = target;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR){
-    setVTxt(target, 'vstatus', 'Не поддерживается / Not supported'); return;
+    setVTxt(target, 'vstatus', 'Not supported / Не поддерживается'); return;
   }
   recognition = new SR();
   recognition.continuous = true;
@@ -2990,8 +2998,8 @@ function toggleMic(target){
   recognition.onstart = () => {
     isRec = true;
     btn.className = 'mic-btn rec';
-    btn.querySelector('.mic-txt').textContent = 'Запись... / Recording... — нажмите стоп';
-    vs.textContent = '🔴 Говорите / Speak now';
+    btn.querySelector('.mic-txt').textContent = 'Recording... — нажмите стоп / Запись...';
+    vs.textContent = 'Speak now / 🔴 Говорите';
   };
   recognition.onresult = ev => {
     let interim = '', fin = finalText;
@@ -3003,7 +3011,7 @@ function toggleMic(target){
     vt.className = 'vtrans';
     vt.textContent = fin + (interim?' '+interim+'...':'');
   };
-  recognition.onerror = ev => { vs.textContent = 'Ошибка / Error: '+ev.error; stopMic(); };
+  recognition.onerror = ev => { vs.textContent = 'Error: / Ошибка'+ev.error; stopMic(); };
   recognition.onend   = () => { if (isRec) recognition.start(); };
   recognition.start();
 }
@@ -3021,9 +3029,9 @@ function stopMic(){
   const vsId  = prefix+'vstatus';
   const btn = document.getElementById(btnId);
   btn.className = 'mic-btn';
-  btn.querySelector('.mic-txt').textContent = 'Нажмите и говорите / Tap and speak';
+  btn.querySelector('.mic-txt').textContent = 'Tap and speak / Нажмите и говорите';
   const vs = document.getElementById(vsId);
-  vs.textContent = '✓ Сохранено / Saved';
+  vs.textContent = 'Saved / ✓ Сохранено';
   setTimeout(()=>vs.textContent='', 2000);
 }
 
@@ -3055,11 +3063,11 @@ function showToast(msg){
 function updateConnBar(online){
   const bar = document.getElementById('conn-bar');
   if (online){
-    bar.textContent = '✓ Подключено · Connected';
+    bar.textContent = 'Connected · ✓ Подключено';
     bar.className = 'conn-bar online';
     setTimeout(()=>{ bar.className='conn-bar'; }, 2500);
   } else {
-    bar.textContent = '⚠ Нет соединения · No connection';
+    bar.textContent = 'No connection · ⚠ Нет соединения';
     bar.className = 'conn-bar offline';
   }
 }
