@@ -563,9 +563,21 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 /* save bar visibility is controlled in JS (updateSaveBar) */
 
 /* ══ HOME SCREEN ══ */
-.home-date{text-align:center;padding:4px 0 14px}
+.home-date{padding:4px 0 14px}
 .home-date .hd-ru{font-size:19px;font-weight:700;color:var(--text);line-height:1.25}
 .home-date .hd-en{font-size:12px;color:var(--hint);margin-top:3px}
+.home-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.home-nav .hn-center{text-align:center;flex:1;min-width:0}
+.home-nav .hn-arr{
+  width:40px;height:40px;border-radius:20px;border:.5px solid var(--bmd);
+  background:var(--surface);font-size:22px;font-weight:700;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:inherit;
+}
+.home-nav .hn-arr:active{transform:scale(.94)}
+.home-nav .hn-arr.dim{opacity:.3}
+.home-nav .hn-arr:disabled{cursor:default}
 
 .dual{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);margin-bottom:14px;overflow:hidden}
 .dual-head{display:grid;grid-template-columns:1.1fr 1fr 1fr;align-items:end;padding:10px 8px;border-bottom:.5px solid var(--border)}
@@ -729,32 +741,17 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Kabrita formula (мл/ml)</span><span class="bi-en">/ KABRITA</span></div>
-        <div class="chips" id="kab-chips"></div>
-        <input type="number" class="ml-inp" id="kab-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onMlInput('kab')">
-      </div>
-
-      <div class="card">
-        <div class="bi"><span class="bi-ru">Nutrilon formula (мл/ml)</span><span class="bi-en">/ NUTRILON</span></div>
+        <div class="bi"><span class="bi-ru">Nutrilon formula (ml / мл)</span><span class="bi-en">/ NUTRILON</span></div>
         <div class="chips" id="nut-chips"></div>
         <input type="number" class="ml-inp" id="nut-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onMlInput('nut')">
       </div>
 
-      <div class="formula-total">
-        <div>
-          <div class="bi-ru" style="font-size:12px">Total formula</div>
-          <div class="bi-en">Итого смеси</div>
-        </div>
-        <div class="ft-n"><span id="f-total">0</span> ml / мл</div>
-      </div>
-
-      <div class="card">
-        <div class="bi"><span class="bi-ru">Photo (до 3 / up to 3)</span><span class="bi-en">/ Фото</span></div>
-        <label class="photo-btn">
-          📷 Добавить фото / Add photo
-          <input type="file" accept="image/*" multiple id="f-photos" onchange="onPhotosPicked(event,'formula')">
-        </label>
-        <div class="photo-preview" id="f-photo-preview"></div>
+      <!-- hidden stubs (KABRITA removed, photo removed; keep IDs for old code paths) -->
+      <div style="display:none">
+        <div id="kab-chips"></div><input id="kab-ml" type="hidden">
+        <span id="f-total">0</span>
+        <input type="file" id="f-photos">
+        <div id="f-photo-preview"></div>
       </div>
 
       <div class="card">
@@ -930,14 +927,18 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
         <textarea class="note-inp" id="eod-concerns" rows="2" placeholder="What concerns / Что беспокоит"></textarea>
         <div class="bi" style="margin-top:8px"><span class="bi-ru">Nanny note</span><span class="bi-en">/ Комментарий няни</span></div>
         <textarea class="note-inp" id="eod-note" rows="2" placeholder="Free comment / Свободный комментарий"></textarea>
-        <div class="bi" style="margin-top:10px"><span class="bi-ru">Voice note</span><span class="bi-en">/ 🎤 Голосовая заметка</span></div>
-        <button class="mic-btn" id="eod-mic-btn" onclick="toggleMic('eod')">
-          <span class="mdot"></span>
-          <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
-        </button>
-        <div class="vstatus" id="eod-vstatus"></div>
-        <div class="vtrans emp" id="eod-vtrans">Голосовая заметка появится здесь · Voice note will appear here</div>
-        <button class="save-btn lev" id="eod-save" onclick="saveEod()" style="margin-top:14px">Сохранить итог / Save summary</button>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Photo (up to 3 / до 3)</span><span class="bi-en">/ Фото</span></div>
+        <label class="photo-btn">
+          📷 Add photo / Добавить фото
+          <input type="file" accept="image/*" multiple id="eod-photos" onchange="onPhotosPicked(event,'eod')">
+        </label>
+        <div class="photo-preview" id="eod-photo-preview"></div>
+        <!-- hidden voice stubs to keep openEod compat -->
+        <div style="display:none">
+          <div id="eod-vtrans" class="emp"></div>
+          <div id="eod-vstatus"></div>
+        </div>
+        <button class="save-btn lev" id="eod-save" onclick="saveEod()" style="margin-top:14px">Save summary / Сохранить итог</button>
       </div>
       <div id="ds-eod-view"></div>
     </div>
@@ -1101,7 +1102,7 @@ let soForm = { color:null, cons:null, photos:[], photoUrls:[] };
 let sSel = { amount:null, accept:null, reactions:new Set(), photos:[], photoUrls:[] };
 
 // eod summary form
-let eodSel = { mood:null, sleep:null, reactions:new Set() };
+let eodSel = { mood:null, sleep:null, reactions:new Set(), photos:[], photoUrls:[] };
 
 // voice
 let recognition = null;
@@ -1150,7 +1151,8 @@ const SLEEPS = [
 const MED_DOSE = (_c) => '7 drops / 7 капель';
 const MED_SCHEDULE = {
   morning:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)},
-              {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ tab / ¼ таб'}],
+              {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ tab / ¼ таб'},
+              {k:'vitd',    ico:'☀️',ru:'Витамин D',     en:'Vitamin D', dose:_=>'2 drops / 2 капли'}],
   afternoon: [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
   evening:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
 };
@@ -1476,11 +1478,13 @@ function resetFeedingForm(){
 function photoBucketFor(kind){
   if (kind==='formula') return fForm;
   if (kind==='stool')   return soForm;
+  if (kind==='eod')     return eodSel;
   return sSel; // solids
 }
 function photoPreviewIdFor(kind){
   if (kind==='formula') return 'f-photo-preview';
   if (kind==='stool')   return 'so-photo-preview';
+  if (kind==='eod')     return 'eod-photo-preview';
   return 's-photo-preview';
 }
 function onPhotosPicked(ev, kind){
@@ -1911,11 +1915,11 @@ window.editSleepInline = async function(id){
 // EOD SUMMARY
 // ═══════════════════════════════════════════════════════════════
 function openEod(){
-  eodSel = { mood:null, sleep:null, reactions:new Set() };
+  eodSel = { mood:null, sleep:null, reactions:new Set(), photos:[], photoUrls:[] };
   document.getElementById('eod-concerns').value='';
   document.getElementById('eod-note').value='';
-  const vt = document.getElementById('eod-vtrans');
-  if (vt){ vt.textContent='Voice note will appear here · Голосовая заметка появится здесь'; vt.className='vtrans emp'; }
+  const pp = document.getElementById('eod-photo-preview');
+  if (pp) pp.innerHTML='';
   document.getElementById('eod-save').className='save-btn '+child;
   renderEodGrids();
   loadExistingEod();
@@ -1982,26 +1986,37 @@ async function loadExistingEod(){
     const e = data[0];
     eodSel.mood = e.mood; eodSel.sleep = e.sleep;
     eodSel.reactions = new Set(e.reactions||[]);
+    eodSel.photoUrls = e.photo_urls || [];
     document.getElementById('eod-concerns').value = e.concerns||'';
     document.getElementById('eod-note').value = e.nanny_note||'';
-    const vt = document.getElementById('eod-vtrans');
-    if (vt && e.voice_note){ vt.textContent = e.voice_note; vt.className='vtrans'; }
+    const pp = document.getElementById('eod-photo-preview');
+    if (pp && eodSel.photoUrls.length){
+      pp.innerHTML = eodSel.photoUrls.map(u => `<div class="photo-thumb"><img src="${escH(u)}"></div>`).join('');
+    }
     renderEodGrids();
   }
 }
 async function saveEod(){
-  const vt = document.getElementById('eod-vtrans');
-  const voiceNote = vt && !vt.classList.contains('emp') ? vt.textContent.trim() : '';
+  const btn = document.getElementById('eod-save');
+  btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
+  const id = newId();
+  let photoUrls = [...(eodSel.photoUrls||[])];
+  if (eodSel.photos && eodSel.photos.length){
+    btn.textContent = 'Uploading photos... / Загрузка фото...';
+    const newUrls = await uploadPhotos(eodSel.photos, 'eod', id);
+    photoUrls = photoUrls.concat(newUrls);
+  }
   const entry = {
-    id: newId(), child, date: todayISO(),
+    id, child, date: todayISO(),
     mood: eodSel.mood, sleep: eodSel.sleep,
     reactions: [...eodSel.reactions],
     concerns: document.getElementById('eod-concerns').value.trim(),
     nanny_note: document.getElementById('eod-note').value.trim(),
-    voice_note: voiceNote,
+    photo_urls: photoUrls,
   };
   const { error } = await db.from(T_SUMMARY).insert([entry]);
-  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); return; }
+  btn.disabled = false; btn.textContent = 'Save summary / Сохранить итог';
+  if (error){ showToast('Error: / Ошибка '+(error?.message||'unknown')); console.error(error); return; }
   showToast('Summary saved ✓ / Итог дня сохранён ✓');
   goHome();
 }
@@ -2018,25 +2033,43 @@ function fmtDur(min){
 }
 function tsHHMM(ts){ return ts ? new Date(ts).toTimeString().slice(0,5) : ''; }
 
+// home day pointer — user can navigate to previous days
+let homeDate = todayISO();
+
 async function renderHome(){
   const hd = document.getElementById('home-date');
-  if (hd){ const f = fmtFullDate(); hd.innerHTML = `<div class="hd-ru">${f.en}</div><div class="hd-en">${f.ru}</div>`; }
+  if (hd){
+    const d = new Date(homeDate+'T12:00:00');
+    const en = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    const ru = d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const isToday = homeDate === todayISO();
+    const canForward = homeDate < todayISO();
+    hd.innerHTML = `
+      <div class="home-nav">
+        <button class="hn-arr" onclick="navHomeDay(-1)" aria-label="prev">‹</button>
+        <div class="hn-center">
+          <div class="hd-ru">${en}${isToday?' · Today':''}</div>
+          <div class="hd-en">${ru.charAt(0).toUpperCase()+ru.slice(1)}</div>
+        </div>
+        <button class="hn-arr ${canForward?'':'dim'}" ${canForward?'':'disabled'} onclick="navHomeDay(1)" aria-label="next">›</button>
+      </div>`;
+  }
   const root = document.getElementById('dual-summary');
   if (!root) return;
-  const today = todayISO();
-  const [feeds, water, solids, meds, sleep] = await Promise.all([
-    db.from(T_FORMULA).select('*').eq('date',today),
-    db.from(T_WATER  ).select('*').eq('date',today),
-    db.from(T_SOLIDS ).select('*').eq('date',today),
-    db.from(T_MEDS   ).select('*').eq('date',today),
-    db.from(T_SLEEP  ).select('*').eq('date',today),
+  const day = homeDate;
+  const [feeds, water, solids, meds, sleep, weights] = await Promise.all([
+    db.from(T_FORMULA).select('*').eq('date',day),
+    db.from(T_WATER  ).select('*').eq('date',day),
+    db.from(T_SOLIDS ).select('*').eq('date',day),
+    db.from(T_MEDS   ).select('*').eq('date',day),
+    db.from(T_SLEEP  ).select('*').eq('date',day),
+    db.from(T_WEIGHT ).select('*').lte('date',day).order('date',{ascending:false}).order('time',{ascending:false}),
   ]);
-  const F=feeds.data||[], WA=water.data||[], S=solids.data||[], M=meds.data||[], SL=sleep.data||[];
+  const F=feeds.data||[], WA=water.data||[], S=solids.data||[], M=meds.data||[], SL=sleep.data||[], W=weights.data||[];
   const totalExp = totalExpectedMeds();
 
   const col = (c) => {
     const f = F.filter(e=>e.child===c);
-    const kab = f.reduce((s,e)=>s+(e.kabrita_ml||0),0);
     const nut = f.reduce((s,e)=>s+(e.nutrilon_ml||0),0);
     const wMl = WA.filter(e=>e.child===c).reduce((s,e)=>s+(e.ml||0),0);
     const sList = S.filter(e=>e.child===c).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||''));
@@ -2051,13 +2084,15 @@ async function renderHome(){
       if (!last || e.start_time > last.start_time) last = e;
       if (e.end_time) totalMin += Math.max(0,(new Date(e.end_time)-new Date(e.start_time))/60000);
     });
-    return {fCount:f.length, kab, nut, wMl, lastSolid, poo, given, slCount:sl.length, totalMin, last};
+    // last weight up to this day (across all dates ≤ day)
+    const childWeights = W.filter(w=>w.child===c);
+    const lastWeight = childWeights.length ? childWeights[0] : null;
+    return {fCount:f.length, nut, wMl, lastSolid, poo, given, slCount:sl.length, totalMin, last, lastWeight};
   };
   const D = { lev: col('lev'), mark: col('mark') };
 
-  const cFeed  = d => d.fCount ? `${d.fCount} ${d.fCount===1?'time':'times'}<small>${d.kab+d.nut} ml · K${d.kab}+N${d.nut}</small>` : '—';
+  const cFeed  = d => d.fCount ? `${d.fCount} ${d.fCount===1?'time':'times'}<small>${d.nut} ml</small>` : '—';
   const cWater = d => d.wMl ? `${d.wMl} ml` : '—';
-  // for the solids product, prefer the EN side (after " / ") when present
   const cSolid = d => {
     if (!d.lastSolid) return '—';
     const parts = (d.lastSolid.product||'').split(' / ');
@@ -2070,9 +2105,15 @@ async function renderHome(){
     if (!d.slCount) return '—';
     let sub = '';
     if (d.last){ sub = d.last.end_time ? tsHHMM(d.last.start_time)+'–'+tsHHMM(d.last.end_time) : 'sleeping since '+tsHHMM(d.last.start_time); }
-    return `${fmtDur(d.totalMin)}<small>${sub}</small>`;
+    return `${fmtDur(d.totalMin)} · ${d.slCount} ${d.slCount===1?'time':'times'}<small>${sub}</small>`;
   };
-  // English label is primary (for nannies), Russian is secondary
+  const cWeight = d => {
+    if (!d.lastWeight) return '—';
+    const w = d.lastWeight;
+    const when = w.date===day ? `${escH(String(w.time||'').slice(0,5))}` : `${escH(w.date)}`;
+    return `${w.weight_kg} kg<small>${when}</small>`;
+  };
+
   const row = (ru, en, fn) => {
     const lv = fn(D.lev), mv = fn(D.mark);
     const cls = v => v==='—' ? 'dr-v empty-v' : 'dr-v';
@@ -2095,8 +2136,18 @@ async function renderHome(){
     ${row('💊 Лекарства','💊 Meds', cMeds)}
     ${row('💩 Стул','💩 Stool', cStool)}
     ${row('😴 Сон','😴 Sleep', cSleep)}
+    ${row('⚖️ Вес','⚖️ Weight', cWeight)}
   `;
 }
+
+window.navHomeDay = function(delta){
+  const d = new Date(homeDate+'T12:00:00');
+  d.setDate(d.getDate()+delta);
+  const newISO = dateISO(d);
+  if (newISO > todayISO()) return;
+  homeDate = newISO;
+  renderHome();
+};
 
 // ═══════════════════════════════════════════════════════════════
 // MEDS TAB

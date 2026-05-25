@@ -98,9 +98,10 @@ create table if not exists sleep_entries (
 -- ── medication_entries: дата начала режима для расчёта пропусков ──
 alter table medication_entries add column if not exists start_date date default current_date;
 
--- ── daily_summaries: реакции (перенесли из прикорма) + голосовая заметка ──
+-- ── daily_summaries: реакции (перенесли из прикорма) + голосовая заметка + фото ──
 alter table daily_summaries add column if not exists reactions  jsonb default '[]';
 alter table daily_summaries add column if not exists voice_note text  default '';
+alter table daily_summaries add column if not exists photo_urls jsonb default '[]';
 
 -- ── RLS: публичный доступ (как в существующей версии) ───────
 alter table feeding_entries     enable row level security;
