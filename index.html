@@ -2933,33 +2933,49 @@ async function renderProfile(root){
       ${[7,14,30,'all'].map(p => `<button class="${profilePeriod===p?'on':''}" onclick="setProfilePeriod(${typeof p==='string'?`'${p}'`:p})">${p==='all'?'All / Всё':p+'d / дн'}</button>`).join('')}
     </div>`;
 
-  // ─── HERO STATS (2x2) ───
-  const medColor = medPct>=90 ? 'var(--ok)' : medPct>=60 ? 'var(--warn)' : 'var(--bad)';
+  // ─── STOOL STATS (last stool + this week from Monday) ───
+  const stoolDates = F.filter(e=>e.stool).map(e=>e.date).sort((a,b)=>b.localeCompare(a));
+  const lastStoolDate = stoolDates.length ? stoolDates[0] : null;
+  const nowD = new Date();
+  const dayOfWeek = (nowD.getDay()+6)%7; // Mon=0
+  const monday = new Date(nowD); monday.setDate(nowD.getDate()-dayOfWeek);
+  const mondayISO = dateISO(monday);
+  const stoolThisWeek = F.filter(e=>e.stool && e.date>=mondayISO).length;
+  let lastStoolStr = '—', stoolHint = '';
+  if (lastStoolDate){
+    const todayD = new Date(todayISO()+'T00:00:00');
+    const lastD = new Date(lastStoolDate+'T00:00:00');
+    const daysAgo = Math.round((todayD-lastD)/(1000*60*60*24));
+    lastStoolStr = daysAgo===0?'Today':daysAgo===1?'1 day ago':`${daysAgo} days ago`;
+    stoolHint = `${stoolThisWeek}/wk (from Mon)`;
+  }
+
+  // ─── HERO STATS (2x2) — Weight / Formula / Stool stats / Solids ───
   const heroH = `
     <div class="hero-grid">
       <div class="hero-stat">
         <div class="hs-ico">⚖️</div>
         <div class="hs-num" ${!W.length?'style="font-size:14px;color:var(--hint)"':''}>${weightLatest}</div>
-        <div class="hs-lbl">Текущий вес / Latest weight</div>
+        <div class="hs-lbl">Latest weight / Текущий вес</div>
         ${weightDelta?`<div class="hs-trend">${weightTrend} ${weightDelta}</div>`:weightHint?`<div class="hs-trend" style="color:var(--hint)">${weightHint}</div>`:''}
       </div>
       <div class="hero-stat">
-        <div class="hs-ico">💊</div>
-        <div class="hs-num" style="color:${medColor}">${medPct}%</div>
-        <div class="hs-lbl">Лекарства / Meds compliance</div>
-        <div class="hs-trend">${medGivenCount} из ${totalExp}</div>
-      </div>
-      <div class="hero-stat">
         <div class="hs-ico">🍼</div>
-        <div class="hs-num">${avg}<span class="hs-sm"> мл/д</span></div>
-        <div class="hs-lbl">Смесь в день / Formula/day</div>
-        <div class="hs-trend">${avgFeedingsPerDay} раз/день / feedings</div>
+        <div class="hs-num">${avg}<span class="hs-sm"> ml/d</span></div>
+        <div class="hs-lbl">Formula/day / Смесь в день</div>
+        <div class="hs-trend">${avgFeedingsPerDay} feedings/d</div>
       </div>
       <div class="hero-stat">
         <div class="hs-ico">💩</div>
-        <div class="hs-num">${avgStoolPerDay}<span class="hs-sm"> /д</span></div>
-        <div class="hs-lbl">Стул в день / Stool/day</div>
-        <div class="hs-trend">${totalStool} всего / total</div>
+        <div class="hs-num" ${!lastStoolDate?'style="font-size:14px;color:var(--hint)"':'style="font-size:18px"'}>${lastStoolStr}</div>
+        <div class="hs-lbl">Last stool / Последний стул</div>
+        <div class="hs-trend">${stoolHint||'no data'}</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-ico">🥦</div>
+        <div class="hs-num">${S.length}</div>
+        <div class="hs-lbl">Solids / Прикормы</div>
+        <div class="hs-trend">${[...new Set(S.map(s=>s.product))].length} foods</div>
       </div>
     </div>`;
 
@@ -3045,11 +3061,6 @@ async function renderProfile(root){
 
     <div class="section-hdr">💩 Цвета стула <span class="sh-en">/ Stool colors</span></div>
     <div class="card tight color-bars">${colorsRows}</div>
-
-    ${medDays.length?`<div class="section-hdr">⚠️ Пропуски лекарств <span class="sh-en">/ Missed doses</span></div>
-    <div class="card tight" style="font-size:12px;color:var(--bad)">
-      ${medDays.slice(0,7).map(d=>fmtDateShortRU(d).day+' '+fmtDateShortRU(d).mo).join(', ')}${medDays.length>7?` + ещё ${medDays.length-7} дн`:''}
-    </div>`:''}
 
     <div class="section-hdr">🥦 Прикорм <span class="sh-en">/ Solids</span></div>
     ${solidsH}
