@@ -17,7 +17,7 @@
   --border:rgba(0,0,0,.08); --bmd:rgba(0,0,0,.14);
   --text:#111010; --muted:#6A6860; --hint:#AAA49C;
   --lev:#2A6B88; --lev-bg:#E7F2F8;
-  --mark:#7A5030; --mark-bg:#F5EDE3;
+  --mark:#5C8B6F; --mark-bg:#E7EFE9;  /* sage green (was brown) */
   --ok:#2A7A2A; --ok-bg:#E7F5E7;
   --warn:#8A5F1A; --warn-bg:#FEF2DC;
   --bad:#8A1A1A; --bad-bg:#FEE7E7;
@@ -485,7 +485,58 @@ input:checked + .tog-tr::after{transform:translateX(22px)}
 .cd-item{display:flex;align-items:center;gap:5px;background:var(--bg);border-radius:14px;padding:5px 10px;font-size:12px}
 
 .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--rsm);background:var(--bg)}
+.gallery.gallery-4{grid-template-columns:repeat(4,1fr);gap:4px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--rsm);background:var(--bg);cursor:pointer}
+
+/* ── NEW PROFILE / parent dashboard ── */
+.hero-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;
+}
+.hero-stat{
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);
+  padding:12px 10px;text-align:center;
+}
+.hero-stat .hs-ico{font-size:20px;line-height:1;margin-bottom:4px}
+.hero-stat .hs-num{font-size:24px;font-weight:700;color:var(--lev);line-height:1.1;letter-spacing:-.02em}
+.mark-active .hero-stat .hs-num{color:var(--mark)}
+.hero-stat .hs-num .hs-sm{font-size:12px;font-weight:500;color:var(--muted)}
+.hero-stat .hs-lbl{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.2;font-weight:500}
+.hero-stat .hs-trend{font-size:10px;color:var(--hint);margin-top:3px;font-weight:600}
+
+.trends-card{
+  background:var(--surface);border:.5px solid var(--border);border-radius:var(--rlg);
+  padding:12px;margin-bottom:10px;
+}
+.trends-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;flex-wrap:wrap}
+.trends-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.trends-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tt-btn{
+  font-family:inherit;font-size:11px;font-weight:600;padding:5px 10px;border-radius:14px;
+  border:.5px solid var(--bmd);background:var(--bg);color:var(--muted);cursor:pointer;touch-action:manipulation;
+}
+.tt-btn.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
+.mark-active .tt-btn.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
+.trend-chart{display:block;width:100%;height:140px}
+
+.color-bars{padding:10px 12px}
+.col-row{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;padding:5px 0}
+.col-row .cr-name{font-size:12px;color:var(--text)}
+.col-row .cr-bar{height:8px;background:var(--bg);border-radius:5px;overflow:hidden}
+.col-row .cr-bar span{display:block;height:100%;border-radius:5px;transition:width .25s}
+.col-row .cr-val{font-size:11px;color:var(--muted);text-align:right;line-height:1.2}
+.col-row .cr-val b{color:var(--text);font-weight:700}
+
+.solid-stats{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.solid-stats b{color:var(--text);font-weight:700}
+.new-prods{margin-top:8px}
+.new-prods .np-hdr{font-size:11px;color:var(--muted);margin-bottom:4px}
+
+.notes-card{padding:6px 12px}
+.note-item{padding:8px 0;border-bottom:.5px solid var(--border);font-size:13px;line-height:1.45}
+.note-item:last-child{border-bottom:none}
+.note-item .ni-date{font-size:10px;color:var(--hint);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.note-item .ni-txt{color:var(--text)}
+.ni-more{text-align:center;font-size:11px;color:var(--hint);padding:8px}
 
 .weight-add{
   display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-top:8px;
@@ -543,6 +594,14 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 .tile.t-solids{background:var(--ok-bg);border-color:rgba(42,122,42,.2)}
 .tile.t-meds{background:var(--warn-bg);border-color:rgba(138,95,26,.22)}
 .tile.t-stool{background:#F2EAE0;border-color:rgba(122,80,48,.22)}
+.tile.t-weight{background:#F4F0E5;border-color:rgba(138,95,26,.18)}
+.weight-when{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.we-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);font-size:13px;line-height:1.4}
+.we-row:last-child{border-bottom:none}
+.we-row .we-kg{font-weight:700;color:var(--lev)}
+.mark-active .we-row .we-kg{color:var(--mark)}
+.we-row .we-when{color:var(--muted);font-size:12px}
+.we-row .we-del{background:none;border:none;cursor:pointer;color:var(--hint);font-size:18px;padding:0 4px}
 
 .tile-wide{width:100%;min-height:64px;border:.5px solid var(--bmd);background:#EEE9F5;border-radius:var(--rlg);
   display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;
@@ -638,14 +697,15 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div class="home-date" id="home-date">—</div>
     <div class="dual" id="dual-summary"><div class="loading">Загрузка... / Loading...</div></div>
     <div class="nanny-only">
+      <button class="tile-wide t-sleep" onclick="goView('sleep')"><span class="ti-ico">😴</span><span class="ti-ru">Сон</span><span class="ti-en">Sleep</span></button>
       <div class="tiles">
         <button class="tile t-feeding" onclick="goView('feeding')"><span class="ti-ico">🍼</span><span class="ti-ru">Кормление</span><span class="ti-en">Feeding</span></button>
         <button class="tile t-water" onclick="goView('water')"><span class="ti-ico">💧</span><span class="ti-ru">Питьё</span><span class="ti-en">Water</span></button>
         <button class="tile t-stool" onclick="goView('stool')"><span class="ti-ico">💩</span><span class="ti-ru">Стул</span><span class="ti-en">Stool</span></button>
         <button class="tile t-solids" onclick="goView('solids')"><span class="ti-ico">🥦</span><span class="ti-ru">Прикорм</span><span class="ti-en">Solids</span></button>
         <button class="tile t-meds" onclick="goView('meds')"><span class="ti-ico">💊</span><span class="ti-ru">Лекарства</span><span class="ti-en">Meds</span></button>
+        <button class="tile t-weight" onclick="goView('weight')"><span class="ti-ico">⚖️</span><span class="ti-ru">Вес</span><span class="ti-en">Weight</span></button>
       </div>
-      <button class="tile-wide t-sleep" onclick="goView('sleep')"><span class="ti-ico">😴</span><span class="ti-ru">Сон</span><span class="ti-en">Sleep</span></button>
       <button class="tile-wide t-eod" onclick="goView('eod')"><span class="ti-ico">🌙</span><span class="ti-ru">Итог дня</span><span class="ti-en">Daily summary</span></button>
     </div>
   </section>
@@ -686,20 +746,6 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Стул</span><span class="bi-en">/ Stool</span></div>
-        <div class="yesno">
-          <button id="stool-yes" onclick="setStool(true)">✅ Был / Yes</button>
-          <button id="stool-no" onclick="setStool(false)">❌ Не было / No</button>
-        </div>
-        <div id="stool-detail" style="display:none">
-          <div class="bi" style="margin-top:14px"><span class="bi-ru">Цвет</span><span class="bi-en">/ Color</span></div>
-          <div class="g5" id="stool-color-grid"></div>
-          <div class="bi" style="margin-top:12px"><span class="bi-ru">Консистенция</span><span class="bi-en">/ Consistency</span></div>
-          <div class="g2" id="stool-cons-grid"></div>
-        </div>
-      </div>
-
-      <div class="card">
         <div class="bi"><span class="bi-ru">Фото</span><span class="bi-en">/ Photo (до 3 / up to 3)</span></div>
         <label class="photo-btn">
           📷 Добавить фото / Add photo
@@ -709,18 +755,16 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Голосовая заметка</span><span class="bi-en">/ Voice note</span></div>
-        <button class="mic-btn" id="f-mic-btn" onclick="toggleMic('formula')">
-          <span class="mdot"></span>
-          <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
-        </button>
-        <div class="vstatus" id="f-vstatus"></div>
-        <div class="vtrans emp" id="f-vtrans">Голосовая заметка появится здесь · Voice note will appear here</div>
-      </div>
-
-      <div class="card">
         <div class="bi"><span class="bi-ru">Текстовая заметка</span><span class="bi-en">/ Note</span></div>
         <textarea class="note-inp" id="f-note" rows="2" placeholder="Был активный, срыгнул / Active, spit up"></textarea>
+      </div>
+
+      <!-- скрытые элементы для совместимости с saveFeeding (стул не используется тут) -->
+      <div style="display:none">
+        <input type="hidden" id="stool-yes"><input type="hidden" id="stool-no">
+        <div id="stool-detail"></div>
+        <div id="stool-color-grid"></div><div id="stool-cons-grid"></div>
+        <div id="f-vtrans" class="emp"></div>
       </div>
 
     </div><!-- /feeding-form -->
@@ -795,6 +839,33 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     </div>
   </section>
 
+  <!-- ═══ ВЕС / WEIGHT (standalone) ═══ -->
+  <section class="tab-pane" data-view="weight" id="pane-weight">
+    <button class="back-btn" onclick="goHome()">← Назад / Back</button>
+    <div id="weight-childpick"></div>
+    <div id="weight-form" style="display:none">
+      <div class="cur-child" id="weight-cur"></div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Дата и время</span><span class="bi-en">/ Date & time</span></div>
+        <div class="weight-when">
+          <input type="date" id="we-date" class="edit-mini-inp">
+          <input type="time" id="we-time" class="edit-mini-inp">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Вес (кг)</span><span class="bi-en">/ Weight (kg)</span></div>
+        <input type="number" step="0.001" inputmode="decimal" class="ml-inp" id="we-kg" placeholder="например 3.450 / e.g. 3.450">
+      </div>
+
+      <div class="card">
+        <div class="bi"><span class="bi-ru">История веса</span><span class="bi-en">/ Weight log</span></div>
+        <div id="we-list"><div class="loading">Загрузка / Loading...</div></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ ЛЕКАРСТВА / MEDS ═══ -->
   <section class="tab-pane" data-view="meds" id="pane-meds">
     <button class="back-btn" onclick="goHome()">← Назад / Back</button>
@@ -850,11 +921,20 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
         <div class="g3" id="eod-mood"></div>
         <div class="bi" style="margin-top:10px"><span class="bi-ru">Сон</span><span class="bi-en">/ Sleep</span></div>
         <div class="g2" id="eod-sleep"></div>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">Реакция за день</span><span class="bi-en">/ Reactions today</span></div>
+        <div class="g2" id="eod-rea"></div>
         <div class="bi" style="margin-top:10px"><span class="bi-ru">Претензии / симптомы</span><span class="bi-en">/ Concerns</span></div>
         <textarea class="note-inp" id="eod-concerns" rows="2" placeholder="Что беспокоит / What concerns"></textarea>
         <div class="bi" style="margin-top:8px"><span class="bi-ru">Комментарий няни</span><span class="bi-en">/ Nanny note</span></div>
         <textarea class="note-inp" id="eod-note" rows="2" placeholder="Свободный комментарий / Free comment"></textarea>
-        <button class="save-btn lev" id="eod-save" onclick="saveEod()" style="margin-top:10px">Сохранить итог / Save summary</button>
+        <div class="bi" style="margin-top:10px"><span class="bi-ru">🎤 Голосовая заметка</span><span class="bi-en">/ Voice note</span></div>
+        <button class="mic-btn" id="eod-mic-btn" onclick="toggleMic('eod')">
+          <span class="mdot"></span>
+          <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
+        </button>
+        <div class="vstatus" id="eod-vstatus"></div>
+        <div class="vtrans emp" id="eod-vtrans">Голосовая заметка появится здесь · Voice note will appear here</div>
+        <button class="save-btn lev" id="eod-save" onclick="saveEod()" style="margin-top:14px">Сохранить итог / Save summary</button>
       </div>
       <div id="ds-eod-view"></div>
     </div>
@@ -892,11 +972,6 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Реакция</span><span class="bi-en">/ Reaction</span></div>
-        <div class="g2" id="rea-grid"></div>
-      </div>
-
-      <div class="card">
         <div class="tog-row">
           <div>
             <div style="font-size:14px;font-weight:500">Новый продукт / New food</div>
@@ -919,18 +994,14 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Голосовая заметка</span><span class="bi-en">/ Voice note</span></div>
-        <button class="mic-btn" id="s-mic-btn" onclick="toggleMic('solids')">
-          <span class="mdot"></span>
-          <span class="mic-txt">Нажмите и говорите / Tap and speak</span>
-        </button>
-        <div class="vstatus" id="s-vstatus"></div>
-        <div class="vtrans emp" id="s-vtrans">Голосовая заметка появится здесь · Voice note will appear here</div>
-      </div>
-
-      <div class="card">
         <div class="bi"><span class="bi-ru">Текстовая заметка</span><span class="bi-en">/ Note</span></div>
         <textarea class="note-inp" id="s-note" rows="2" placeholder="Морщился, но съел / Made faces but ate it"></textarea>
+      </div>
+
+      <!-- скрытые элементы для совместимости с saveSolids (реакции и голос перенесены в Итог дня) -->
+      <div style="display:none">
+        <div id="rea-grid"></div>
+        <div id="s-vtrans" class="emp"></div>
       </div>
 
     </div><!-- /solids-form -->
@@ -1006,7 +1077,7 @@ let profilePeriod = 7;
 let exportPeriod = 7;
 
 // input screens that require a child-selection step
-const CHILD_VIEWS = ['feeding','water','stool','solids','meds','sleep','eod'];
+const CHILD_VIEWS = ['feeding','water','stool','solids','meds','weight','sleep','eod'];
 // water form
 let wSel = { ml:0 };
 
@@ -1027,7 +1098,7 @@ let soForm = { color:null, cons:null, photos:[], photoUrls:[] };
 let sSel = { amount:null, accept:null, reactions:new Set(), photos:[], photoUrls:[] };
 
 // eod summary form
-let eodSel = { mood:null, sleep:null };
+let eodSel = { mood:null, sleep:null, reactions:new Set() };
 
 // voice
 let recognition = null;
@@ -1270,6 +1341,7 @@ window.chooseChild = function(c, v){
   if (v==='solids')  resetSolidsForm();
   if (v==='water')   resetWaterForm();
   if (v==='stool')   resetStoolOnlyForm();
+  if (v==='weight'){ resetWeightForm(); renderWeightList(); }
   if (v==='meds')    renderMeds();
   if (v==='sleep'){  resetSleepForm(); renderSleepList(); }
   if (v==='eod')     openEod();
@@ -1297,12 +1369,13 @@ window.setChild = setChild;
 function updateSaveBar(){
   const w = document.querySelector('.save-wrap');
   const sb = document.getElementById('save-btn');
-  const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water','stool'].includes(view);
+  const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water','stool','weight'].includes(view);
   w.style.display = show ? 'block' : 'none';
   if (view==='feeding')      sb.textContent = '💾 Сохранить кормление · Save feeding';
   else if (view==='solids')  sb.textContent = '💾 Сохранить прикорм · Save solids';
   else if (view==='water')   sb.textContent = '💾 Сохранить питьё · Save water';
   else if (view==='stool')   sb.textContent = '💩 Записать стул · Save stool';
+  else if (view==='weight')  sb.textContent = '⚖️ Сохранить вес · Save weight';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1496,6 +1569,7 @@ async function onSave(){
   else if (view==='solids') await saveSolids();
   else if (view==='water') await saveWater();
   else if (view==='stool') await saveStoolOnly();
+  else if (view==='weight') await saveWeight();
 }
 
 async function saveFeeding(){
@@ -1684,6 +1758,51 @@ async function saveStoolOnly(){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// WEIGHT / ВЕС
+// ═══════════════════════════════════════════════════════════════
+function resetWeightForm(){
+  const d = document.getElementById('we-date'); if (d) d.value = todayISO();
+  const t = document.getElementById('we-time'); if (t) t.value = nowHHMM();
+  const k = document.getElementById('we-kg');   if (k) k.value = '';
+}
+async function renderWeightList(){
+  const root = document.getElementById('we-list'); if (!root) return;
+  const { data } = await db.from(T_WEIGHT).select('*').eq('child',child)
+    .order('date',{ascending:false}).order('time',{ascending:false}).limit(15);
+  const rows = data || [];
+  if (!rows.length){ root.innerHTML = '<div class="empty" style="padding:14px">Замеров нет / No measurements</div>'; return; }
+  root.innerHTML = rows.map(w => `
+    <div class="we-row">
+      <span><span class="we-kg">${w.weight_kg} кг / kg</span>
+        <span class="we-when"> · ${escH(w.date)} ${w.time?escH(String(w.time).slice(0,5)):''}</span></span>
+      <button class="we-del" onclick="delWeight(${w.id})">×</button>
+    </div>`).join('');
+}
+window.delWeight = async function(id){
+  if (!confirm('Удалить замер? / Delete measurement?')) return;
+  const { error } = await db.from(T_WEIGHT).delete().eq('id', id);
+  if (!error){ showToast('Удалено / Deleted'); renderWeightList(); }
+};
+async function saveWeight(){
+  const date = document.getElementById('we-date').value;
+  const time = document.getElementById('we-time').value;
+  const kg   = parseFloat(document.getElementById('we-kg').value);
+  if (!date || !kg || isNaN(kg)){ showToast('Заполни дату и вес / Fill date & weight'); return; }
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Сохранение... / Saving...';
+  const { error } = await db.from(T_WEIGHT).insert([{
+    id: newId(), child, date, time, weight_kg: kg
+  }]);
+  if (error){ showToast('Ошибка / Error: '+error.message); console.error(error); }
+  else {
+    showToast('Вес сохранён ✓ / Weight saved ✓');
+    resetWeightForm();
+    renderWeightList();
+  }
+  btn.disabled = false; btn.textContent = '⚖️ Сохранить вес · Save weight';
+}
+
+// ═══════════════════════════════════════════════════════════════
 // SLEEP / СОН
 // ═══════════════════════════════════════════════════════════════
 async function getOpenSleep(){
@@ -1788,9 +1907,11 @@ window.editSleepInline = async function(id){
 // EOD SUMMARY
 // ═══════════════════════════════════════════════════════════════
 function openEod(){
-  eodSel = { mood:null, sleep:null };
+  eodSel = { mood:null, sleep:null, reactions:new Set() };
   document.getElementById('eod-concerns').value='';
   document.getElementById('eod-note').value='';
+  const vt = document.getElementById('eod-vtrans');
+  if (vt){ vt.textContent='Голосовая заметка появится здесь · Voice note will appear here'; vt.className='vtrans emp'; }
   document.getElementById('eod-save').className='save-btn '+child;
   renderEodGrids();
   loadExistingEod();
@@ -1832,6 +1953,22 @@ function renderEodGrids(){
   s.querySelectorAll('[data-sleep]').forEach(el => {
     el.onclick = () => { eodSel.sleep = eodSel.sleep===el.dataset.sleep ? null : el.dataset.sleep; renderEodGrids(); };
   });
+  const r = document.getElementById('eod-rea');
+  if (r){
+    r.innerHTML = REAS.map(x => {
+      const on = eodSel.reactions.has(x.k);
+      return `<div class="rea${on?' s-'+x.cls:''}" data-rea="${x.k}">
+        <span class="r-ru">${x.ru}</span><span class="r-en">${x.en}</span>
+      </div>`;
+    }).join('');
+    r.querySelectorAll('[data-rea]').forEach(el => {
+      el.onclick = () => {
+        const k = el.dataset.rea;
+        eodSel.reactions.has(k) ? eodSel.reactions.delete(k) : eodSel.reactions.add(k);
+        renderEodGrids();
+      };
+    });
+  }
 }
 async function loadExistingEod(){
   const { data } = await db.from(T_SUMMARY)
@@ -1840,17 +1977,24 @@ async function loadExistingEod(){
   if (data && data.length){
     const e = data[0];
     eodSel.mood = e.mood; eodSel.sleep = e.sleep;
+    eodSel.reactions = new Set(e.reactions||[]);
     document.getElementById('eod-concerns').value = e.concerns||'';
     document.getElementById('eod-note').value = e.nanny_note||'';
+    const vt = document.getElementById('eod-vtrans');
+    if (vt && e.voice_note){ vt.textContent = e.voice_note; vt.className='vtrans'; }
     renderEodGrids();
   }
 }
 async function saveEod(){
+  const vt = document.getElementById('eod-vtrans');
+  const voiceNote = vt && !vt.classList.contains('emp') ? vt.textContent.trim() : '';
   const entry = {
     id: newId(), child, date: todayISO(),
     mood: eodSel.mood, sleep: eodSel.sleep,
+    reactions: [...eodSel.reactions],
     concerns: document.getElementById('eod-concerns').value.trim(),
     nanny_note: document.getElementById('eod-note').value.trim(),
+    voice_note: voiceNote,
   };
   const { error } = await db.from(T_SUMMARY).insert([entry]);
   if (error){ showToast('Ошибка / Error'); console.error(error); return; }
@@ -2225,6 +2369,10 @@ function renderTimelineEntry(ev){
       const sleepObj = SLEEPS.find(s=>s.k===e.sleep);
       title = [moodObj?moodObj.ico+' '+moodObj.ru:'', sleepObj?sleepObj.ico+' '+sleepObj.ru:''].filter(Boolean).join(' · ') || 'Итог / Summary';
       if (e.concerns) sub = '⚠️ '+e.concerns;
+      (e.reactions||[]).forEach(rk => {
+        const r = REAS.find(x=>x.k===rk);
+        if (r) pills += `<span class="pill p-${r.cls}">${r.ru}</span>`;
+      });
       break;
     }
   }
@@ -2511,98 +2659,150 @@ async function renderProfile(root){
   // missed days = past days (within regimen) where 0 meds given; today excluded (ongoing)
   const medDays = effDates.filter(d => d < endISO && M.filter(e=>e.date===d && e.given).length===0);
 
+  // ─── KEY METRICS (hero) ───
+  const feedingsByDay = dates.map(d => F.filter(e => e.date===d && ((e.kabrita_ml||0)+(e.nutrilon_ml||0))>0).length);
+  const avgFeedingsPerDay = feedDays.length ? (feedingsByDay.reduce((a,b)=>a+b,0)/feedDays.length).toFixed(1) : '—';
+  const totalStool = stoolByDay.reduce((a,b)=>a+b,0);
+  const avgStoolPerDay = feedDays.length ? (totalStool/feedDays.length).toFixed(1) : '—';
+
+  // weight: latest + trend
+  let weightLatest = '—', weightTrend = '', weightDelta = '';
+  if (W.length){
+    const sorted = [...W].sort((a,b)=>((a.date+a.time)||'').localeCompare((b.date+b.time)||''));
+    weightLatest = `${sorted[sorted.length-1].weight_kg} кг`;
+    if (sorted.length>=2){
+      const d = (sorted[sorted.length-1].weight_kg - sorted[0].weight_kg);
+      weightDelta = (d>=0?'+':'') + d.toFixed(3) + ' кг';
+      weightTrend = d>0 ? '↑' : d<0 ? '↓' : '→';
+    }
+  }
+
+  // total color distribution (max for bars)
+  const totalColorsN = Object.values(colorCounts).reduce((a,b)=>a+b,0);
+
+  // ─── PERIOD SELECTOR ───
   const periodBtns = `
     <div class="prof-period">
-      ${[7,14,30,'all'].map(p => `<button class="${profilePeriod===p?'on':''}" onclick="setProfilePeriod(${typeof p==='string'?`'${p}'`:p})">${p==='all'?'Всё / All':p+' дн'}</button>`).join('')}
+      ${[7,14,30,'all'].map(p => `<button class="${profilePeriod===p?'on':''}" onclick="setProfilePeriod(${typeof p==='string'?`'${p}'`:p})">${p==='all'?'Всё / All':p+' дн / d'}</button>`).join('')}
     </div>`;
 
-  // Weights
-  const weightAddH = `
-    <div class="card tight">
-      <div class="bi"><span class="bi-ru">Добавить замер</span><span class="bi-en">/ Add measurement</span></div>
-      <div class="weight-add">
-        <input type="date" id="w-date" value="${todayISO()}">
-        <input type="time" id="w-time" value="${nowHHMM()}">
-        <input type="number" step="0.001" inputmode="decimal" placeholder="кг / kg" id="w-kg">
-        <button onclick="addWeight()">+</button>
+  // ─── HERO STATS (2x2) ───
+  const medColor = medPct>=90 ? 'var(--ok)' : medPct>=60 ? 'var(--warn)' : 'var(--bad)';
+  const heroH = `
+    <div class="hero-grid">
+      <div class="hero-stat">
+        <div class="hs-ico">⚖️</div>
+        <div class="hs-num">${weightLatest}</div>
+        <div class="hs-lbl">Текущий вес / Latest weight</div>
+        ${weightDelta?`<div class="hs-trend">${weightTrend} ${weightDelta}</div>`:''}
+      </div>
+      <div class="hero-stat">
+        <div class="hs-ico">💊</div>
+        <div class="hs-num" style="color:${medColor}">${medPct}%</div>
+        <div class="hs-lbl">Лекарства / Meds compliance</div>
+        <div class="hs-trend">${medGivenCount} из ${totalExp}</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-ico">🍼</div>
+        <div class="hs-num">${avg}<span class="hs-sm"> мл/д</span></div>
+        <div class="hs-lbl">Смесь в день / Formula/day</div>
+        <div class="hs-trend">${avgFeedingsPerDay} раз/день / feedings</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-ico">💩</div>
+        <div class="hs-num">${avgStoolPerDay}<span class="hs-sm"> /д</span></div>
+        <div class="hs-lbl">Стул в день / Stool/day</div>
+        <div class="hs-trend">${totalStool} всего / total</div>
       </div>
     </div>`;
 
-  let weightChart = '<div class="empty" style="padding:16px">Нет замеров / No measurements</div>';
-  if (W.length>=1){
-    weightChart = `<div class="chart-wrap"><canvas id="weight-chart"></canvas>
-      <div class="chart-meta">
-        <span>мин <b>${Math.min(...W.map(w=>w.weight_kg))} кг</b></span>
-        <span>макс <b>${Math.max(...W.map(w=>w.weight_kg))} кг</b></span>
-        <span>замеров <b>${W.length}</b></span>
-      </div></div>`;
-  }
-
-  // Solids list
-  const solidProducts = [...new Set(S.map(s=>s.product))];
-  const newProducts = [...new Set(S.filter(s=>s.is_new).map(s=>s.product))];
-  const reactCount = S.filter(s => (s.reactions||[]).some(r => r.includes('bad') || r==='gas')).length;
-  const solidsH = !S.length ? '<div class="empty" style="padding:16px">Записей нет / No entries</div>' : `
-    <div class="card tight">
-      <div style="font-size:13px;margin-bottom:8px"><b>${S.length}</b> записей / entries · <b>${solidProducts.length}</b> продуктов / foods · <b style="color:${reactCount>0?'var(--bad)':'var(--ok)'}">${reactCount}</b> реакций / reactions</div>
-      ${newProducts.length?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px">★ Новые продукты / New foods:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">${newProducts.map(p=>`<span class="pill p-warn">${escH(p)}</span>`).join('')}</div>`:''}
+  // ─── TRENDS (combined chart) ───
+  const trendsH = `
+    <div class="trends-card">
+      <div class="trends-hdr">
+        <div class="trends-title">Тренды · Trends</div>
+        <div class="trends-tabs">
+          <button class="tt-btn on" data-tt="nutri" onclick="switchTrend('nutri')">🍼 Смесь</button>
+          <button class="tt-btn" data-tt="stool" onclick="switchTrend('stool')">💩 Стул</button>
+          ${W.length?'<button class="tt-btn" data-tt="weight" onclick="switchTrend(\'weight\')">⚖️ Вес</button>':''}
+        </div>
+      </div>
+      <canvas id="trend-chart" class="trend-chart"></canvas>
+      <div class="chart-meta" id="trend-meta">
+        <span>средн. <b>${avg} мл</b></span>
+        <span>макс <b>${maxV}</b></span>
+        <span>мин <b>${minV}</b></span>
+      </div>
     </div>`;
 
-  // Photos gallery
+  // ─── STOOL COLORS (horizontal bars) ───
+  const colorsRows = totalColorsN === 0
+    ? '<div style="color:var(--hint);font-size:12px;padding:6px">Нет данных за период / No data</div>'
+    : STOOL_COLORS
+        .filter(c => colorCounts[c.k])
+        .sort((a,b)=>colorCounts[b.k]-colorCounts[a.k])
+        .map(c => {
+          const v = colorCounts[c.k] || 0;
+          const pct = Math.round(v*100/totalColorsN);
+          return `<div class="col-row">
+            <div class="cr-name">${c.ico} ${c.ru}</div>
+            <div class="cr-bar"><span style="width:${pct}%;background:${c.k==='yellow'?'#E5C94B':c.k==='brown'?'#7A5030':c.k==='green'?'#5C8B6F':c.k==='white'?'#CFCFCF':'#B04545'}"></span></div>
+            <div class="cr-val"><b>${v}</b> <span style="color:var(--hint)">·${pct}%</span></div>
+          </div>`;
+        }).join('');
+
+  // ─── SOLIDS pills ───
+  const solidProducts = [...new Set(S.map(s=>s.product))];
+  const newProducts = [...new Set(S.filter(s=>s.is_new).map(s=>s.product))];
+  // reactions: now stored in daily_summaries → count bad/warn reactions for the period
+  const eodReact = DS.flatMap(d => d.reactions||[]).filter(r => r.includes('bad') || r==='gas').length;
+  const solidsH = !S.length ? '<div class="empty" style="padding:14px;font-size:13px">Прикорм не вводился / No solids</div>' : `
+    <div class="card tight">
+      <div class="solid-stats">
+        <span><b>${S.length}</b> записей</span>
+        <span><b>${solidProducts.length}</b> продуктов</span>
+        <span><b style="color:${eodReact>0?'var(--bad)':'var(--ok)'}">${eodReact}</b> реакций</span>
+      </div>
+      ${newProducts.length?`<div class="new-prods">
+        <div class="np-hdr">★ Новые продукты / New foods</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${newProducts.map(p=>`<span class="pill p-warn">${escH(p)}</span>`).join('')}</div>
+      </div>`:''}
+    </div>`;
+
+  // ─── PHOTOS (compact grid 4x) ───
   const allPhotos = [...F, ...S].flatMap(e => (e.photo_urls||[]).map(u=>({u, t:e.created_at})));
   allPhotos.sort((a,b)=>(b.t||'').localeCompare(a.t||''));
   const photosH = allPhotos.length
-    ? `<div class="gallery">${allPhotos.slice(0,30).map(p=>`<img src="${escH(p.u)}" loading="lazy" onclick="openPhoto('${escH(p.u)}')">`).join('')}</div>`
-    : `<div class="empty" style="padding:16px">Фото нет / No photos</div>`;
+    ? `<div class="gallery gallery-4">${allPhotos.slice(0,20).map(p=>`<img src="${escH(p.u)}" loading="lazy" onclick="openPhoto('${escH(p.u)}')">`).join('')}</div>${allPhotos.length>20?`<div style="text-align:center;font-size:11px;color:var(--hint);margin-top:6px">показано 20 из ${allPhotos.length}</div>`:''}`
+    : '<div class="empty" style="padding:14px;font-size:13px">Фото нет / No photos</div>';
 
-  // Notes timeline
+  // ─── NOTES (compact) ───
   const notes = [
     ...F.filter(e=>e.note||e.voice_note).map(e=>({date:e.date,time:e.time||'',txt:[e.note,e.voice_note].filter(Boolean).join(' · '),src:'🍼'})),
     ...S.filter(e=>e.note||e.voice_note).map(e=>({date:e.date,time:e.time||'',txt:[e.note,e.voice_note].filter(Boolean).join(' · '),src:'🥦'})),
-    ...DS.map(e=>({date:e.date,time:'23:59',txt:[e.concerns?'⚠️ '+e.concerns:'',e.nanny_note?'💬 '+e.nanny_note:''].filter(Boolean).join('  ·  '),src:'🌙'})),
-  ].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
-  const notesH = !notes.length ? '<div class="empty" style="padding:16px">Заметок нет / No notes</div>' : `
-    <div class="card tight">
-      ${notes.slice(0,20).map(n=>`<div style="padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px;line-height:1.5">
-        <div style="font-size:11px;color:var(--hint);font-weight:600">${escH(n.date)} ${escH(n.time)} ${n.src}</div>
-        <div style="color:var(--text)">${escH(n.txt)}</div>
+    ...DS.map(e=>({date:e.date,time:'23:59',txt:[e.concerns?'⚠️ '+e.concerns:'',e.nanny_note?'💬 '+e.nanny_note:'',e.voice_note?'🎤 '+e.voice_note:''].filter(Boolean).join('  ·  '),src:'🌙'})),
+  ].filter(n => n.txt).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const notesH = !notes.length ? '<div class="empty" style="padding:14px;font-size:13px">Заметок нет / No notes</div>' : `
+    <div class="card tight notes-card">
+      ${notes.slice(0,10).map(n=>`<div class="note-item">
+        <div class="ni-date">${escH(n.date)} ${escH(n.time)} ${n.src}</div>
+        <div class="ni-txt">${escH(n.txt)}</div>
       </div>`).join('')}
+      ${notes.length>10?`<div class="ni-more">+ ещё ${notes.length-10} заметок</div>`:''}
     </div>`;
 
   root.innerHTML = `
     ${periodBtns}
+    ${heroH}
+    ${trendsH}
 
-    <div class="section-hdr">🍼 Питание <span class="sh-en">/ Nutrition</span></div>
-    <div class="chart-wrap">
-      <canvas id="nutri-chart"></canvas>
-      <div class="chart-meta">
-        <span>средн. <b>${avg} мл/день</b></span>
-        <span>макс <b>${maxV} мл</b></span>
-        <span>мин <b>${minV} мл</b></span>
-      </div>
-    </div>
+    <div class="section-hdr">💩 Цвета стула <span class="sh-en">/ Stool colors</span></div>
+    <div class="card tight color-bars">${colorsRows}</div>
 
-    <div class="section-hdr">💩 Стул <span class="sh-en">/ Stool</span></div>
-    <div class="chart-wrap">
-      <canvas id="stool-chart"></canvas>
-      <div class="color-dist">
-        ${Object.entries(colorCounts).map(([k,v])=>{const c=STOOL_COLORS.find(x=>x.k===k);return c?`<div class="cd-item">${c.ico} ${c.ru}: <b>${v}</b></div>`:'';}).join('') || '<span style="color:var(--hint);font-size:12px">Нет данных / No data</span>'}
-      </div>
-    </div>
-
-    <div class="section-hdr">💊 Лекарства <span class="sh-en">/ Medications</span></div>
-    <div class="card tight">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div><span style="font-size:24px;font-weight:700;color:${medPct>=90?'var(--ok)':medPct>=60?'var(--warn)':'var(--bad)'}">${medPct}%</span><span style="font-size:12px;color:var(--muted);margin-left:6px">выполнено / completed</span></div>
-        <div style="font-size:11px;color:var(--muted);text-align:right">${medGivenCount} из ${totalExp}<br>${medGivenCount} of ${totalExp}</div>
-      </div>
-      ${medDays.length?`<div style="margin-top:8px;font-size:11px;color:var(--bad)">Пропущенные дни / Missed: ${medDays.slice(0,5).map(d=>fmtDateShortRU(d).day+' '+fmtDateShortRU(d).mo).join(', ')}${medDays.length>5?' +'+(medDays.length-5):''}</div>`:''}
-    </div>
-
-    <div class="section-hdr">⚖️ Вес <span class="sh-en">/ Weight</span></div>
-    ${weightAddH}
-    ${weightChart}
+    ${medDays.length?`<div class="section-hdr">⚠️ Пропуски лекарств <span class="sh-en">/ Missed doses</span></div>
+    <div class="card tight" style="font-size:12px;color:var(--bad)">
+      ${medDays.slice(0,7).map(d=>fmtDateShortRU(d).day+' '+fmtDateShortRU(d).mo).join(', ')}${medDays.length>7?` + ещё ${medDays.length-7} дн`:''}
+    </div>`:''}
 
     <div class="section-hdr">🥦 Прикорм <span class="sh-en">/ Solids</span></div>
     ${solidsH}
@@ -2610,19 +2810,33 @@ async function renderProfile(root){
     <div class="section-hdr">📷 Фото <span class="sh-en">/ Photos</span></div>
     ${photosH}
 
-    <div class="section-hdr">💬 Заметки и итоги <span class="sh-en">/ Notes & summaries</span></div>
+    <div class="section-hdr">💬 Заметки <span class="sh-en">/ Notes</span></div>
     ${notesH}
   `;
 
-  // draw charts after DOM
-  setTimeout(()=>{
-    drawBarChart('nutri-chart', dates, mlByDay, colorVar(), 'мл');
-    drawBarChart('stool-chart', dates, stoolByDay, 'var(--warn)', 'раз');
-    if (W.length>=1){
-      drawLineChart('weight-chart', W.map(w=>w.date), W.map(w=>parseFloat(w.weight_kg)), colorVar(), 'кг');
-    }
-  }, 30);
+  // store data globally for trend switching
+  window._trendData = {
+    nutri:  { labels: dates, data: mlByDay, color: colorVar(), unit:'мл', avg, max:maxV, min:minV },
+    stool:  { labels: dates, data: stoolByDay, color: 'var(--warn)', unit:'раз', avg: avgStoolPerDay, max: Math.max(...stoolByDay,0), min:0 },
+    weight: W.length ? { labels: W.map(w=>w.date), data: W.map(w=>parseFloat(w.weight_kg)), color: colorVar(), unit:'кг', avg: weightLatest, max: Math.max(...W.map(w=>w.weight_kg)), min: Math.min(...W.map(w=>w.weight_kg)) } : null,
+  };
+  setTimeout(()=>switchTrend('nutri'), 30);
 }
+
+window.switchTrend = function(kind){
+  const d = window._trendData[kind]; if (!d) return;
+  document.querySelectorAll('.tt-btn').forEach(b => b.classList.toggle('on', b.dataset.tt===kind));
+  const meta = document.getElementById('trend-meta');
+  if (meta){
+    if (kind==='weight'){
+      meta.innerHTML = `<span>сейчас <b>${d.avg}</b></span><span>макс <b>${d.max} кг</b></span><span>мин <b>${d.min} кг</b></span>`;
+    } else {
+      meta.innerHTML = `<span>средн. <b>${d.avg} ${d.unit}</b></span><span>макс <b>${d.max}</b></span><span>мин <b>${d.min}</b></span>`;
+    }
+  }
+  if (kind==='weight') drawLineChart('trend-chart', d.labels, d.data, d.color, d.unit);
+  else drawBarChart('trend-chart', d.labels, d.data, d.color, d.unit);
+};
 
 window.setProfilePeriod = function(p){ profilePeriod = p; renderHistory(); };
 window.addWeight = async function(){
@@ -2759,9 +2973,10 @@ function toggleMic(target){
   recognition.interimResults = true;
   recognition.lang = 'ru-RU';
 
-  const btnId  = target==='formula' ? 'f-mic-btn' : 's-mic-btn';
-  const vtId   = target==='formula' ? 'f-vtrans'  : 's-vtrans';
-  const vsId   = target==='formula' ? 'f-vstatus' : 's-vstatus';
+  const prefix = target==='formula' ? 'f-' : target==='eod' ? 'eod-' : 's-';
+  const btnId  = prefix+'mic-btn';
+  const vtId   = prefix+'vtrans';
+  const vsId   = prefix+'vstatus';
   const btn = document.getElementById(btnId);
   const vt  = document.getElementById(vtId);
   const vs  = document.getElementById(vsId);
@@ -2788,16 +3003,17 @@ function toggleMic(target){
   recognition.start();
 }
 function setVTxt(target, kind, txt){
-  const id = (target==='formula'?'f-':'s-')+kind;
-  const el = document.getElementById(id); if (el) el.textContent = txt;
+  const prefix = target==='formula'?'f-' : target==='eod' ? 'eod-' : 's-';
+  const el = document.getElementById(prefix+kind); if (el) el.textContent = txt;
 }
 function stopMic(){
   isRec = false;
   if (recognition){ recognition.onend = null; recognition.stop(); }
   const t = voiceTarget;
   if (!t) return;
-  const btnId = t==='formula'?'f-mic-btn':'s-mic-btn';
-  const vsId  = t==='formula'?'f-vstatus':'s-vstatus';
+  const prefix = t==='formula'?'f-' : t==='eod' ? 'eod-' : 's-';
+  const btnId = prefix+'mic-btn';
+  const vsId  = prefix+'vstatus';
   const btn = document.getElementById(btnId);
   btn.className = 'mic-btn';
   btn.querySelector('.mic-txt').textContent = 'Нажмите и говорите / Tap and speak';
