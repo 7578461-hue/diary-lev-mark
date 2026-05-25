@@ -1,11 +1,14 @@
-# Lev & Mark — Дневник близнецов
-# Lev & Mark — Twins Tracker
+# lev-mark-tracker
+
+**Lev & Mark — Дневник близнецов / Twins Tracker**
 
 Мобильное приложение для контроля ухода за близнецами Лев и Марк
 (09.01.2026). Двуязычное (RU/EN), для нянь-филиппинок и родителей.
 
-Стек: одностраничное PWA (`index.html`) + Supabase (PostgreSQL +
-Storage + Realtime). Без сборки, без зависимостей.
+- Прод: https://lev-mark-tracker.netlify.app
+- Репо: https://github.com/7578461-hue/lev-mark-tracker
+- Стек: одностраничное PWA (`index.html`) + Supabase (PostgreSQL +
+  Storage + Realtime). Без сборки, без зависимостей.
 
 ---
 
