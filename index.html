@@ -699,6 +699,18 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 .sli-open{color:var(--warn);font-weight:600}
 .sli-actions{margin-left:auto;display:flex;gap:2px;flex-shrink:0}
 
+/* inline-edit panel that expands under a list row (feeding & sleep) */
+.inline-edit{margin-top:10px;padding:10px;background:var(--surface);border:.5px solid var(--bmd);border-radius:var(--rsm)}
+.inline-edit .time-pair label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
+.inline-edit .time-pair input{width:100%;padding:8px 10px;border:.5px solid var(--bmd);border-radius:var(--rsm);font-family:inherit;font-size:15px;background:var(--bg);outline:none;-webkit-appearance:none}
+.inline-edit .ml-inp{margin-top:0;padding:9px 12px;font-size:15px}
+.inline-edit .note-inp{min-height:38px;padding:8px 10px;font-size:14px}
+.inline-actions{display:flex;gap:6px;margin-top:8px}
+.inline-actions .ebtn{flex:1;padding:9px;border-radius:var(--rsm);border:.5px solid var(--bmd);background:var(--surface);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;color:var(--muted)}
+.inline-actions .ebtn-save{color:white;border-color:transparent}
+.inline-actions .ebtn-save.lev{background:var(--lev)}
+.inline-actions .ebtn-save.mark{background:var(--mark)}
+
 /* manual time pair */
 .time-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .time-pair label{font-size:11px;color:var(--hint);display:block;margin-bottom:4px}
@@ -758,40 +770,41 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="feeding-form" style="display:none">
       <div class="cur-child" id="feeding-cur"></div>
 
+      <!-- Start / Stop now -->
       <div class="card">
-        <div class="bi"><span class="bi-ru">Feeding time</span><span class="bi-en">/ Время кормления</span></div>
+        <div class="sleep-now">
+          <button class="sn-sleep" id="fn-start" onclick="startFeedingNow()">🍼 Начал кормить<span class="sn-sub">Start feeding</span></button>
+          <button class="sn-wake"  id="fn-stop"  onclick="stopFeedingNow()">⏹ Закончил<span class="sn-sub">Stop feeding</span></button>
+        </div>
+        <div class="sleep-status" id="feeding-status"></div>
+      </div>
+
+      <!-- Manual interval -->
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Manual entry</span><span class="bi-en">/ Ручной ввод</span></div>
         <div class="time-pair">
           <div><label>From / Начало</label><input type="time" id="f-time"></div>
           <div><label>To / Конец</label><input type="time" id="f-time-end"></div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="bi"><span class="bi-ru">Nutrilon formula (ml / мл)</span><span class="bi-en">/ NUTRILON</span></div>
+        <div class="bi" style="margin-top:12px"><span class="bi-ru">Nutrilon (ml / мл)</span><span class="bi-en">/ NUTRILON</span></div>
         <div class="chips" id="nut-chips"></div>
         <input type="number" class="ml-inp" id="nut-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onMlInput('nut')">
+        <textarea class="note-inp" id="f-note" rows="2" placeholder="Note / Заметка" style="margin-top:10px"></textarea>
+        <button class="btn-secondary" onclick="addFeedingManual()">＋ Add feeding / Добавить кормление</button>
       </div>
 
-      <!-- hidden stubs (KABRITA removed, photo removed; keep IDs for old code paths) -->
+      <!-- Today's feedings -->
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Today's feedings</span><span class="bi-en">/ Кормления сегодня</span></div>
+        <div id="feeding-list"></div>
+      </div>
+
+      <!-- hidden stubs for legacy code paths -->
       <div style="display:none">
         <div id="kab-chips"></div><input id="kab-ml" type="hidden">
         <span id="f-total">0</span>
         <input type="file" id="f-photos">
         <div id="f-photo-preview"></div>
-      </div>
-
-      <div class="card">
-        <div class="bi"><span class="bi-ru">Note</span><span class="bi-en">/ Текстовая заметка</span></div>
-        <textarea class="note-inp" id="f-note" rows="2" placeholder="Active, spit up / Был активный, срыгнул"></textarea>
-      </div>
-
-      <div class="card today-list-card">
-        <div class="bi"><span class="bi-ru">Today / Сегодня</span><span class="bi-en">· tap row to edit</span></div>
-        <div id="feeding-today" class="today-list"></div>
-      </div>
-
-      <!-- скрытые элементы для совместимости с saveFeeding (стул не используется тут) -->
-      <div style="display:none">
         <input type="hidden" id="stool-yes"><input type="hidden" id="stool-no">
         <div id="stool-detail"></div>
         <div id="stool-color-grid"></div><div id="stool-cons-grid"></div>
@@ -1409,18 +1422,17 @@ window.setChild = setChild;
 function updateSaveBar(){
   const w = document.querySelector('.save-wrap');
   const sb = document.getElementById('save-btn');
-  const show = mode==='nanny' && viewStep==='form' && ['feeding','solids','water','stool','weight'].includes(view);
+  // feeding uses inline buttons (start/stop/add manual) — no sticky bar
+  const show = mode==='nanny' && viewStep==='form' && ['solids','water','stool','weight'].includes(view);
   w.style.display = show ? 'block' : 'none';
   const editing =
-    (view==='feeding' && fForm.editId) ||
-    (view==='water'   && wSel.editId)  ||
-    (view==='stool'   && soForm.editId);
+    (view==='water' && wSel.editId)  ||
+    (view==='stool' && soForm.editId);
   if (editing){
     sb.textContent = '✓ Update / Обновить';
     return;
   }
-  if (view==='feeding')      sb.textContent = 'Save feeding · 💾 Сохранить кормление';
-  else if (view==='solids')  sb.textContent = 'Save solids · 💾 Сохранить прикорм';
+  if (view==='solids')       sb.textContent = 'Save solids · 💾 Сохранить прикорм';
   else if (view==='water')   sb.textContent = 'Save water · 💾 Сохранить питьё';
   else if (view==='stool')   sb.textContent = 'Save stool · 💩 Записать стул';
   else if (view==='weight')  sb.textContent = 'Save weight · ⚖️ Сохранить вес';
@@ -1513,51 +1525,140 @@ function resetFeedingForm(){
   if (vt){ vt.textContent='Voice note will appear here · Голосовая заметка появится здесь'; vt.className='vtrans emp'; }
   document.getElementById('f-photo-preview').innerHTML='';
   renderAllChips(); updateTotal();
-  renderFeedingToday();
+  renderFeedingList();
   updateSaveBar();
 }
-async function renderFeedingToday(){
-  const root = document.getElementById('feeding-today'); if (!root) return;
+// ─── Feeding: list + inline edit ─────────────────────────────────
+let feedingEditOpen = null;  // id of currently inline-editing entry
+
+async function renderFeedingList(){
+  const root = document.getElementById('feeding-list');
+  const status = document.getElementById('feeding-status');
+  if (!root) return;
   const { data } = await db.from(T_FORMULA).select('*')
     .eq('child',child).eq('date',todayISO()).neq('stool',true)
-    .order('time',{ascending:false});
-  const rows = (data || []).filter(r => (r.nutrilon_ml||0)>0 || (r.kabrita_ml||0)>0 || r.note);
-  if (!rows.length){ root.innerHTML = '<div class="tl-empty">No feedings today / Кормлений пока нет</div>'; return; }
-  root.innerHTML = rows.map(r => {
-    const total = (r.nutrilon_ml||0) + (r.kabrita_ml||0);
-    const t1 = escH(String(r.time||'').slice(0,5));
-    const t2 = r.time_end ? '–'+escH(String(r.time_end).slice(0,5)) : '';
-    return `<div class="tl-row ${fForm.editId===r.id?'editing':''}">
-      <div class="tl-time">${t1}${t2}</div>
-      <div class="tl-body" onclick="loadFeedingForEdit(${r.id})"><b>${total} ml</b>${r.note?' · '+escH(r.note):''}</div>
-      <button class="tl-del" onclick="delFeeding(${r.id})">×</button>
+    .order('time',{ascending:true});
+  // show every non-stool feeding entry — even 0 ml ones that nanny just closed
+  const list = data || [];
+  const open = list.find(e => !e.time_end);
+  const start = document.getElementById('fn-start');
+  const stop  = document.getElementById('fn-stop');
+  if (start) start.disabled = !!open;
+  if (stop)  stop.disabled  = !open;
+  const totalMl = list.reduce((s,e)=>s+(e.nutrilon_ml||0)+(e.kabrita_ml||0),0);
+  if (status){
+    status.innerHTML = open
+      ? `🍼 Сейчас кормит с <b>${escH(String(open.time||'').slice(0,5))}</b><br>Currently feeding`
+      : `Всего за день: <b>${list.length} ${list.length===1?'time':'times'} · ${totalMl} ml</b><br>Total today`;
+  }
+  if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">Нет кормлений / No feedings</div>'; return; }
+  root.innerHTML = list.map(e => {
+    const t1 = escH(String(e.time||'').slice(0,5));
+    const t2 = e.time_end ? '–'+escH(String(e.time_end).slice(0,5)) : '–…';
+    const ml = (e.nutrilon_ml||0)+(e.kabrita_ml||0);
+    const mlStr = ml ? `${ml} ml` : (e.time_end ? '0 ml' : 'feeding now / кормится');
+    const noteStr = e.note ? ' · '+escH(e.note) : '';
+    return `<div class="sleep-list-item">
+      <div style="min-width:0;flex:1">
+        <div class="sli-time">${t1}${t2}</div>
+        <div class="sli-dur ${e.time_end?'':'sli-open'}">${mlStr}${noteStr}</div>
+        ${feedingEditOpen===e.id ? buildFeedingInlineEdit(e) : ''}
+      </div>
+      <div class="sli-actions">
+        <button class="act-btn edit-btn" onclick="toggleFeedingEdit(${e.id})">✏️</button>
+        <button class="act-btn del-btn" onclick="delFeeding(${e.id})">✕</button>
+      </div>
     </div>`;
   }).join('');
 }
-window.loadFeedingForEdit = async function(id){
-  const { data } = await db.from(T_FORMULA).select('*').eq('id', id).limit(1);
-  if (!data || !data.length) return;
-  const e = data[0];
-  fForm = resetFormula();
-  fForm.kab = e.kabrita_ml||0;
-  fForm.nut = e.nutrilon_ml||0;
-  fForm.editId = id;
-  document.getElementById('f-time').value = String(e.time||'').slice(0,5) || nowHHMM();
-  document.getElementById('f-time-end').value = e.time_end ? String(e.time_end).slice(0,5) : '';
-  document.getElementById('nut-ml').value = e.nutrilon_ml||'';
-  document.getElementById('f-note').value = e.note||'';
-  renderAllChips(); updateTotal();
-  renderFeedingToday();
-  updateSaveBar();
-  window.scrollTo({top:0, behavior:'smooth'});
+
+function buildFeedingInlineEdit(e){
+  return `<div class="inline-edit">
+    <div class="time-pair">
+      <div><label>From</label><input type="time" id="ef-st-${e.id}" value="${String(e.time||'').slice(0,5)}"></div>
+      <div><label>To</label><input type="time" id="ef-en-${e.id}" value="${e.time_end?String(e.time_end).slice(0,5):''}"></div>
+    </div>
+    <input type="number" inputmode="numeric" class="ml-inp" id="ef-ml-${e.id}" value="${e.nutrilon_ml||0}" placeholder="ml" style="margin-top:8px">
+    <textarea class="note-inp" id="ef-nt-${e.id}" rows="1" placeholder="Note / Заметка" style="margin-top:6px">${escH(e.note||'')}</textarea>
+    <div class="inline-actions">
+      <button class="ebtn" onclick="toggleFeedingEdit(null)">Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveFeedingInline(${e.id})">Save</button>
+    </div>
+  </div>`;
+}
+
+window.toggleFeedingEdit = function(id){
+  feedingEditOpen = (feedingEditOpen===id) ? null : id;
+  renderFeedingList();
 };
+
+window.saveFeedingInline = async function(id){
+  const ch = {
+    time: document.getElementById('ef-st-'+id).value || null,
+    time_end: document.getElementById('ef-en-'+id).value || null,
+    nutrilon_ml: parseInt(document.getElementById('ef-ml-'+id).value,10) || 0,
+    note: document.getElementById('ef-nt-'+id).value.trim(),
+  };
+  const { error } = await db.from(T_FORMULA).update(ch).eq('id', id);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓');
+  feedingEditOpen = null;
+  renderFeedingList();
+};
+
+window.startFeedingNow = async function(){
+  const t = nowHHMM();
+  const { error } = await db.from(T_FORMULA).insert([{
+    id:newId(), child, date: todayISO(),
+    time:t, time_end:null,
+    kabrita_ml:0, nutrilon_ml:0, water_ml:0,
+    stool:false, stool_color:null, stool_consistency:null,
+    photo_urls:[], note:'', voice_note:'',
+  }]);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); console.error(error); return; }
+  showToast('Started feeding ✓ / Начал кормить ✓');
+  renderFeedingList();
+};
+
+window.stopFeedingNow = async function(){
+  const { data } = await db.from(T_FORMULA).select('*')
+    .eq('child',child).eq('date',todayISO()).is('time_end', null)
+    .order('time',{ascending:false}).limit(1);
+  if (!data || !data.length){ showToast('No open feeding / Нет начатого'); return; }
+  const open = data[0];
+  const { error } = await db.from(T_FORMULA).update({ time_end: nowHHMM() }).eq('id', open.id);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); return; }
+  showToast('Stopped ✓ — tap entry to add ml / Закончил, нажми чтобы добавить мл');
+  feedingEditOpen = open.id;  // auto-open edit so nanny can quickly enter ml
+  renderFeedingList();
+};
+
+window.addFeedingManual = async function(){
+  const t1 = document.getElementById('f-time').value;
+  const t2 = document.getElementById('f-time-end').value;
+  const ml = parseInt(document.getElementById('nut-ml').value,10) || fForm.nut || 0;
+  const note = document.getElementById('f-note').value.trim();
+  if (!t1 && !ml){ showToast('Enter time or ml / Введи время или мл'); return; }
+  const { error } = await db.from(T_FORMULA).insert([{
+    id:newId(), child, date: todayISO(),
+    time: t1 || nowHHMM(),
+    time_end: t2 || null,
+    kabrita_ml:0, nutrilon_ml: ml,
+    water_ml:0, stool:false, stool_color:null, stool_consistency:null,
+    photo_urls:[], note, voice_note:'',
+  }]);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); console.error(error); return; }
+  showToast('Added ✓ / Добавлено ✓');
+  resetFeedingForm();
+};
+
 window.delFeeding = async function(id){
   if (!confirm('Delete feeding? / Удалить кормление?')) return;
   const { error } = await db.from(T_FORMULA).delete().eq('id', id);
-  if (error){ showToast('Error: / Ошибка '+error.message); return; }
+  if (error){ showToast('Error: '+(error?.message||'unknown')); return; }
   showToast('Deleted / Удалено');
-  if (fForm.editId===id) resetFeedingForm();
-  else renderFeedingToday();
+  if (feedingEditOpen===id) feedingEditOpen=null;
+  renderFeedingList();
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1661,7 +1762,8 @@ function resetSolidsForm(){
 // SAVE (router)
 // ═══════════════════════════════════════════════════════════════
 async function onSave(){
-  if (view==='feeding') await saveFeeding();
+  // feeding has its own inline buttons, no sticky save
+  if (false && view==='feeding') await saveFeeding();
   else if (view==='solids') await saveSolids();
   else if (view==='water') await saveWater();
   else if (view==='stool') await saveStoolOnly();
@@ -2052,40 +2154,65 @@ async function renderSleepList(){
     const timeStr = e.end_time ? `${tsHHMM(e.start_time)} – ${tsHHMM(e.end_time)}` : `${tsHHMM(e.start_time)} – …`;
     const durStr  = e.end_time ? fmtDur(sleepDurMin(e)) : 'asleep / спит сейчас';
     return `<div class="sleep-list-item">
-      <div>
+      <div style="min-width:0;flex:1">
         <div class="sli-time">${timeStr}</div>
         <div class="sli-dur ${e.end_time?'':'sli-open'}">${durStr}${e.note?' · '+escH(e.note):''}</div>
+        ${sleepEditOpen===e.id ? buildSleepInlineEdit(e) : ''}
       </div>
       <div class="sli-actions">
-        <button class="act-btn edit-btn" onclick="editSleepInline(${e.id})">✏️</button>
+        <button class="act-btn edit-btn" onclick="toggleSleepEdit(${e.id})">✏️</button>
         <button class="act-btn del-btn" onclick="delSleep(${e.id})">✕</button>
       </div>
     </div>`;
   }).join('');
 }
+
+let sleepEditOpen = null;
+function buildSleepInlineEdit(e){
+  return `<div class="inline-edit">
+    <div class="time-pair">
+      <div><label>From / Заснул</label><input type="time" id="es-st-${e.id}" value="${tsHHMM(e.start_time)}"></div>
+      <div><label>To / Проснулся</label><input type="time" id="es-en-${e.id}" value="${e.end_time?tsHHMM(e.end_time):''}"></div>
+    </div>
+    <textarea class="note-inp" id="es-nt-${e.id}" rows="1" placeholder="Note / Заметка" style="margin-top:6px">${escH(e.note||'')}</textarea>
+    <div class="inline-actions">
+      <button class="ebtn" onclick="toggleSleepEdit(null)">Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveSleepInline(${e.id})">Save</button>
+    </div>
+  </div>`;
+}
+window.toggleSleepEdit = function(id){
+  sleepEditOpen = (sleepEditOpen===id) ? null : id;
+  renderSleepList();
+};
+window.saveSleepInline = async function(id){
+  const startV = document.getElementById('es-st-'+id).value;
+  const endV   = document.getElementById('es-en-'+id).value;
+  const noteV  = document.getElementById('es-nt-'+id).value.trim();
+  if (!startV){ showToast('Start time required / Введи время начала'); return; }
+  const d = todayISO();
+  const start = new Date(d+'T'+startV+':00');
+  let end = null;
+  if (endV){
+    end = new Date(d+'T'+endV+':00');
+    if (end < start) end.setDate(end.getDate()+1);  // wraps past midnight
+  }
+  const { error } = await db.from(T_SLEEP).update({
+    start_time: start.toISOString(),
+    end_time: end ? end.toISOString() : null,
+    note: noteV,
+  }).eq('id', id);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓');
+  sleepEditOpen = null;
+  renderSleepList();
+};
 window.delSleep = async function(id){
   if (!confirm('Delete interval? / Удалить интервал?')) return;
   await db.from(T_SLEEP).delete().eq('id', id);
   renderSleepList();
 };
-window.editSleepInline = async function(id){
-  const { data } = await db.from(T_SLEEP).select('*').eq('id',id).limit(1);
-  if (!data || !data.length) return;
-  const e = data[0];
-  const ns = prompt('From (HH:MM): / Заснул (ЧЧ:ММ)', tsHHMM(e.start_time));
-  if (ns===null) return;
-  const ne = prompt('To (HH:MM, empty = still asleep): / Проснулся (ЧЧ:ММ, пусто = ещё спит)', e.end_time?tsHHMM(e.end_time):'');
-  if (ne===null) return;
-  const d = e.date || todayISO();
-  const start = new Date(d+'T'+ns+':00');
-  let end = null;
-  if (ne.trim()){ end = new Date(d+'T'+ne.trim()+':00'); if (end < start) end.setDate(end.getDate()+1); }
-  const { error } = await db.from(T_SLEEP).update({
-    start_time: start.toISOString(), end_time: end ? end.toISOString() : null
-  }).eq('id', id);
-  if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); return; }
-  renderSleepList();
-};
+// (old prompt-based editor replaced with inline edit panel above)
 
 // ═══════════════════════════════════════════════════════════════
 // EOD SUMMARY
