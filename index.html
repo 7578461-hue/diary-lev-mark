@@ -1072,7 +1072,8 @@ const SLEEPS = [
 ];
 
 // Meds schedule per dose-time card
-const MED_DOSE = (c) => c==='lev' ? '4 капли / 4 drops' : '7 капель / 7 drops';
+// Обоим детям одинаковая доза Мальтофера (изменили с 4/7 на 7/7 капель)
+const MED_DOSE = (_c) => '7 капель / 7 drops';
 const MED_SCHEDULE = {
   morning:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)},
               {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ таб / ¼ tab'}],
