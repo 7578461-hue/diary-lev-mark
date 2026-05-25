@@ -103,6 +103,9 @@ alter table daily_summaries add column if not exists reactions  jsonb default '[
 alter table daily_summaries add column if not exists voice_note text  default '';
 alter table daily_summaries add column if not exists photo_urls jsonb default '[]';
 
+-- ── formula_entries: конец кормления (start=time, end=time_end) ──
+alter table formula_entries add column if not exists time_end text;
+
 -- ── RLS: публичный доступ (как в существующей версии) ───────
 alter table feeding_entries     enable row level security;
 alter table formula_entries     enable row level security;

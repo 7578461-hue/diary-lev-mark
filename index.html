@@ -760,9 +760,9 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Feeding time</span><span class="bi-en">/ Время кормления</span></div>
-        <div class="time-row">
-          <input type="time" class="time-inp" id="f-time">
-          <div class="time-hint">When fed<br>Когда кормили</div>
+        <div class="time-pair">
+          <div><label>From / Начало</label><input type="time" id="f-time"></div>
+          <div><label>To / Конец</label><input type="time" id="f-time-end"></div>
         </div>
       </div>
 
@@ -809,15 +809,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       <div class="cur-child" id="water-cur"></div>
 
       <div class="card">
-        <div class="bi"><span class="bi-ru">Time</span><span class="bi-en">/ Время</span></div>
-        <div class="time-row">
-          <input type="time" class="time-inp" id="wa-time">
-          <div class="time-hint">When drank<br>Когда пил</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="bi"><span class="bi-ru">Water (мл/ml)</span><span class="bi-en">/ Объём воды</span></div>
+        <div class="bi"><span class="bi-ru">Water today (ml)</span><span class="bi-en">/ Вода за день (мл)</span></div>
         <div class="chips" id="wa-presets"></div>
         <input type="number" class="ml-inp" id="wa-ml" placeholder="manual / вручную" inputmode="numeric" oninput="onWaterInput()">
       </div>
@@ -1162,7 +1154,7 @@ let lastEntries = {};
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 const ML_PRESETS = [50,80,100,120,150,160];
-const WATER_PRESETS = [10,20,30,50];
+const WATER_PRESETS = [130,140,150,160,170,180,190];
 
 const STOOL_COLORS = [
   {k:'yellow',  ico:'🟡', ru:'Жёлтый',     en:'Yellow'},
@@ -1513,6 +1505,7 @@ function resetFeedingForm(){
   fForm = resetFormula();
   ['kab-ml','nut-ml','water-ml','f-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
   document.getElementById('f-time').value = nowHHMM();
+  document.getElementById('f-time-end').value = '';
   document.getElementById('stool-yes').className = '';
   document.getElementById('stool-no').className = '';
   document.getElementById('stool-detail').style.display = 'none';
@@ -1532,8 +1525,10 @@ async function renderFeedingToday(){
   if (!rows.length){ root.innerHTML = '<div class="tl-empty">No feedings today / Кормлений пока нет</div>'; return; }
   root.innerHTML = rows.map(r => {
     const total = (r.nutrilon_ml||0) + (r.kabrita_ml||0);
+    const t1 = escH(String(r.time||'').slice(0,5));
+    const t2 = r.time_end ? '–'+escH(String(r.time_end).slice(0,5)) : '';
     return `<div class="tl-row ${fForm.editId===r.id?'editing':''}">
-      <div class="tl-time">${escH(String(r.time||'').slice(0,5))}</div>
+      <div class="tl-time">${t1}${t2}</div>
       <div class="tl-body" onclick="loadFeedingForEdit(${r.id})"><b>${total} ml</b>${r.note?' · '+escH(r.note):''}</div>
       <button class="tl-del" onclick="delFeeding(${r.id})">×</button>
     </div>`;
@@ -1548,6 +1543,7 @@ window.loadFeedingForEdit = async function(id){
   fForm.nut = e.nutrilon_ml||0;
   fForm.editId = id;
   document.getElementById('f-time').value = String(e.time||'').slice(0,5) || nowHHMM();
+  document.getElementById('f-time-end').value = e.time_end ? String(e.time_end).slice(0,5) : '';
   document.getElementById('nut-ml').value = e.nutrilon_ml||'';
   document.getElementById('f-note').value = e.note||'';
   renderAllChips(); updateTotal();
@@ -1674,6 +1670,7 @@ async function onSave(){
 
 async function saveFeeding(){
   const time = document.getElementById('f-time').value || nowHHMM();
+  const timeEnd = document.getElementById('f-time-end').value || '';
   const kab = fForm.kab||0;
   const nut = fForm.nut||0;
   const water = 0; // вода теперь отдельный экран Питьё / water is a separate screen
@@ -1690,7 +1687,7 @@ async function saveFeeding(){
   const id = fForm.editId || newId();
 
   const fields = {
-    child, date: todayISO(), time,
+    child, date: todayISO(), time, time_end: timeEnd || null,
     kabrita_ml: 0, nutrilon_ml: nut, water_ml: 0,
     stool: false, stool_color: null, stool_consistency: null,
     photo_urls: [],
@@ -1765,7 +1762,6 @@ function onWaterInput(){
 function resetWaterForm(){
   wSel = { ml:0, editId:null };
   ['wa-ml','wa-note'].forEach(id => { const e=document.getElementById(id); if (e) e.value=''; });
-  const t = document.getElementById('wa-time'); if (t) t.value = nowHHMM();
   renderWaterPresets();
   renderWaterToday();
   updateSaveBar();
@@ -1777,7 +1773,7 @@ async function saveWater(){
   btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const fields = {
     child, date: todayISO(),
-    time: document.getElementById('wa-time').value || nowHHMM(),
+    time: null,                       // time field removed — nannies log per-day totals
     ml, note: document.getElementById('wa-note').value.trim(),
   };
   let error;
@@ -1798,7 +1794,7 @@ async function renderWaterToday(){
   if (!rows.length){ root.innerHTML = '<div class="tl-empty">No entries yet / Записей нет</div>'; return; }
   root.innerHTML = rows.map(r => `
     <div class="tl-row ${wSel.editId===r.id?'editing':''}">
-      <div class="tl-time">${escH(String(r.time||'').slice(0,5))}</div>
+      <div class="tl-time">+</div>
       <div class="tl-body" onclick="loadWaterForEdit(${r.id})"><b>${r.ml} ml</b>${r.note?' · '+escH(r.note):''}</div>
       <button class="tl-del" onclick="delWater(${r.id})">×</button>
     </div>`).join('');
@@ -1810,7 +1806,6 @@ window.loadWaterForEdit = async function(id){
   wSel = { ml: e.ml||0, editId: id };
   document.getElementById('wa-ml').value = e.ml||'';
   document.getElementById('wa-note').value = e.note||'';
-  document.getElementById('wa-time').value = String(e.time||'').slice(0,5) || nowHHMM();
   renderWaterPresets();
   renderWaterToday();
   updateSaveBar();
@@ -2628,9 +2623,14 @@ function renderTimelineEntry(ev){
     photosH = `<div class="te-photos">${e.photo_urls.map(u=>`<img src="${escH(u)}" loading="lazy" onclick="openPhoto('${escH(u)}')">`).join('')}</div>`;
   }
   const editable = kind!=='summary'; // summary edit not implemented
+  // For feeding show "start–end" if both present
+  let timeDisplay = escH(time);
+  if (kind==='formula' && e.time_end){
+    timeDisplay = escH(String(e.time||'').slice(0,5))+'–'+escH(String(e.time_end).slice(0,5));
+  }
   return `<div class="timeline-entry">
     <div class="te-view">
-      <div class="te-time"><div class="te-time-v">${escH(time)}</div><div class="te-time-l">time</div></div>
+      <div class="te-time"><div class="te-time-v" style="font-size:${timeDisplay.length>5?'12px':'16px'}">${timeDisplay}</div><div class="te-time-l">time</div></div>
       <div class="te-body">
         <div class="te-kind">${kindLbl}</div>
         <div class="te-title">${escH(title)}</div>
@@ -2675,8 +2675,6 @@ function buildEditBlock(kind, e){
 }
 function buildEditWater(e){
   return `<div class="te-edit">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Time</span><span class="bi-en">/ Время</span></div>
-      <input type="time" class="edit-mini-inp" id="ewa-time-${e.id}" value="${e.time||''}"></div>
     <div class="edit-row"><div class="edit-bi"><span class="bi-ru">ml</span><span class="bi-en">/ Объём мл</span></div>
       <input type="number" inputmode="numeric" class="edit-mini-inp" id="ewa-ml-${e.id}" value="${e.ml||0}"></div>
     <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Note</span><span class="bi-en">/ Заметка</span></div>
@@ -2689,7 +2687,6 @@ function buildEditWater(e){
 }
 window.saveEditWater = async (id) => {
   const ch = {
-    time: document.getElementById('ewa-time-'+id).value,
     ml: parseInt(document.getElementById('ewa-ml-'+id).value,10)||0,
     note: document.getElementById('ewa-note-'+id).value.trim(),
   };
@@ -2737,8 +2734,11 @@ function buildEditFormula(e){
   const consHtml = STOOL_CONS.map(c =>
     `<div class="etap${editBuf.f.stoolCons===c.k?' '+sc():''}" onclick="eFCons('${c.k}')">${c.ru}<br><span style="font-size:9px;opacity:.6">${c.en}</span></div>`).join('');
   return `<div class="te-edit" id="te-edit-${e.id}">
-    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">Time</span><span class="bi-en">/ Время</span></div>
-      <input type="time" class="edit-mini-inp" id="ef-time-${e.id}" value="${e.time||''}"></div>
+    <div class="edit-row"><div class="edit-bi"><span class="bi-ru">From / To</span><span class="bi-en">/ Начало / Конец</span></div>
+      <div class="edit-g2">
+        <input type="time" class="edit-mini-inp" id="ef-time-${e.id}" value="${String(e.time||'').slice(0,5)}">
+        <input type="time" class="edit-mini-inp" id="ef-tend-${e.id}" value="${e.time_end ? String(e.time_end).slice(0,5) : ''}">
+      </div></div>
     <div class="edit-row"><div class="edit-bi"><span class="bi-ru">ml</span><span class="bi-en">/ KABRITA мл</span></div>
       <input type="number" inputmode="numeric" class="edit-mini-inp" id="ef-kab-${e.id}" value="${e.kabrita_ml||0}"></div>
     <div class="edit-row"><div class="edit-bi"><span class="bi-ru">ml</span><span class="bi-en">/ NUTRILON мл</span></div>
@@ -2768,7 +2768,8 @@ window.eFStcol = (k) => { editBuf.f.stoolColor=editBuf.f.stoolColor===k?null:k; 
 window.eFCons  = (k) => { editBuf.f.stoolCons=editBuf.f.stoolCons===k?null:k; renderHistory(); };
 window.saveEditFormula = async (id) => {
   const ch = {
-    time: document.getElementById('ef-time-'+id).value,
+    time:     document.getElementById('ef-time-'+id).value,
+    time_end: document.getElementById('ef-tend-'+id)?.value || null,
     kabrita_ml: parseInt(document.getElementById('ef-kab-'+id).value,10)||0,
     nutrilon_ml: parseInt(document.getElementById('ef-nut-'+id).value,10)||0,
     water_ml:    parseInt(document.getElementById('ef-wat-'+id).value,10)||0,
