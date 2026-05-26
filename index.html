@@ -706,6 +706,11 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 .inline-edit .ml-inp{margin-top:0;padding:9px 12px;font-size:15px}
 .inline-edit .note-inp{min-height:38px;padding:8px 10px;font-size:14px}
 .inline-actions{display:flex;gap:6px;margin-top:8px}
+
+/* Day group header for today/yesterday lists */
+.day-grp{margin-bottom:10px}
+.day-grp:last-child{margin-bottom:0}
+.day-grp-hdr{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 2px 4px}
 .inline-actions .ebtn{flex:1;padding:9px;border-radius:var(--rsm);border:.5px solid var(--bmd);background:var(--surface);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;color:var(--muted)}
 .inline-actions .ebtn-save{color:white;border-color:transparent}
 .inline-actions .ebtn-save.lev{background:var(--lev)}
@@ -1544,40 +1549,53 @@ async function renderFeedingList(){
   const root = document.getElementById('feeding-list');
   const status = document.getElementById('feeding-status');
   if (!root) return;
+  // Get today's + last 2 days so nanny can view/edit yesterday & open intervals
+  // that crossed midnight still show up.
+  const today = todayISO();
+  const back2 = (() => { const d = new Date(); d.setDate(d.getDate()-2); return dateISO(d); })();
   const { data } = await db.from(T_FORMULA).select('*')
-    .eq('child',child).eq('date',todayISO()).neq('stool',true)
-    .order('time',{ascending:true});
-  // show every non-stool feeding entry — even 0 ml ones that nanny just closed
-  const list = data || [];
-  const open = list.find(e => !e.time_end);
+    .eq('child',child).gte('date',back2).lte('date',today).neq('stool',true)
+    .order('date',{ascending:false}).order('time',{ascending:true});
+  const allRows = data || [];
+  // Open feeding (no time_end) — even from yesterday
+  const open = allRows.find(e => !e.time_end);
   const start = document.getElementById('fn-start');
   const stop  = document.getElementById('fn-stop');
   if (start) start.disabled = !!open;
   if (stop)  stop.disabled  = !open;
-  const totalMl = list.reduce((s,e)=>s+(e.nutrilon_ml||0)+(e.kabrita_ml||0),0);
+  const todayList = allRows.filter(e => e.date === today);
+  const totalMl = todayList.reduce((s,e)=>s+(e.nutrilon_ml||0)+(e.kabrita_ml||0),0);
   if (status){
     status.innerHTML = open
-      ? `🍼 Сейчас кормит с <b>${escH(String(open.time||'').slice(0,5))}</b><br>Currently feeding`
-      : `Всего за день: <b>${list.length} ${list.length===1?'time':'times'} · ${totalMl} ml</b><br>Total today`;
+      ? `🍼 Currently feeding since <b>${escH(String(open.time||'').slice(0,5))}</b>${open.date!==today?` <span style="color:var(--warn)">(${open.date})</span>`:''}<br>Сейчас кормит`
+      : `Total today: <b>${todayList.length} ${todayList.length===1?'time':'times'} · ${totalMl} ml</b><br>Всего за день`;
   }
-  if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">Нет кормлений / No feedings</div>'; return; }
-  root.innerHTML = list.map(e => {
-    const t1 = escH(String(e.time||'').slice(0,5));
-    const t2 = e.time_end ? '–'+escH(String(e.time_end).slice(0,5)) : '–…';
-    const ml = (e.nutrilon_ml||0)+(e.kabrita_ml||0);
-    const mlStr = ml ? `${ml} ml` : (e.time_end ? '0 ml' : 'feeding now / кормится');
-    const noteStr = e.note ? ' · '+escH(e.note) : '';
-    return `<div class="sleep-list-item">
-      <div style="min-width:0;flex:1">
-        <div class="sli-time">${t1}${t2}</div>
-        <div class="sli-dur ${e.time_end?'':'sli-open'}">${mlStr}${noteStr}</div>
-        ${feedingEditOpen===e.id ? buildFeedingInlineEdit(e) : ''}
-      </div>
-      <div class="sli-actions">
-        <button class="act-btn edit-btn" onclick="toggleFeedingEdit(${e.id})">✏️</button>
-        <button class="act-btn del-btn" onclick="delFeeding(${e.id})">✕</button>
-      </div>
-    </div>`;
+  if (!allRows.length){ root.innerHTML = '<div class="empty" style="padding:14px">No feedings / Нет кормлений</div>'; return; }
+  // Render grouped by date — today first, then prior days
+  const groups = {};
+  allRows.forEach(e => { (groups[e.date] = groups[e.date] || []).push(e); });
+  const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+  root.innerHTML = sortedDates.map(d => {
+    const dayLabel = d===today ? 'Today / Сегодня' : (d===dateISO(new Date(Date.now()-86400000)) ? 'Yesterday / Вчера' : d);
+    const rowsH = groups[d].map(e => {
+      const t1 = escH(String(e.time||'').slice(0,5));
+      const t2 = e.time_end ? '–'+escH(String(e.time_end).slice(0,5)) : '–…';
+      const ml = (e.nutrilon_ml||0)+(e.kabrita_ml||0);
+      const mlStr = ml ? `${ml} ml` : (e.time_end ? '0 ml' : 'feeding now / кормится');
+      const noteStr = e.note ? ' · '+escH(e.note) : '';
+      return `<div class="sleep-list-item">
+        <div style="min-width:0;flex:1">
+          <div class="sli-time">${t1}${t2}</div>
+          <div class="sli-dur ${e.time_end?'':'sli-open'}">${mlStr}${noteStr}</div>
+          ${feedingEditOpen===e.id ? buildFeedingInlineEdit(e) : ''}
+        </div>
+        <div class="sli-actions">
+          <button class="act-btn edit-btn" onclick="toggleFeedingEdit(${e.id})">✏️</button>
+          <button class="act-btn del-btn" onclick="delFeeding(${e.id})">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="day-grp"><div class="day-grp-hdr">${dayLabel}</div>${rowsH}</div>`;
   }).join('');
 }
 
@@ -1630,9 +1648,10 @@ window.startFeedingNow = async function(){
 };
 
 window.stopFeedingNow = async function(){
+  // Find any open feeding (could have started yesterday, then crosses midnight)
   const { data } = await db.from(T_FORMULA).select('*')
-    .eq('child',child).eq('date',todayISO()).is('time_end', null)
-    .order('time',{ascending:false}).limit(1);
+    .eq('child',child).is('time_end', null).neq('stool',true)
+    .order('date',{ascending:false}).order('time',{ascending:false}).limit(1);
   if (!data || !data.length){ showToast('No open feeding / Нет начатого'); return; }
   const open = data[0];
   const { error } = await db.from(T_FORMULA).update({ time_end: nowHHMM() }).eq('id', open.id);
@@ -1851,27 +1870,36 @@ async function saveSolids(){
 let solidsEditOpen = null;
 async function renderSolidsList(){
   const root = document.getElementById('solids-list'); if (!root) return;
-  const { data } = await db.from(T_SOLIDS).select('*').eq('child',child).eq('date',todayISO())
-    .order('time',{ascending:true});
+  const today = todayISO();
+  const back2 = (() => { const d = new Date(); d.setDate(d.getDate()-2); return dateISO(d); })();
+  const { data } = await db.from(T_SOLIDS).select('*').eq('child',child)
+    .gte('date',back2).lte('date',today)
+    .order('date',{ascending:false}).order('time',{ascending:true});
   const list = data || [];
   if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">No solids today / Прикорма пока нет</div>'; return; }
-  root.innerHTML = list.map(e => {
-    const t = escH(String(e.time||'').slice(0,5));
-    const prod = escH(e.product||'');
-    const amt = AMTS.find(a=>a.v===e.amount);
-    const acc = ACCS.find(a=>a.k===e.accept);
-    const sub = [amt?(amt.ru+' / '+amt.en):'', acc?(acc.ico+' '+acc.ru):''].filter(Boolean).join(' · ');
-    return `<div class="sleep-list-item">
-      <div style="min-width:0;flex:1">
-        <div class="sli-time">${t} · ${prod}${e.is_new?' <span style="font-size:11px;color:var(--warn);font-weight:600">★ new</span>':''}</div>
-        <div class="sli-dur">${sub}${e.note?' · '+escH(e.note):''}</div>
-        ${solidsEditOpen===e.id ? buildSolidsInlineEdit(e) : ''}
-      </div>
-      <div class="sli-actions">
-        <button class="act-btn edit-btn" onclick="toggleSolidsEdit(${e.id})">✏️</button>
-        <button class="act-btn del-btn" onclick="delSolid(${e.id})">✕</button>
-      </div>
-    </div>`;
+  const groups = {};
+  list.forEach(e => { (groups[e.date] = groups[e.date] || []).push(e); });
+  root.innerHTML = Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(d => {
+    const dayLabel = d===today ? 'Today / Сегодня' : (d===dateISO(new Date(Date.now()-86400000)) ? 'Yesterday / Вчера' : d);
+    const rowsH = groups[d].map(e => {
+      const t = escH(String(e.time||'').slice(0,5));
+      const prod = escH(e.product||'');
+      const amt = AMTS.find(a=>a.v===e.amount);
+      const acc = ACCS.find(a=>a.k===e.accept);
+      const sub = [amt?(amt.ru+' / '+amt.en):'', acc?(acc.ico+' '+acc.ru):''].filter(Boolean).join(' · ');
+      return `<div class="sleep-list-item">
+        <div style="min-width:0;flex:1">
+          <div class="sli-time">${t} · ${prod}${e.is_new?' <span style="font-size:11px;color:var(--warn);font-weight:600">★ new</span>':''}</div>
+          <div class="sli-dur">${sub}${e.note?' · '+escH(e.note):''}</div>
+          ${solidsEditOpen===e.id ? buildSolidsInlineEdit(e) : ''}
+        </div>
+        <div class="sli-actions">
+          <button class="act-btn edit-btn" onclick="toggleSolidsEdit(${e.id})">✏️</button>
+          <button class="act-btn del-btn" onclick="delSolid(${e.id})">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="day-grp"><div class="day-grp-hdr">${dayLabel}</div>${rowsH}</div>`;
   }).join('');
 }
 function buildSolidsInlineEdit(e){
@@ -1964,16 +1992,25 @@ async function saveWater(){
 }
 async function renderWaterToday(){
   const root = document.getElementById('water-today'); if (!root) return;
-  const { data } = await db.from(T_WATER).select('*').eq('child',child).eq('date',todayISO())
-    .order('time',{ascending:false});
+  const today = todayISO();
+  const back2 = (() => { const d = new Date(); d.setDate(d.getDate()-2); return dateISO(d); })();
+  const { data } = await db.from(T_WATER).select('*').eq('child',child)
+    .gte('date',back2).lte('date',today)
+    .order('date',{ascending:false}).order('time',{ascending:false});
   const rows = data || [];
   if (!rows.length){ root.innerHTML = '<div class="tl-empty">No entries yet / Записей нет</div>'; return; }
-  root.innerHTML = rows.map(r => `
-    <div class="tl-row ${wSel.editId===r.id?'editing':''}">
-      <div class="tl-time">+</div>
-      <div class="tl-body" onclick="loadWaterForEdit(${r.id})"><b>${r.ml} ml</b>${r.note?' · '+escH(r.note):''}</div>
-      <button class="tl-del" onclick="delWater(${r.id})">×</button>
-    </div>`).join('');
+  const groups = {};
+  rows.forEach(r => { (groups[r.date] = groups[r.date] || []).push(r); });
+  root.innerHTML = Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(d => {
+    const dayLabel = d===today ? 'Today / Сегодня' : (d===dateISO(new Date(Date.now()-86400000)) ? 'Yesterday / Вчера' : d);
+    const rowsH = groups[d].map(r => `
+      <div class="tl-row ${wSel.editId===r.id?'editing':''}">
+        <div class="tl-time">+</div>
+        <div class="tl-body" onclick="loadWaterForEdit(${r.id})"><b>${r.ml} ml</b>${r.note?' · '+escH(r.note):''}</div>
+        <button class="tl-del" onclick="delWater(${r.id})">×</button>
+      </div>`).join('');
+    return `<div class="day-grp"><div class="day-grp-hdr">${dayLabel}</div>${rowsH}</div>`;
+  }).join('');
 }
 window.loadWaterForEdit = async function(id){
   const { data } = await db.from(T_WATER).select('*').eq('id', id).limit(1);
@@ -2040,22 +2077,30 @@ function resetStoolOnlyForm(){
 }
 async function renderStoolToday(){
   const root = document.getElementById('stool-today'); if (!root) return;
+  const today = todayISO();
+  const back2 = (() => { const d = new Date(); d.setDate(d.getDate()-2); return dateISO(d); })();
   const { data } = await db.from(T_FORMULA).select('*')
-    .eq('child',child).eq('date',todayISO()).eq('stool',true)
-    .order('time',{ascending:false});
+    .eq('child',child).gte('date',back2).lte('date',today).eq('stool',true)
+    .order('date',{ascending:false}).order('time',{ascending:false});
   const rows = data || [];
-  if (!rows.length){ root.innerHTML = '<div class="tl-empty">No stool today / Стула не было</div>'; return; }
-  root.innerHTML = rows.map(r => {
-    const cobj = STOOL_COLORS.find(x=>x.k===r.stool_color);
-    const xobj = STOOL_CONS.find(x=>x.k===r.stool_consistency);
-    const parts = [];
-    if (cobj) parts.push(`${cobj.ico} ${cobj.en}`);
-    if (xobj) parts.push(xobj.en);
-    return `<div class="tl-row ${soForm.editId===r.id?'editing':''}">
-      <div class="tl-time">${escH(String(r.time||'').slice(0,5))}</div>
-      <div class="tl-body" onclick="loadStoolForEdit(${r.id})">${parts.join(' · ')||'—'}${r.note?`<br><span style="font-size:11px;color:var(--hint)">${escH(r.note)}</span>`:''}</div>
-      <button class="tl-del" onclick="delStool(${r.id})">×</button>
-    </div>`;
+  if (!rows.length){ root.innerHTML = '<div class="tl-empty">No stool / Стула не было</div>'; return; }
+  const groups = {};
+  rows.forEach(r => { (groups[r.date] = groups[r.date] || []).push(r); });
+  root.innerHTML = Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(d => {
+    const dayLabel = d===today ? 'Today / Сегодня' : (d===dateISO(new Date(Date.now()-86400000)) ? 'Yesterday / Вчера' : d);
+    const rowsH = groups[d].map(r => {
+      const cobj = STOOL_COLORS.find(x=>x.k===r.stool_color);
+      const xobj = STOOL_CONS.find(x=>x.k===r.stool_consistency);
+      const parts = [];
+      if (cobj) parts.push(`${cobj.ico} ${cobj.ru}`);
+      if (xobj) parts.push(xobj.ru);
+      return `<div class="tl-row ${soForm.editId===r.id?'editing':''}">
+        <div class="tl-time">${escH(String(r.time||'').slice(0,5))}</div>
+        <div class="tl-body" onclick="loadStoolForEdit(${r.id})">${parts.join(' · ')||'—'}${r.note?`<br><span style="font-size:11px;color:var(--hint)">${escH(r.note)}</span>`:''}</div>
+        <button class="tl-del" onclick="delStool(${r.id})">×</button>
+      </div>`;
+    }).join('');
+    return `<div class="day-grp"><div class="day-grp-hdr">${dayLabel}</div>${rowsH}</div>`;
   }).join('');
 }
 window.loadStoolForEdit = async function(id){
@@ -2210,26 +2255,36 @@ async function renderSleepList(){
   const root = document.getElementById('sleep-list');
   const statusEl = document.getElementById('sleep-status');
   if (!root) return;
+  // Get today's intervals AND any still-open interval from earlier days
+  // (so a sleep started 20:00 yesterday → user wakes 02:00 today → still tracked correctly)
+  const today = todayISO();
+  const ydate = (() => { const d = new Date(); d.setDate(d.getDate()-1); return dateISO(d); })();
   const { data } = await db.from(T_SLEEP).select('*')
-    .eq('child',child).eq('date',todayISO()).order('start_time',{ascending:true});
-  const list = data || [];
-  const open = list.find(e=>!e.end_time);
+    .eq('child',child).gte('date', ydate).lte('date', today)
+    .order('start_time',{ascending:true});
+  const allRows = data || [];
+  // Open interval (no end_time) — even if started yesterday
+  const open = allRows.find(e => !e.end_time);
+  // Today's-only for display (but always include the open one if it exists)
+  const list = allRows.filter(e => e.date === today || (open && e.id === open.id));
   const snSleep = document.getElementById('sn-sleep'), snWake = document.getElementById('sn-wake');
   if (snSleep) snSleep.disabled = !!open;
   if (snWake)  snWake.disabled  = !open;
-  const totalMin = list.reduce((s,e)=>s+sleepDurMin(e),0);
+  const totalMin = list.filter(e=>e.end_time).reduce((s,e)=>s+sleepDurMin(e),0);
   if (statusEl){
     statusEl.innerHTML = open
-      ? `🟣 Сейчас спит с <b>${tsHHMM(open.start_time)}</b><br>Currently asleep`
-      : `Всего за день: <b>${fmtDur(totalMin)}</b><br>Total today`;
+      ? `🟣 Currently asleep since <b>${tsHHMM(open.start_time)}</b>${open.date!==today?` <span style="color:var(--warn)">(yesterday)</span>`:''}<br>Сейчас спит`
+      : `Total today: <b>${fmtDur(totalMin)}</b><br>Всего за день`;
   }
-  if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">Нет интервалов / No intervals</div>'; return; }
+  if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">No intervals / Нет интервалов</div>'; return; }
   root.innerHTML = list.map(e => {
+    const fromYesterday = e.date !== today;
     const timeStr = e.end_time ? `${tsHHMM(e.start_time)} – ${tsHHMM(e.end_time)}` : `${tsHHMM(e.start_time)} – …`;
     const durStr  = e.end_time ? fmtDur(sleepDurMin(e)) : 'asleep / спит сейчас';
+    const yBadge  = fromYesterday ? '<span style="background:var(--warn-bg);color:var(--warn);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">yesterday</span>' : '';
     return `<div class="sleep-list-item">
       <div style="min-width:0;flex:1">
-        <div class="sli-time">${timeStr}</div>
+        <div class="sli-time">${timeStr}${yBadge}</div>
         <div class="sli-dur ${e.end_time?'':'sli-open'}">${durStr}${e.note?' · '+escH(e.note):''}</div>
         ${sleepEditOpen===e.id ? buildSleepInlineEdit(e) : ''}
       </div>
