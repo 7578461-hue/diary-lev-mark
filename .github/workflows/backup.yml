@@ -1,0 +1,36 @@
+name: Daily Supabase Backup
+
+on:
+  schedule:
+    # 03:00 UTC daily (06:00 Moscow, 11:00 Manila)
+    - cron: "0 3 * * *"
+  # Allows manual run from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download all tables → backups/YYYY-MM-DD.json
+        run: python3 scripts/backup.py
+
+      - name: Commit backup if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backups/
+          if ! git diff --staged --quiet; then
+            git commit -m "backup: $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "No changes — backup identical to previous"
+          fi
