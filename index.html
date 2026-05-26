@@ -711,6 +711,20 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 .day-grp{margin-bottom:10px}
 .day-grp:last-child{margin-bottom:0}
 .day-grp-hdr{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 2px 4px}
+
+/* day-picker — choose which date a new save lands on */
+.day-pick{display:flex;gap:6px;margin-bottom:10px}
+.day-pick button{
+  flex:1;font-family:inherit;font-size:12px;font-weight:600;
+  padding:8px 6px;border-radius:var(--rsm);
+  border:.5px solid var(--bmd);background:var(--bg);color:var(--muted);
+  cursor:pointer;touch-action:manipulation;line-height:1.2;
+}
+.day-pick button .dp-d{display:block;font-size:10px;color:var(--hint);font-weight:500;margin-top:2px}
+.day-pick button.on{background:var(--lev-bg);border-color:var(--lev);color:var(--lev)}
+.day-pick button.on .dp-d{color:var(--lev);opacity:.8}
+.mark-active .day-pick button.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
+.mark-active .day-pick button.on .dp-d{color:var(--mark)}
 .inline-actions .ebtn{flex:1;padding:9px;border-radius:var(--rsm);border:.5px solid var(--bmd);background:var(--surface);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;color:var(--muted)}
 .inline-actions .ebtn-save{color:white;border-color:transparent}
 .inline-actions .ebtn-save.lev{background:var(--lev)}
@@ -787,6 +801,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       <!-- Manual interval -->
       <div class="card">
         <div class="bi"><span class="bi-ru">Manual entry</span><span class="bi-en">/ Ручной ввод</span></div>
+        <div id="feeding-daypick" class="day-pick"></div>
         <div class="time-pair">
           <div><label>From / Начало</label><input type="time" id="f-time"></div>
           <div><label>To / Конец</label><input type="time" id="f-time-end"></div>
@@ -825,6 +840,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="water-childpick"></div>
     <div id="water-form" style="display:none">
       <div class="cur-child" id="water-cur"></div>
+      <div id="water-daypick" class="day-pick"></div>
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Water today (ml)</span><span class="bi-en">/ Вода за день (мл)</span></div>
@@ -850,6 +866,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="stool-childpick"></div>
     <div id="stool-form" style="display:none">
       <div class="cur-child" id="stool-cur"></div>
+      <div id="stool-daypick" class="day-pick"></div>
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Stool time</span><span class="bi-en">/ Время стула</span></div>
@@ -945,6 +962,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Manual interval</span><span class="bi-en">/ Ручной ввод интервала</span></div>
+        <div id="sleep-daypick" class="day-pick"></div>
         <div class="time-pair">
           <div><label>Заснул / From</label><input type="time" id="sl-start"></div>
           <div><label>Проснулся / To</label><input type="time" id="sl-end"></div>
@@ -1001,6 +1019,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="solids-childpick"></div>
     <div id="solids-form" style="display:none">
       <div class="cur-child" id="solids-cur"></div>
+      <div id="solids-daypick" class="day-pick"></div>
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Feeding time</span><span class="bi-en">/ Время кормления</span></div>
@@ -1173,6 +1192,29 @@ let editBuf = {};
 
 // in-memory caches refreshed on every render
 let lastEntries = {};
+
+// per-view date selector — which day a new Save lands on
+// Defaults to today; user can flip to yesterday in the form header.
+const formDate = { feeding:null, water:null, solids:null, stool:null, sleep:null };
+function fdate(view){ return formDate[view] || todayISO(); }
+function yesterdayISO(){ const d=new Date(); d.setDate(d.getDate()-1); return dateISO(d); }
+function renderDayPicker(view){
+  const root = document.getElementById(view+'-daypick'); if (!root) return;
+  const today = todayISO(), yd = yesterdayISO();
+  const sel = formDate[view] || today;
+  const lbl = iso => { const d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
+  root.innerHTML = `
+    <button class="${sel===today?'on':''}" onclick="pickFormDate('${view}','${today}')">Today<span class="dp-d">${lbl(today)}</span></button>
+    <button class="${sel===yd?'on':''}"     onclick="pickFormDate('${view}','${yd}')">Yesterday<span class="dp-d">${lbl(yd)}</span></button>`;
+}
+window.pickFormDate = function(view, d){
+  formDate[view] = d;
+  renderDayPicker(view);
+  // update any auto-time fields that depend on date
+  if (view==='water')   { /* time-less */ }
+  if (view==='stool')   { const t=document.getElementById('so-time'); if (t && d!==todayISO()) t.value=''; else if (t) t.value=nowHHMM(); }
+  if (view==='solids')  { const t=document.getElementById('s-time');  if (t && d!==todayISO()) t.value=''; else if (t) t.value=nowHHMM(); }
+};
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -1404,13 +1446,15 @@ window.chooseChild = function(c, v){
       <button class="cc-switch" onclick="renderChildPick('${v}')">↔ Switch / Сменить</button>`;
   }
   updateSaveBar();
-  if (v==='feeding') resetFeedingForm();
-  if (v==='solids')  resetSolidsForm();
-  if (v==='water')   resetWaterForm();
-  if (v==='stool')   resetStoolOnlyForm();
+  // Reset day-picker to today every time we enter a form
+  ['feeding','water','solids','stool','sleep'].forEach(k => formDate[k]=null);
+  if (v==='feeding') { resetFeedingForm(); renderDayPicker('feeding'); }
+  if (v==='solids')  { resetSolidsForm();  renderDayPicker('solids'); }
+  if (v==='water')   { resetWaterForm();   renderDayPicker('water'); }
+  if (v==='stool')   { resetStoolOnlyForm(); renderDayPicker('stool'); }
   if (v==='weight'){ resetWeightForm(); renderWeightList(); }
   if (v==='meds')    renderMeds();
-  if (v==='sleep'){  resetSleepForm(); renderSleepList(); }
+  if (v==='sleep'){  resetSleepForm(); renderSleepList(); renderDayPicker('sleep'); }
   if (v==='eod')     openEod();
 };
 
@@ -1668,7 +1712,7 @@ window.addFeedingManual = async function(){
   const note = document.getElementById('f-note').value.trim();
   if (!t1 && !ml){ showToast('Enter time or ml / Введи время или мл'); return; }
   const { error } = await db.from(T_FORMULA).insert([{
-    id:newId(), child, date: todayISO(),
+    id:newId(), child, date: fdate('feeding'),
     time: t1 || nowHHMM(),
     time_end: t2 || null,
     kabrita_ml:0, nutrilon_ml: ml,
@@ -1850,7 +1894,7 @@ async function saveSolids(){
   const voiceNote = vt.classList.contains('emp') ? '' : vt.textContent.trim();
   const entry = {
     id, child,
-    date: todayISO(),
+    date: fdate('solids'),
     time: document.getElementById('s-time').value || nowHHMM(),
     product,
     amount: sSel.amount, accept: sSel.accept,
@@ -1976,7 +2020,7 @@ async function saveWater(){
   const btn = document.getElementById('save-btn');
   btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const fields = {
-    child, date: todayISO(),
+    child, date: fdate('water'),
     time: nowHHMM(),                  // time hidden in UI but column is NOT NULL, send current
     ml, note: document.getElementById('wa-note').value.trim(),
   };
@@ -2140,7 +2184,7 @@ async function saveStoolOnly(){
   }
   const entry = {
     id, child,
-    date: todayISO(),
+    date: fdate('stool'),
     time: document.getElementById('so-time').value || nowHHMM(),
     kabrita_ml: 0, nutrilon_ml: 0, water_ml: 0,
     stool: true,
@@ -2238,7 +2282,7 @@ async function addSleepManual(){
   const sv = document.getElementById('sl-start').value;
   const ev = document.getElementById('sl-end').value;
   if (!sv){ showToast('Enter start time / Укажите время засыпания'); return; }
-  const d = todayISO();
+  const d = fdate('sleep');
   const start = new Date(d+'T'+sv+':00');
   let end = null;
   if (ev){ end = new Date(d+'T'+ev+':00'); if (end < start) end.setDate(end.getDate()+1); }
