@@ -1048,6 +1048,12 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
         <textarea class="note-inp" id="s-note" rows="2" placeholder="Made faces but ate it / Морщился, но съел"></textarea>
       </div>
 
+      <!-- Today's solids list -->
+      <div class="card">
+        <div class="bi"><span class="bi-ru">Today's solids</span><span class="bi-en">/ Прикорм сегодня</span></div>
+        <div id="solids-list"></div>
+      </div>
+
       <!-- скрытые элементы для совместимости с saveSolids (реакции и голос перенесены в Итог дня) -->
       <div style="display:none">
         <div id="rea-grid"></div>
@@ -1169,77 +1175,80 @@ let lastEntries = {};
 const ML_PRESETS = [50,80,100,120,150,160];
 const WATER_PRESETS = [130,140,150,160,170,180,190];
 
+// EN primary, RU secondary (matches the rest of the app)
 const STOOL_COLORS = [
-  {k:'yellow',  ico:'🟡', ru:'Жёлтый',     en:'Yellow'},
-  {k:'brown',   ico:'🟤', ru:'Коричневый', en:'Brown'},
-  {k:'green',   ico:'🟢', ru:'Зелёный',    en:'Green'},
-  {k:'white',   ico:'⚪', ru:'Белый',      en:'White'},
-  {k:'red',     ico:'🔴', ru:'Красный',    en:'Red'},
+  {k:'yellow',     ico:'🟡', ru:'Yellow',     en:'Жёлтый'},
+  {k:'brown',      ico:'🟤', ru:'Brown',      en:'Коричневый'},
+  {k:'dark_brown', ico:'🟫', ru:'Dark brown', en:'Тёмно-коричневый'},
+  {k:'green',      ico:'🟢', ru:'Green',      en:'Зелёный'},
+  {k:'red',        ico:'🔴', ru:'Red',        en:'Красный'},
 ];
+// EN primary, RU secondary
 const STOOL_CONS = [
-  {k:'loose',   ru:'Жидкий',    en:'Loose'},
-  {k:'mushy',   ru:'Кашицей',   en:'Mushy'},
-  {k:'normal',  ru:'Нормальный',en:'Normal'},
-  {k:'hard',    ru:'Твёрдый',   en:'Hard'},
+  {k:'loose',   ru:'Loose',  en:'Жидкий'},
+  {k:'mushy',   ru:'Mushy',  en:'Кашицей'},
+  {k:'normal',  ru:'Normal', en:'Нормальный'},
+  {k:'hard',    ru:'Hard',   en:'Твёрдый'},
 ];
 
+// EN primary, RU secondary (data swapped so .X-ru renders English text)
 const MOODS = [
-  {k:'good',ico:'😊',ru:'Хорошо',en:'Good'},
-  {k:'norm',ico:'😐',ru:'Норма',en:'Normal'},
-  {k:'rest',ico:'😟',ru:'Беспокойный',en:'Restless'},
+  {k:'good',ico:'😊',ru:'Good',en:'Хорошо'},
+  {k:'norm',ico:'😐',ru:'Normal',en:'Норма'},
+  {k:'rest',ico:'😟',ru:'Restless',en:'Беспокойный'},
 ];
 const SLEEPS = [
-  {k:'good',ico:'😴',ru:'Хорошо',en:'Slept well'},
-  {k:'bad', ico:'🙄',ru:'Плохо',en:'Slept poorly'},
+  {k:'good',ico:'😴',ru:'Slept well',en:'Хорошо'},
+  {k:'bad', ico:'🙄',ru:'Slept poorly',en:'Плохо'},
 ];
 
-// Meds schedule per dose-time card
-// Обоим детям одинаковая доза Мальтофера (изменили с 4/7 на 7/7 капель)
+// Meds schedule per dose-time card — EN primary, RU secondary
 const MED_DOSE = (_c) => '7 drops / 7 капель';
 const MED_SCHEDULE = {
-  morning:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)},
-              {k:'folic',   ico:'💊',ru:'Фолиевая кислота',en:'Folic acid',dose:_=>'¼ tab / ¼ таб'},
-              {k:'vitd',    ico:'☀️',ru:'Витамин D',     en:'Vitamin D', dose:_=>'2 drops / 2 капли'}],
-  afternoon: [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
-  evening:   [{k:'maltofer',ico:'💧',ru:'Мальтофер',en:'Maltofer',dose:c=>MED_DOSE(c)}],
+  morning:   [{k:'maltofer',ico:'💧',ru:'Maltofer',en:'Мальтофер',dose:c=>MED_DOSE(c)},
+              {k:'folic',   ico:'💊',ru:'Folic acid',en:'Фолиевая кислота',dose:_=>'¼ tab / ¼ таб'},
+              {k:'vitd',    ico:'☀️',ru:'Vitamin D',en:'Витамин D',     dose:_=>'2 drops / 2 капли'}],
+  afternoon: [{k:'maltofer',ico:'💧',ru:'Maltofer',en:'Мальтофер',dose:c=>MED_DOSE(c)}],
+  evening:   [{k:'maltofer',ico:'💧',ru:'Maltofer',en:'Мальтофер',dose:c=>MED_DOSE(c)}],
 };
 const DOSE_TIME_LBL = {
-  morning:   {ru:'УТРО',ен:'Morning',ico:'☀️'},
-  afternoon: {ru:'ДЕНЬ',ен:'Afternoon',ico:'🌤'},
-  evening:   {ru:'ВЕЧЕР',ен:'Evening',ico:'🌙'},
+  morning:   {ru:'MORNING',  ен:'Утро',  ico:'☀️'},
+  afternoon: {ru:'AFTERNOON',ен:'День',  ico:'🌤'},
+  evening:   {ru:'EVENING',  ен:'Вечер', ico:'🌙'},
 };
 
-// Solids constants (existing)
+// Solids constants — EN primary, RU secondary
+// Tuple order is [primary, secondary] so chip render shows English big, Russian small.
 const PRODS = [
-  ['Кабачок','Zucchini'],['Цв. капуста','Cauliflower'],['Брокколи','Broccoli'],
-  ['Тыква','Pumpkin'],['Морковь','Carrot'],['Картофель','Potato'],
-  ['Банан','Banana'],['Яблоко','Apple'],['Груша','Pear'],
-  ['Гречка','Buckwheat'],['Рис','Rice'],['Кукуруза','Corn'],
-  ['Индейка','Turkey'],['Кролик','Rabbit'],['Говядина','Beef'],
-  ['Кефир','Kefir'],['Творог','Cottage ch.'],['Хек','Hake'],
+  ['Zucchini','Кабачок'],['Cauliflower','Цв. капуста'],['Broccoli','Брокколи'],
+  ['Pumpkin','Тыква'],['Carrot','Морковь'],['Potato','Картофель'],
+  ['Banana','Банан'],['Apple','Яблоко'],['Pear','Груша'],
+  ['Buckwheat','Гречка'],['Rice','Рис'],['Corn','Кукуруза'],
+  ['Turkey','Индейка'],['Rabbit','Кролик'],['Beef','Говядина'],
+  ['Kefir','Кефир'],['Cottage ch.','Творог'],['Hake','Хек'],
 ];
 const AMTS = [
-  {v:'0.5',ru:'½ ч.л.',en:'½ tsp', s:'~2 г'},
-  {v:'1',  ru:'1 ч.л.',en:'1 tsp', s:'~5 г'},
-  {v:'2',  ru:'2 ч.л.',en:'2 tsp', s:'~10 г'},
-  {v:'3',  ru:'1 ст.л.',en:'1 tbsp',s:'~15 г'},
-  {v:'10', ru:'50 г',  en:'50 g',  s:'10 ч.л.'},
-  {v:'20', ru:'100 г', en:'100 g', s:'~½ порц.'},
-  {v:'30', ru:'150 г', en:'150 g', s:'полн.'},
+  {v:'0.5',ru:'½ tsp',  en:'½ ч.л.',  s:'~2 g'},
+  {v:'1',  ru:'1 tsp',  en:'1 ч.л.',  s:'~5 g'},
+  {v:'2',  ru:'2 tsp',  en:'2 ч.л.',  s:'~10 g'},
+  {v:'3',  ru:'1 tbsp', en:'1 ст.л.', s:'~15 g'},
+  {v:'10', ru:'50 g',   en:'50 г',    s:'10 tsp'},
+  {v:'20', ru:'100 g',  en:'100 г',   s:'~½ portion'},
+  {v:'30', ru:'150 g',  en:'150 г',   s:'full'},
 ];
 const ACCS = [
-  {k:'all',     ico:'😋', ru:'Съел всё',  en:'Ate all'},
-  {k:'half',    ico:'🙂', ru:'Половину',  en:'Half'},
-  {k:'little',  ico:'😐', ru:'Немного',   en:'A little'},
-  {k:'refused', ico:'🙅', ru:'Отказался', en:'Refused'},
+  {k:'all',     ico:'😋', ru:'Ate all',  en:'Съел всё'},
+  {k:'half',    ico:'🙂', ru:'Half',     en:'Половину'},
+  {k:'little',  ico:'😐', ru:'A little', en:'Немного'},
+  {k:'refused', ico:'🙅', ru:'Refused',  en:'Отказался'},
 ];
 const REAS = [
-  {k:'skin_ok',  cls:'ok',  ru:'Кожа чистая',     en:'Skin clear'},
-  {k:'skin_bad', cls:'bad', ru:'Сыпь / краснота',  en:'Rash / redness'},
-  {k:'stool_ok', cls:'ok',  ru:'Стул норма',       en:'Stool normal'},
-  {k:'stool_bad',cls:'warn',ru:'Стул изменился',   en:'Stool changed'},
-  {k:'calm',     cls:'ok',  ru:'Спокойный',        en:'Calm / happy'},
-  {k:'gas',      cls:'warn',ru:'Газики / колики',  en:'Gas / colic'},
+  {k:'skin_ok',  cls:'ok',  ru:'Skin clear',     en:'Кожа чистая'},
+  {k:'skin_bad', cls:'bad', ru:'Rash / redness', en:'Сыпь / краснота'},
+  {k:'stool_ok', cls:'ok',  ru:'Stool normal',   en:'Стул норма'},
+  {k:'stool_bad',cls:'warn',ru:'Stool changed',  en:'Стул изменился'},
+  {k:'calm',     cls:'ok',  ru:'Calm / happy',   en:'Спокойный'},
+  {k:'gas',      cls:'warn',ru:'Gas / colic',    en:'Газики / колики'},
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -1756,6 +1765,7 @@ function resetSolidsForm(){
   if (vt){ vt.textContent='Voice note will appear here · Голосовая заметка появится здесь'; vt.className='vtrans emp'; }
   document.getElementById('s-photo-preview').innerHTML='';
   renderAmts(); renderAccs(); renderReas();
+  renderSolidsList();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1833,9 +1843,73 @@ async function saveSolids(){
   };
   const { error } = await db.from(T_SOLIDS).insert([entry]);
   if (error){ showToast('Error: / Ошибка'+(error?.message||'unknown')); console.error(error); }
-  else { showToast('Saved ✓ / Сохранено ✓'); resetSolidsForm(); goHome(); }
+  else { showToast('Saved ✓ / Сохранено ✓'); resetSolidsForm(); renderSolidsList(); }
   btn.disabled = false; btn.textContent = 'Save solids · 💾 Сохранить прикорм';
 }
+
+// ─── Solids list + inline edit ──────────────────────────────────
+let solidsEditOpen = null;
+async function renderSolidsList(){
+  const root = document.getElementById('solids-list'); if (!root) return;
+  const { data } = await db.from(T_SOLIDS).select('*').eq('child',child).eq('date',todayISO())
+    .order('time',{ascending:true});
+  const list = data || [];
+  if (!list.length){ root.innerHTML = '<div class="empty" style="padding:14px">No solids today / Прикорма пока нет</div>'; return; }
+  root.innerHTML = list.map(e => {
+    const t = escH(String(e.time||'').slice(0,5));
+    const prod = escH(e.product||'');
+    const amt = AMTS.find(a=>a.v===e.amount);
+    const acc = ACCS.find(a=>a.k===e.accept);
+    const sub = [amt?(amt.ru+' / '+amt.en):'', acc?(acc.ico+' '+acc.ru):''].filter(Boolean).join(' · ');
+    return `<div class="sleep-list-item">
+      <div style="min-width:0;flex:1">
+        <div class="sli-time">${t} · ${prod}${e.is_new?' <span style="font-size:11px;color:var(--warn);font-weight:600">★ new</span>':''}</div>
+        <div class="sli-dur">${sub}${e.note?' · '+escH(e.note):''}</div>
+        ${solidsEditOpen===e.id ? buildSolidsInlineEdit(e) : ''}
+      </div>
+      <div class="sli-actions">
+        <button class="act-btn edit-btn" onclick="toggleSolidsEdit(${e.id})">✏️</button>
+        <button class="act-btn del-btn" onclick="delSolid(${e.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function buildSolidsInlineEdit(e){
+  const amtH = AMTS.map(a => `<option value="${a.v}"${e.amount===a.v?' selected':''}>${a.ru} / ${a.en}</option>`).join('');
+  const accH = ACCS.map(a => `<option value="${a.k}"${e.accept===a.k?' selected':''}>${a.ico} ${a.ru}</option>`).join('');
+  return `<div class="inline-edit">
+    <input type="time" class="edit-mini-inp" id="es-t-${e.id}" value="${String(e.time||'').slice(0,5)}">
+    <input class="edit-mini-inp" id="es-p-${e.id}" value="${escH(e.product||'')}" placeholder="Product / Продукт" style="margin-top:6px">
+    <select class="edit-mini-inp" id="es-a-${e.id}" style="margin-top:6px"><option value="">— amount —</option>${amtH}</select>
+    <select class="edit-mini-inp" id="es-c-${e.id}" style="margin-top:6px"><option value="">— how —</option>${accH}</select>
+    <textarea class="note-inp" id="es-nt-${e.id}" rows="1" placeholder="Note" style="margin-top:6px">${escH(e.note||'')}</textarea>
+    <div class="inline-actions">
+      <button class="ebtn" onclick="toggleSolidsEdit(null)">Cancel</button>
+      <button class="ebtn ebtn-save ${child}" onclick="saveSolidsInline(${e.id})">Save</button>
+    </div>
+  </div>`;
+}
+window.toggleSolidsEdit = function(id){ solidsEditOpen = (solidsEditOpen===id)?null:id; renderSolidsList(); };
+window.saveSolidsInline = async function(id){
+  const ch = {
+    time: document.getElementById('es-t-'+id).value || null,
+    product: document.getElementById('es-p-'+id).value.trim(),
+    amount: document.getElementById('es-a-'+id).value || null,
+    accept: document.getElementById('es-c-'+id).value || null,
+    note: document.getElementById('es-nt-'+id).value.trim(),
+  };
+  const { error } = await db.from(T_SOLIDS).update(ch).eq('id', id);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); return; }
+  showToast('Updated ✓ / Обновлено ✓');
+  solidsEditOpen = null; renderSolidsList();
+};
+window.delSolid = async function(id){
+  if (!confirm('Delete? / Удалить?')) return;
+  const { error } = await db.from(T_SOLIDS).delete().eq('id', id);
+  if (error){ showToast('Error: '+(error?.message||'unknown')); return; }
+  if (solidsEditOpen===id) solidsEditOpen = null;
+  renderSolidsList();
+};
 
 // ═══════════════════════════════════════════════════════════════
 // WATER / ПИТЬЁ
@@ -1875,7 +1949,7 @@ async function saveWater(){
   btn.disabled = true; btn.textContent = 'Saving... / Сохранение...';
   const fields = {
     child, date: todayISO(),
-    time: null,                       // time field removed — nannies log per-day totals
+    time: nowHHMM(),                  // time hidden in UI but column is NOT NULL, send current
     ml, note: document.getElementById('wa-note').value.trim(),
   };
   let error;
@@ -2240,8 +2314,8 @@ async function refreshEodView(){
     const sleepObj = SLEEPS.find(s=>s.k===e.sleep);
     v.innerHTML = `<div class="card" style="font-size:13px;line-height:1.5">
       <div style="font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Сохранённый итог · Saved summary</div>
-      ${moodObj?`<div>${moodObj.ico} ${moodObj.en} / ${moodObj.ru}</div>`:''}
-      ${sleepObj?`<div>${sleepObj.ico} ${sleepObj.en} / ${sleepObj.ru}</div>`:''}
+      ${moodObj?`<div>${moodObj.ico} ${moodObj.ru} / ${moodObj.en}</div>`:''}
+      ${sleepObj?`<div>${sleepObj.ico} ${sleepObj.ru} / ${sleepObj.en}</div>`:''}
       ${e.concerns?`<div style="color:var(--bad);margin-top:4px">⚠️ ${escH(e.concerns)}</div>`:''}
       ${e.nanny_note?`<div style="color:var(--muted);margin-top:4px;font-style:italic">💬 ${escH(e.nanny_note)}</div>`:''}
     </div>`;
@@ -2502,7 +2576,7 @@ async function renderMeds(){
       html += `<div class="med-row${given?' given':''}" onclick="toggleMed('${m.k}','${dt}')">
         <div class="mr-icon">${m.ico}</div>
         <div>
-          <div class="mr-name">${m.en} ${m.dose(child)}<span class="en">${m.en}</span></div>
+          <div class="mr-name">${m.ru} ${m.dose(child)}<span class="en">${m.en}</span></div>
         </div>
         <div class="mr-status">${given ? '✅ '+e.given_at : '⬜ Не дано<br>Not given'}</div>
       </div>`;
@@ -2708,7 +2782,7 @@ function renderTimelineEntry(ev){
       kindLbl = 'Medication / 💊 Лекарство';
       const m = (MED_SCHEDULE.morning.concat(MED_SCHEDULE.afternoon,MED_SCHEDULE.evening))
                   .find(x=>x.k===e.medication);
-      title = m ? `${m.en} ${m.dose(child)}` : e.medication;
+      title = m ? `${m.ru} ${m.dose(child)}` : e.medication;
       sub = `${DOSE_TIME_LBL[e.dose_time]?.ru || e.dose_time} — ${m?m.en:''}`;
       break;
     }
@@ -2717,11 +2791,11 @@ function renderTimelineEntry(ev){
       title = e.product;
       const a = AMTS.find(x=>x.v===e.amount);
       const ac = ACCS.find(x=>x.k===e.accept);
-      sub = [a?`${a.en} / ${a.ru}`:'', ac?`${ac.ico} ${ac.ru}`:''].filter(Boolean).join(' · ');
+      sub = [a?`${a.ru} / ${a.en}`:'', ac?`${ac.ico} ${ac.ru}`:''].filter(Boolean).join(' · ');
       if (e.is_new) pills += `<span class="pill p-warn">★ Новый / New</span>`;
       (e.reactions||[]).forEach(rk => {
         const r = REAS.find(x=>x.k===rk);
-        if (r) pills += `<span class="pill p-${r.cls}">${r.en} / ${r.ru}</span>`;
+        if (r) pills += `<span class="pill p-${r.cls}">${r.ru} / ${r.en}</span>`;
       });
       break;
     }
@@ -3137,27 +3211,40 @@ async function renderProfile(root){
           const pct = Math.round(v*100/totalColorsN);
           return `<div class="col-row">
             <div class="cr-name">${c.ico} ${c.en}</div>
-            <div class="cr-bar"><span style="width:${pct}%;background:${c.k==='yellow'?'#E5C94B':c.k==='brown'?'#7A5030':c.k==='green'?'#5C8B6F':c.k==='white'?'#CFCFCF':'#B04545'}"></span></div>
+            <div class="cr-bar"><span style="width:${pct}%;background:${c.k==='yellow'?'#E5C94B':c.k==='brown'?'#9E6F3D':c.k==='dark_brown'?'#5A3A1E':c.k==='green'?'#5C8B6F':'#B04545'}"></span></div>
             <div class="cr-val"><b>${v}</b> <span style="color:var(--hint)">·${pct}%</span></div>
           </div>`;
         }).join('');
 
-  // ─── SOLIDS pills ───
+  // ─── SOLIDS pills + recent log ───
   const solidProducts = [...new Set(S.map(s=>s.product))];
   const newProducts = [...new Set(S.filter(s=>s.is_new).map(s=>s.product))];
   // reactions: now stored in daily_summaries → count bad/warn reactions for the period
   const eodReact = DS.flatMap(d => d.reactions||[]).filter(r => r.includes('bad') || r==='gas').length;
-  const solidsH = !S.length ? '<div class="empty" style="padding:14px;font-size:13px">Прикорм не вводился / No solids</div>' : `
+  // last 10 solids sorted newest-first
+  const recentSolids = [...S].sort((a,b) => (b.date+(b.time||'')).localeCompare(a.date+(a.time||''))).slice(0,10);
+  const solidsH = !S.length ? '<div class="empty" style="padding:14px;font-size:13px">No solids / Прикорм не вводился</div>' : `
     <div class="card tight">
       <div class="solid-stats">
-        <span><b>${S.length}</b> записей</span>
-        <span><b>${solidProducts.length}</b> продуктов</span>
-        <span><b style="color:${eodReact>0?'var(--bad)':'var(--ok)'}">${eodReact}</b> реакций</span>
+        <span><b>${S.length}</b> entries</span>
+        <span><b>${solidProducts.length}</b> foods</span>
+        <span><b style="color:${eodReact>0?'var(--bad)':'var(--ok)'}">${eodReact}</b> reactions</span>
       </div>
       ${newProducts.length?`<div class="new-prods">
-        <div class="np-hdr">★ Новые продукты / New foods</div>
+        <div class="np-hdr">★ New foods / Новые продукты</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px">${newProducts.map(p=>`<span class="pill p-warn">${escH(p)}</span>`).join('')}</div>
       </div>`:''}
+      <div style="margin-top:10px;border-top:.5px solid var(--border);padding-top:8px">
+        <div class="np-hdr" style="margin-bottom:4px">Recent / Последние</div>
+        ${recentSolids.map(s => {
+          const t = String(s.time||'').slice(0,5);
+          const acc = ACCS.find(a=>a.k===s.accept);
+          return `<div style="display:flex;gap:6px;font-size:12px;padding:4px 0;border-bottom:.5px dashed var(--border);line-height:1.4">
+            <span style="color:var(--hint);min-width:62px">${escH(s.date.slice(5))} ${escH(t)}</span>
+            <span style="flex:1;color:var(--text)">${escH(s.product)}${s.is_new?' ★':''}${acc?' · '+acc.ico:''}</span>
+          </div>`;
+        }).join('')}
+      </div>
     </div>`;
 
   // ─── PHOTOS (compact grid 4x) ───
