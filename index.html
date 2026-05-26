@@ -3070,14 +3070,16 @@ async function renderProfile(root){
   const startISO = dateISO(start);
   const endISO   = todayISO();
 
-  const [feeds, meds, solids, summaries, weights] = await Promise.all([
+  const [feeds, meds, solids, summaries, weights, sleeps] = await Promise.all([
     db.from(T_FORMULA).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
     db.from(T_MEDS   ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
     db.from(T_SOLIDS ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
     db.from(T_SUMMARY).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
     db.from(T_WEIGHT ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO).order('date',{ascending:true}),
+    db.from(T_SLEEP  ).select('*').eq('child',child).gte('date',startISO).lte('date',endISO),
   ]);
   const F = feeds.data||[], M = meds.data||[], S = solids.data||[], DS = summaries.data||[], W = weights.data||[];
+  const SL = sleeps.data || [];
 
   // build day buckets
   const dates = [];
@@ -3086,6 +3088,12 @@ async function renderProfile(root){
     dates.push(dateISO(d));
   }
   const mlByDay = dates.map(d => F.filter(e=>e.date===d).reduce((s,e)=>s+(e.kabrita_ml||0)+(e.nutrilon_ml||0),0));
+  // sleep minutes per day (intervals that started on that day count fully)
+  const sleepByDay = dates.map(d => SL.filter(e=>e.date===d).reduce((sum,e)=>sum+sleepDurMin(e),0));
+  const sleepDays = sleepByDay.filter(x=>x>0);
+  const avgSleepMin = sleepDays.length ? Math.round(sleepDays.reduce((a,b)=>a+b,0)/sleepDays.length) : 0;
+  const maxSleepMin = Math.max(...sleepByDay, 0);
+  const minSleepMin = Math.min(...(sleepDays.length?sleepDays:[0]));
   const stoolByDay = dates.map(d => F.filter(e=>e.date===d && e.stool).length);
   // среднее только по дням с записями / average over days that have entries only
   const feedDays = mlByDay.filter(x=>x>0);
@@ -3187,9 +3195,10 @@ async function renderProfile(root){
       <div class="trends-hdr">
         <div class="trends-title">Тренды · Trends</div>
         <div class="trends-tabs">
-          <button class="tt-btn on" data-tt="nutri" onclick="switchTrend('nutri')">🍼 Смесь</button>
-          <button class="tt-btn" data-tt="stool" onclick="switchTrend('stool')">💩 Стул</button>
-          ${W.length?'<button class="tt-btn" data-tt="weight" onclick="switchTrend(\'weight\')">⚖️ Вес</button>':''}
+          <button class="tt-btn on" data-tt="nutri" onclick="switchTrend('nutri')">🍼 Formula</button>
+          <button class="tt-btn" data-tt="stool" onclick="switchTrend('stool')">💩 Stool</button>
+          <button class="tt-btn" data-tt="sleep" onclick="switchTrend('sleep')">😴 Sleep</button>
+          ${W.length?'<button class="tt-btn" data-tt="weight" onclick="switchTrend(\'weight\')">⚖️ Weight</button>':''}
         </div>
       </div>
       <canvas id="trend-chart" class="trend-chart"></canvas>
@@ -3288,10 +3297,14 @@ async function renderProfile(root){
   `;
 
   // store data globally for trend switching
+  // sleep stored as HOURS (with decimal) so the bar chart is readable
+  const sleepHoursByDay = sleepByDay.map(m => +(m/60).toFixed(1));
   window._trendData = {
-    nutri:  { labels: dates, data: mlByDay, color: colorVar(), unit:'мл', avg, max:maxV, min:minV },
-    stool:  { labels: dates, data: stoolByDay, color: 'var(--warn)', unit:'раз', avg: avgStoolPerDay, max: Math.max(...stoolByDay,0), min:0 },
-    weight: W.length ? { labels: W.map(w=>w.date), data: W.map(w=>parseFloat(w.weight_kg)), color: colorVar(), unit:'кг', avg: weightLatest, max: Math.max(...W.map(w=>w.weight_kg)), min: Math.min(...W.map(w=>w.weight_kg)) } : null,
+    nutri:  { labels: dates, data: mlByDay,      color: colorVar(),  unit:'ml',  avg, max:maxV, min:minV },
+    stool:  { labels: dates, data: stoolByDay,   color: 'var(--warn)', unit:'times', avg: avgStoolPerDay, max: Math.max(...stoolByDay,0), min:0 },
+    sleep:  { labels: dates, data: sleepHoursByDay, color: '#7B5BB5', unit:'h',
+              avg: fmtDur(avgSleepMin), max: fmtDur(maxSleepMin), min: fmtDur(minSleepMin) },
+    weight: W.length ? { labels: W.map(w=>w.date), data: W.map(w=>parseFloat(w.weight_kg)), color: colorVar(), unit:'kg', avg: weightLatest, max: Math.max(...W.map(w=>w.weight_kg)), min: Math.min(...W.map(w=>w.weight_kg)) } : null,
   };
   setTimeout(()=>switchTrend('nutri'), 30);
 }
@@ -3302,9 +3315,11 @@ window.switchTrend = function(kind){
   const meta = document.getElementById('trend-meta');
   if (meta){
     if (kind==='weight'){
-      meta.innerHTML = `<span>сейчас <b>${d.avg}</b></span><span>макс <b>${d.max} кг</b></span><span>мин <b>${d.min} кг</b></span>`;
+      meta.innerHTML = `<span>now <b>${d.avg}</b></span><span>max <b>${d.max} kg</b></span><span>min <b>${d.min} kg</b></span>`;
+    } else if (kind==='sleep'){
+      meta.innerHTML = `<span>avg <b>${d.avg}</b>/day</span><span>max <b>${d.max}</b></span><span>min <b>${d.min}</b></span>`;
     } else {
-      meta.innerHTML = `<span>средн. <b>${d.avg} ${d.unit}</b></span><span>макс <b>${d.max}</b></span><span>мин <b>${d.min}</b></span>`;
+      meta.innerHTML = `<span>avg <b>${d.avg} ${d.unit}</b></span><span>max <b>${d.max}</b></span><span>min <b>${d.min}</b></span>`;
     }
   }
   if (kind==='weight') drawLineChart('trend-chart', d.labels, d.data, d.color, d.unit);
