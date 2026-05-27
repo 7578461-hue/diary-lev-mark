@@ -725,6 +725,26 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
 .day-pick button.on .dp-d{color:var(--lev);opacity:.8}
 .mark-active .day-pick button.on{background:var(--mark-bg);border-color:var(--mark);color:var(--mark)}
 .mark-active .day-pick button.on .dp-d{color:var(--mark)}
+
+/* pediatrician tip — small info card with subtle background */
+.tip-card{
+  background:#F5F5DC; border:.5px solid rgba(138,95,26,.18); border-radius:var(--rsm);
+  padding:10px 12px; margin-bottom:10px;
+  font-size:12px; line-height:1.5; color:#5A4A20;
+}
+.tip-card .tip-hdr{font-size:11px;font-weight:700;color:#8A5F1A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.tip-card ul{margin:4px 0 0;padding-left:18px}
+.tip-card li{margin:2px 0}
+
+/* Upcoming appointments — home screen */
+.upcoming-card{
+  background:var(--surface); border:.5px solid var(--border); border-radius:var(--rlg);
+  padding:14px; margin-top:10px;
+}
+.upcoming-card .up-hdr{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.upcoming-card ul{margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--text)}
+.upcoming-card li{margin:3px 0}
+.upcoming-card .up-meta{font-size:11px;color:var(--hint);margin-top:8px;padding-top:6px;border-top:.5px solid var(--border)}
 .inline-actions .ebtn{flex:1;padding:9px;border-radius:var(--rsm);border:.5px solid var(--bmd);background:var(--surface);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;color:var(--muted)}
 .inline-actions .ebtn-save{color:white;border-color:transparent}
 .inline-actions .ebtn-save.lev{background:var(--lev)}
@@ -780,6 +800,16 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
       </div>
       <button class="tile-wide t-eod" onclick="goView('eod')"><span class="ti-ico">🌙</span><span class="ti-ru">Daily summary</span><span class="ti-en">Итог дня</span></button>
     </div>
+    <div class="upcoming-card">
+      <div class="up-hdr">📅 Upcoming / Предстоящие осмотры</div>
+      <ul>
+        <li><b>8–10 June</b> · Blood test / Клинический анализ крови</li>
+        <li><b>09 July (6 mo)</b> · Ophthalmologist / Окулист — both kids</li>
+        <li><b>09 July (6 mo)</b> · Pediatrician checkup / Осмотр педиатра</li>
+        <li>Every 3–4 weeks · Online consult on solids / онлайн консультация по прикорму</li>
+      </ul>
+      <div class="up-meta">Born / Родились: 09.01.2026 · Лев & Марк</div>
+    </div>
   </section>
 
   <!-- ═══ КОРМЛЕНИЕ / FEEDING (formula) ═══ -->
@@ -788,6 +818,14 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="feeding-childpick"></div>
     <div id="feeding-form" style="display:none">
       <div class="cur-child" id="feeding-cur"></div>
+      <div class="tip-card">
+        <div class="tip-hdr">💡 Pediatrician guideline / Рекомендации</div>
+        <ul>
+          <li>Every 3.5–4 hours, 180 ml per feeding</li>
+          <li>5–6 feedings per day, total 900–1000 ml</li>
+          <li>Nutrilon Hypoallergenic / гипоаллергенный</li>
+        </ul>
+      </div>
 
       <!-- Start / Stop now -->
       <div class="card">
@@ -841,6 +879,10 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="water-form" style="display:none">
       <div class="cur-child" id="water-cur"></div>
       <div id="water-daypick" class="day-pick"></div>
+      <div class="tip-card">
+        <div class="tip-hdr">💡 Pediatrician guideline / Рекомендации</div>
+        <ul><li>Daily norm / Норма: 100 ml/day per child</li></ul>
+      </div>
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Water today (ml)</span><span class="bi-en">/ Вода за день (мл)</span></div>
@@ -951,6 +993,13 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="sleep-childpick"></div>
     <div id="sleep-form" style="display:none">
       <div class="cur-child" id="sleep-cur"></div>
+      <div class="tip-card">
+        <div class="tip-hdr">💡 Pediatrician guideline / Рекомендации</div>
+        <ul>
+          <li>2 walks per day, 1.5–2 hours each / 2 прогулки по 1,5–2 часа</li>
+          <li>Daytime nap: max 2 hours / Днём не давать спать больше 2 ч</li>
+        </ul>
+      </div>
 
       <div class="card">
         <div class="sleep-now">
@@ -1020,6 +1069,14 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
     <div id="solids-form" style="display:none">
       <div class="cur-child" id="solids-cur"></div>
       <div id="solids-daypick" class="day-pick"></div>
+      <div class="tip-card">
+        <div class="tip-hdr">💡 Pediatrician plan / План педиатра</div>
+        <ul>
+          <li>Week 1 / Неделя 1: Zucchini / Кабачок</li>
+          <li>Week 2 / Неделя 2: Cauliflower or Broccoli / Цв. капуста или Брокколи</li>
+          <li>+2 weeks: dairy-free porridge (Fleur Alpin) on formula — buckwheat first, 1 tsp → 120 g</li>
+        </ul>
+      </div>
 
       <div class="card">
         <div class="bi"><span class="bi-ru">Feeding time</span><span class="bi-en">/ Время кормления</span></div>
@@ -1251,12 +1308,23 @@ const SLEEPS = [
 
 // Meds schedule per dose-time card — EN primary, RU secondary
 const MED_DOSE = (_c) => '7 drops / 7 капель';
+// Vitamin D dose: Mark gets 4 drops for 2 weeks starting May 28, then back to 2.
+// Lev always 2 drops.
+function vitdDose(c){
+  if (c === 'mark'){
+    const t = todayISO();
+    if (t >= '2026-05-28' && t <= '2026-06-11') return '4 drops / 4 капли';
+  }
+  return '2 drops / 2 капли';
+}
 const MED_SCHEDULE = {
-  morning:   [{k:'maltofer',ico:'💧',ru:'Maltofer',en:'Мальтофер',dose:c=>MED_DOSE(c)},
-              {k:'folic',   ico:'💊',ru:'Folic acid',en:'Фолиевая кислота',dose:_=>'¼ tab / ¼ таб'},
-              {k:'vitd',    ico:'☀️',ru:'Vitamin D',en:'Витамин D',     dose:_=>'2 drops / 2 капли'}],
-  afternoon: [{k:'maltofer',ico:'💧',ru:'Maltofer',en:'Мальтофер',dose:c=>MED_DOSE(c)}],
-  evening:   [{k:'maltofer',ico:'💧',ru:'Maltofer',en:'Мальтофер',dose:c=>MED_DOSE(c)}],
+  morning:   [{k:'maltofer',  ico:'💧',ru:'Maltofer',  en:'Мальтофер',         dose:c=>MED_DOSE(c)},
+              {k:'folic',     ico:'💊',ru:'Folic acid',en:'Фолиевая кислота',  dose:_=>'¼ tab / ¼ таб'},
+              {k:'vitd',      ico:'☀️',ru:'Vitamin D', en:'Витамин D',         dose:c=>vitdDose(c)},
+              {k:'emollient', ico:'🧴',ru:'Emollient', en:'Эмолент (Emolium/Avene)', dose:_=>'apply / нанести'}],
+  afternoon: [{k:'maltofer',  ico:'💧',ru:'Maltofer',  en:'Мальтофер',         dose:c=>MED_DOSE(c)}],
+  evening:   [{k:'maltofer',  ico:'💧',ru:'Maltofer',  en:'Мальтофер',         dose:c=>MED_DOSE(c)},
+              {k:'emollient', ico:'🧴',ru:'Emollient', en:'Эмолент (Emolium/Avene)', dose:_=>'apply / нанести'}],
 };
 const DOSE_TIME_LBL = {
   morning:   {ru:'MORNING',  ен:'Утро',  ico:'☀️'},
