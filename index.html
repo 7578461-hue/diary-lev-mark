@@ -806,7 +806,7 @@ body.parents-mode .main{padding-bottom:calc(var(--nav-h) + 20px + var(--safe-bot
         <li><b>8–10 June</b> · Blood test / Клинический анализ крови</li>
         <li><b>09 July (6 mo)</b> · Ophthalmologist / Окулист — both kids</li>
         <li><b>09 July (6 mo)</b> · Pediatrician checkup / Осмотр педиатра</li>
-        <li>Every 3–4 weeks · Online consult on solids / онлайн консультация по прикорму</li>
+        <li><b>18 June</b> · Online consult on solids / онлайн консультация по прикорму</li>
       </ul>
       <div class="up-meta">Born / Родились: 09.01.2026 · Лев & Марк</div>
     </div>
@@ -1280,12 +1280,13 @@ const ML_PRESETS = [50,80,100,120,150,160];
 const WATER_PRESETS = [130,140,150,160,170,180,190];
 
 // EN primary, RU secondary (matches the rest of the app)
+// Key kept as 'dark_brown' so existing rows still resolve; visible label is now dark green.
 const STOOL_COLORS = [
-  {k:'yellow',     ico:'🟡', ru:'Yellow',     en:'Жёлтый'},
-  {k:'brown',      ico:'🟤', ru:'Brown',      en:'Коричневый'},
-  {k:'dark_brown', ico:'🟫', ru:'Dark brown', en:'Тёмно-коричневый'},
-  {k:'green',      ico:'🟢', ru:'Green',      en:'Зелёный'},
-  {k:'red',        ico:'🔴', ru:'Red',        en:'Красный'},
+  {k:'yellow',     ico:'🟡', ru:'Yellow',      en:'Жёлтый'},
+  {k:'brown',      ico:'🟤', ru:'Brown',       en:'Коричневый'},
+  {k:'dark_brown', ico:'🫒', ru:'Dark green',  en:'Чёрно-зелёный'},
+  {k:'green',      ico:'🟢', ru:'Green',       en:'Зелёный'},
+  {k:'red',        ico:'🔴', ru:'Red',         en:'Красный'},
 ];
 // EN primary, RU secondary
 const STOOL_CONS = [
@@ -3408,7 +3409,7 @@ async function renderProfile(root){
           const pct = Math.round(v*100/totalColorsN);
           return `<div class="col-row">
             <div class="cr-name">${c.ico} ${c.en}</div>
-            <div class="cr-bar"><span style="width:${pct}%;background:${c.k==='yellow'?'#E5C94B':c.k==='brown'?'#9E6F3D':c.k==='dark_brown'?'#5A3A1E':c.k==='green'?'#5C8B6F':'#B04545'}"></span></div>
+            <div class="cr-bar"><span style="width:${pct}%;background:${c.k==='yellow'?'#E5C94B':c.k==='brown'?'#9E6F3D':c.k==='dark_brown'?'#2E4A23':c.k==='green'?'#5C8B6F':'#B04545'}"></span></div>
             <div class="cr-val"><b>${v}</b> <span style="color:var(--hint)">·${pct}%</span></div>
           </div>`;
         }).join('');
